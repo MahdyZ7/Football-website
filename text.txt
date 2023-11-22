@@ -1,0 +1,39 @@
+// Add this inside your handleSubmit function in the `pages/index.tsx` file, right before each alert call
+
+const showAlertWithGif = (message: string, gifUrl: string) => {
+  const alertWrapper = document.createElement('div');
+  const alertMessage = document.createElement('p');
+  const alertGif = document.createElement('img');
+
+  alertMessage.textContent = message;
+  alertGif.src = gifUrl;
+  alertGif.style.width = '100px'; // Set the size of the gif as you like
+  alertGif.style.height = '100px'; // Set the size of the gif as you like
+  alertGif.alt = 'alert gif';
+
+  alertWrapper.appendChild(alertMessage);
+  alertWrapper.appendChild(alertGif);
+
+  alertWrapper.style.position = 'fixed';
+  alertWrapper.style.left = '0';
+  alertWrapper.style.top = '0';
+  alertWrapper.style.width = '100%';
+  alertWrapper.style.height = '100%';
+  alertWrapper.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+  alertWrapper.style.display = 'flex';
+  alertWrapper.style.flexDirection = 'column';
+  alertWrapper.style.justifyContent = 'center';
+  alertWrapper.style.alignItems = 'center';
+  alertWrapper.style.zIndex = '1000';
+
+  document.body.appendChild(alertWrapper);
+
+  // Dismiss the alert with a click
+  alertWrapper.onclick = function () {
+	document.body.removeChild(alertWrapper);
+  };
+};
+
+// Replace each `alert('Your message');` call with the following:
+const gifUrl = 'path_to_your_gif.gif'; // Replace with your gif URL
+showAlertWithGif('Your message', gifUrl);
