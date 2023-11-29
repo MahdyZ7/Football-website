@@ -8,7 +8,7 @@ const db = new Database();
 // Helper function to read users from the Replit Database
 const readUsersFromDatabase = async (): Promise<any[]> => {
   try {
-    const users: any[] = await db.get('users') || [];
+    const users: any[] = await db.get('users') as [] || [];
     return users;
   } catch (error) {
     throw error;

@@ -5,21 +5,18 @@ import  Database  from '@replit/database';
 
 const db = new Database();
 
-const getUsers = async (): Promise<User[]> => {
-  try {
-    const users: User[] = await db.get('users') || [];
-    return users;
-  } catch (error) {
-    throw error;
-  }
+type User = {
+  name: string;
+  id: string;
 };
+
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     const { name, id } = req.body as User;
 
     // Retrieve the current list of users
-    const users: User[] = await db.get('users') || [];
+    const users: User[] = ((await db.get('users')) as User[]) || [];
 
     // Check for a user with the same ID
     const idExists = users.some((user) => user.id === id);
