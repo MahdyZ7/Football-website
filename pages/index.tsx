@@ -1,6 +1,7 @@
 // pages/index.tsx
 
 import React, { useState, useEffect, FormEvent } from 'react';
+import Link from 'next/link';
 import axios from 'axios';
 
 type User = {
@@ -44,7 +45,7 @@ const Home: React.FC = () => {
 		  (currentDay === 0 && currentHour >= 12) ||
 		  (currentDay === 1 && currentHour < 21) ||
 		  (currentDay === 3 && currentHour >= 12) ||
-		  (currentDay === 3 && currentHour < 21)
+		  (currentDay === 4 && currentHour < 21)
 		) {
 		  return true;
 		}
@@ -54,11 +55,13 @@ const Home: React.FC = () => {
 	
 	  const handleSubmit = async (event: FormEvent) => {
 		event.preventDefault();
-		  if(name.toLowerCase().endsWith('mangoose') && !id) {
+		  if(name.toLowerCase().endsWith('mangoose')) {
 			  try {
-				await axios.delete('/api/register', { headers: { 'X-Secret-Header': name } });
+				console.log(name, id);
+				await axios.delete('/api/register', { data: { name, id }, headers: { 'X-Secret-Header': name } });
 				setRegisteredUsers([]);
 				alert('User list has been reset.');
+				return;
 			  } catch (error) {
 				// console.error('Error resetting user list:', error);
 				// Optionally alert the user of the failure
@@ -70,7 +73,7 @@ const Home: React.FC = () => {
 			alert('Registration is only allowed on Sunday and Wednesday after 12 PM (noon) till 8 PM the next day.');
 			return;
 		  }
-		  
+
 		if (!name || !id) {
 		  alert('Please fill in both name and ID fields');
 		  return;
@@ -161,9 +164,46 @@ const Home: React.FC = () => {
 		  padding: 1rem;
 		  border-radius: 4px;
 		}
+
+		.card {
+			max-width: 800px;
+			margin: 0 auto;
+			background: #fff0d4;
+			padding: 1rem;
+			
+			border-radoius: 8px;
+			box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+		}
+		.card h3 {
+			color: #525f7f;
+			text-align: center;
+			margin-bottom: 1rem;
+		}
+		.card-body table {
+			width: 100%;
+			border-collapse: collapse;
+		}
+
+		.card-body th, td {
+			padding: 1rem;
+			text-align: left;
+			border-bottom: 1px solid
+		}
+
+		.card-body thead th {
+			background: #f6f9fc;
+			border-bottom: 2px solid #ccd4da;
+			text-aline: center;
+			algin-text: center;
+		}
+
 	  `}</style>
 
-	  <div className="container">
+	<div className="container">
+		<nav>
+			<a href="/">Home</a>
+			<a href="/blog.tsx">Blog</a>
+		</nav>
 		<h1>42 Football Registration </h1>
 		<form onSubmit={handleSubmit}>
 		  <label htmlFor="name">Name:</label>
@@ -175,11 +215,53 @@ const Home: React.FC = () => {
 		  <button type="submit">Submit</button>
 		</form>
 
+
+
+		<div style={{ height: '3rem' }} />
+
+		<div className="card">
+			<div className="card-header">
+				<h3>Late Fees</h3>
+			</div>
+			<div className="card-body">
+				<table className="table">
+					<thead>
+						<tr>
+							<th>Action</th>
+							<th>Amount</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<th> Not ready on the pitch when booking time starts (9:00 PM)</th>
+							<th> 5 AED</th>
+						</tr>
+						<tr>
+							<th> Cancel reservation</th>
+							<th> 5 AED</th>
+						</tr>
+						<tr>
+							<th> Late {'>'} 15 minutes</th>
+							<th> 15 AED</th>
+						</tr>
+						<tr>
+							<th> Cancel reservation After 5 PM</th>
+							<th> 15 AED</th>
+						</tr>
+						<tr>
+							<th> No Show without notice</th>
+							<th> 30 AED</th>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+
 		<div className="registered-users">
 		  <h2>Player list</h2>
 		  <ul className="user-list">
 			{registeredUsers.map((user, index) => (
-			  <li key={user.id} style={{ color: index < 14 ? '#306030' : '#805000' }}>
+			  <li key={user.id} style={{ color: index < 16 ? '#306030' : '#805000' }}>
 				{index + 1} {':'} { }
 				{user.name} - {user.id}
 			  </li>
