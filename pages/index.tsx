@@ -1,8 +1,8 @@
 // pages/index.tsx
-
 import React, { useState, useEffect, FormEvent } from 'react';
-import Link from 'next/link';
 import axios from 'axios';
+import Navbar from './Navbar';
+
 
 type User = {
   name: string;
@@ -52,7 +52,6 @@ const Home: React.FC = () => {
 
 		return false;
 	  };
-	
 	  const handleSubmit = async (event: FormEvent) => {
 		event.preventDefault();
 		  if(name.toLowerCase().endsWith('mangoose')) {
@@ -99,112 +98,9 @@ const Home: React.FC = () => {
 
   return (
 	<div>
-	  <style jsx>{`
-		.container {
-		  padding: 4rem;
-		  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-		}
-
-		h1 {
-		  color: #525f7f;
-		  text-align: center;
-		  margin-bottom: 2rem;
-		}
-
-		form {
-		  max-width: 400px;
-		  margin: 0 auto;
-		  background: #f6f9fc;
-		  padding: 2rem;
-		  border-radius: 8px;
-		  box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
-		}
-
-		label {
-		  display: block;
-		  margin: 0.5rem 0;
-		}
-
-		input {
-		  width: 100%;
-		  padding: 0.8rem;
-		  margin-bottom: 1rem;
-		  border-radius: 4px;
-		  border: 1px solid #ccd4da;
-		  box-sizing: border-box;
-		}
-
-		button {
-		  width: 100%;
-		  background: #805b30;
-		  color: white;
-		  border: none;
-		  padding: 1rem;
-		  border-radius: 4px;
-		  cursor: pointer;
-		  transition: background-color 0.3s ease;
-		}
-
-		button:hover {
-		  background: #43458b;
-		}
-
-		.registered-users {
-		  margin-top: 3rem;
-		}
-
-		.user-list {
-		  list-style: none;
-		  padding: 0;
-		}
-
-		.user-list li {
-		  background: #e3ebf6;
-		  margin-bottom: 0.5rem;
-		  padding: 1rem;
-		  border-radius: 4px;
-		}
-
-		.card {
-			max-width: 800px;
-			margin: 0 auto;
-			background: #fff0d4;
-			padding: 1rem;
-			
-			border-radoius: 8px;
-			box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
-		}
-		.card h3 {
-			color: #525f7f;
-			text-align: center;
-			margin-bottom: 1rem;
-		}
-		.card-body table {
-			width: 100%;
-			border-collapse: collapse;
-		}
-
-		.card-body th, td {
-			padding: 1rem;
-			text-align: left;
-			border-bottom: 1px solid
-		}
-
-		.card-body thead th {
-			background: #f6f9fc;
-			border-bottom: 2px solid #ccd4da;
-			text-aline: center;
-			algin-text: center;
-		}
-
-	  `}</style>
-
+		<Navbar />
 	<div className="container">
-		<nav>
-			<a href="/">Home</a>
-			<a href="/blog.tsx">Blog</a>
-		</nav>
-		<h1>42 Football Registration </h1>
+		<h1>Football Registration </h1>
 		<form onSubmit={handleSubmit}>
 		  <label htmlFor="name">Name:</label>
 		  <input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} />
@@ -233,7 +129,7 @@ const Home: React.FC = () => {
 					</thead>
 					<tbody>
 						<tr>
-							<th> Not ready on the pitch when booking time starts (9:00 PM)</th>
+							<th> Not ready when booking time starts</th>
 							<th> 5 AED</th>
 						</tr>
 						<tr>
@@ -245,7 +141,7 @@ const Home: React.FC = () => {
 							<th> 15 AED</th>
 						</tr>
 						<tr>
-							<th> Cancel reservation After 5 PM</th>
+							<th> Cancel reservation on game day after 5 PM</th>
 							<th> 15 AED</th>
 						</tr>
 						<tr>
