@@ -2,6 +2,7 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import axios from 'axios';
 import Navbar from './Navbar';
+import Footer from './footer';
 
 
 type User = {
@@ -110,60 +111,59 @@ const Home: React.FC = () => {
 			<button type="submit">Submit</button>
 		</form>
 
-
-
 		<div style={{ height: '3rem' }} />
 
-		<div className="card">
-			<div className="card-header">
-				<h3>Late Fees</h3>
+			<div className="card">
+				<div className="card-header">
+					<h3>Late Fees</h3>
+				</div>
+				<div className="card-body">
+					<table className="table">
+						<thead>
+							<tr>
+								<th>Action</th>
+								<th>Amount</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<th> Not ready when booking time starts</th>
+								<th> 5 AED</th>
+							</tr>
+							<tr>
+								<th> Cancel reservation</th>
+								<th> 5 AED</th>
+							</tr>
+							<tr>
+								<th> Late {'>'} 15 minutes</th>
+								<th> 15 AED</th>
+							</tr>
+							<tr>
+								<th> Cancel reservation on game day after 5 PM</th>
+								<th> 15 AED</th>
+							</tr>
+							<tr>
+								<th> No Show without notice</th>
+								<th> 30 AED</th>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 			</div>
-			<div className="card-body">
-				<table className="table">
-					<thead>
-						<tr>
-							<th>Action</th>
-							<th>Amount</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<th> Not ready when booking time starts</th>
-							<th> 5 AED</th>
-						</tr>
-						<tr>
-							<th> Cancel reservation</th>
-							<th> 5 AED</th>
-						</tr>
-						<tr>
-							<th> Late {'>'} 15 minutes</th>
-							<th> 15 AED</th>
-						</tr>
-						<tr>
-							<th> Cancel reservation on game day after 5 PM</th>
-							<th> 15 AED</th>
-						</tr>
-						<tr>
-							<th> No Show without notice</th>
-							<th> 30 AED</th>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-		</div>
 
-		<div className="registered-users">
-			<h2>Player list</h2>
-			<ul className="user-list">
-			{registeredUsers.map((user, index) => (
-				<li key={user.id} style={{ color: index < 16 ? '#306030' : '#805000' }}>
-				{index + 1} {':'} { }
-				{user.name} - {user.id}
-				</li>
-			))}
-			</ul>
+			<div className="registered-users">
+				<h2>Player list</h2>
+				<ul className="user-list">
+				{registeredUsers.map((user, index) => (
+					<li key={user.id} style={{ color: index < 16 ? '#306030' : '#805000' }}>
+					{index + 1} {':'} { }
+					{user.name} - {user.id}
+					</li>
+				))}
+				</ul>
+			</div>
 		</div>
-		</div>
+		<Footer />
 	</div>
 	);
 };

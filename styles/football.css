@@ -12,7 +12,7 @@ h1 {
 
 form {
 	max-width: 400px;
-	min-width: 300px;
+	/* min-width: 300px; */
 	margin: 0 auto;
 	background: #f6f9fc;
 	padding: 2rem;
@@ -80,7 +80,7 @@ button:hover {
 
 .card {
 	max-width: 800px;
-	min-width: 300px;
+	/* min-width: 300px; */
 	margin: 0 auto;
 	background: #fff0d4;
 	padding: 1rem;
@@ -98,6 +98,7 @@ button:hover {
 }
 
 .card-body th, td {
+	max-width: 300px;
 	padding: 1rem;
 	text-align: left;
 	border-bottom: 1px solid
@@ -142,4 +143,20 @@ nav a.active {
 	background-color: #805b30;
 	color: white;
 	/* background-color: #635bff */
+}
+
+.footer1 {
+  display: flex;
+  flex: 1;
+  padding: 1rem 0;
+  border-top: 1px solid #f6f9fc;
+  justify-content: center;
+  align-items: center;
+}
+
+.footer1 a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
 }
