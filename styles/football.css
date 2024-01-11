@@ -43,11 +43,34 @@ button {
 	border-radius: 4px;
 	cursor: pointer;
 	transition: background-color 0.3s ease;
+	position: relative;
+	overflow: hidden;
 }
 
-button:hover {
-	background: #43458b;
+button::after {
+	content: '';
+	position: absolute;
+	width: 1000px; /* or the size of the glow effect you want */
+	height: 100px; /* or the size of the glow effect you want */
+	background: 
+		linear-gradient(217deg,rgb(255 0 0 / 80%),rgb(255 0 0 / 0%) 70.71%),
+		linear-gradient(127deg, rgb(0 255 0 / 80%), rgb(0 255 0 / 0%) 70.71%),
+		linear-gradient(0deg, rgb(0 0 255 / 80%), rgb(0 0 255 / 0%) 70.71%);
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%) translate(var(--x), var(--y));
+	pointer-events: none; /* this is so the pseudo-element doesn't interfere with button functionality */
+	/* border-radius: 30px; */
+	transition: transform 0.1s, opacity 0.1s;
+	opacity: 0;
 }
+button:hover::after {
+	opacity: 0.6;
+}
+
+/* button:hover {
+	background: #43458b;
+} */
 
 .registered-users {
 	margin-top: 3rem;
@@ -87,6 +110,7 @@ button:hover {
 	border-radoius: 8px;
 	box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
 }
+
 .card h3 {
 	color: #525f7f;
 	text-align: center;
@@ -115,14 +139,21 @@ button:hover {
 nav {
 	float: left;
 	background: #f6f9fc;
-	padding: 1rem;
+	padding: 0.4rem;
 	border-radius: 8px;
 	box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+	@media (max-width: 470px) {
+		padding: 0.5rem;
+	}
 }
+
 nav a {
-	/* float: left; */
-	text-algin: center;
+	float: left;
+	text-align: center;
 	font-size: 1rem;
+	@media (max-width: 470px) {
+		font-size: 0.8rem;
+	}
 	color: #525f7f;
 	text-decoration: none;
 	margin-left: 1rem;
@@ -130,8 +161,6 @@ nav a {
 	border-radius: 14px;
 	transition: background-color 0.3s ease;
 	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-	
-
 }
 
 nav a:hover {
@@ -146,17 +175,17 @@ nav a.active {
 }
 
 .footer1 {
-  display: flex;
-  flex: 1;
-  padding: 1rem 0;
-  border-top: 1px solid #f6f9fc;
-  justify-content: center;
-  align-items: center;
+	display: flex;
+	flex: 1;
+	padding: 1rem 0;
+	border-top: 1px solid #f6f9fc;
+	justify-content: center;
+	align-items: center;
 }
 
 .footer1 a {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-grow: 1;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-grow: 1;
 }

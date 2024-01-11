@@ -1,5 +1,5 @@
 // pages/index.tsx
-import React, { useState, useEffect, FormEvent } from 'react';
+import React, { useState, useEffect, FormEvent, useRef } from 'react';
 import axios from 'axios';
 import Navbar from './Navbar';
 import Footer from './footer';
@@ -14,7 +14,8 @@ const Home: React.FC = () => {
 	const [name, setName] = useState<string>('');
 	const [id, setId] = useState<string>('');
 	const [registeredUsers, setRegisteredUsers] = useState<User[]>([]);
-
+	const buttonRef = useRef<HTMLButtonElement>(null);
+	
 	useEffect(() => {
 		axios.get('/api/users')
 		.then(response => {
@@ -34,7 +35,8 @@ const Home: React.FC = () => {
 		});
 	}, []);
 
-		const isSubmissionAllowed = () => {
+
+	const isSubmissionAllowed = () => {
 		const currentTime = new Date();
 		const currentDay = currentTime.getDay();
 		const currentHour = currentTime.getHours();
@@ -96,6 +98,17 @@ const Home: React.FC = () => {
 		}
 		};
 
+	const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
+	  if (buttonRef.current) {
+		const rect = buttonRef.current.getBoundingClientRect();
+		const x = e.clientX - rect.left - (rect.width / 2); // Center the glow on the button
+		const y = e.clientY - rect.top - (rect.height / 2); // Center the glow on the button
+		buttonRef.current.style.setProperty('--x', `${x}px`);
+		buttonRef.current.style.setProperty('--y', `${y}px`);
+	  }
+	};
+
+
 	return (
 	<div>
 		<Navbar />
@@ -108,7 +121,22 @@ const Home: React.FC = () => {
 			<label htmlFor="id">Intra login:</label>
 			<input type="text" id="id" value={id} onChange={(e) => setId(e.target.value)} />
 
-			<button type="submit">Submit</button>
+			<button
+				type="submit"
+				ref= {buttonRef}
+				onMouseMove={handleMouseMove}
+				onMouseLeave={() => {
+				if (buttonRef.current) {
+						buttonRef.current.style.setProperty('--x', '0px');
+						buttonRef.current.style.setProperty('--y', '0px');
+					}
+				}}
+				  style={{
+					'--x': '0px',
+					'--y': '0px',
+					color: 'white',
+				  } as React.CSSProperties}
+				>Submit</button>
 		</form>
 
 		<div style={{ height: '3rem' }} />
