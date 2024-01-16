@@ -40,7 +40,7 @@ const Money = () => {
           className="money-table"
           style={{ borderCollapse: "collapse", width: "100%" }}
         >
-          <thead style={{ backgroundColor: "#f3e5f5" }}>
+          {/* <thead style={{ backgroundColor: "#f3e5f5" }}>
             <tr>
               <th style={{ border: "1px solid #ddd", padding: "8px" }}>Date</th>
               <th style={{ border: "1px solid #ddd", padding: "8px" }}>Name</th>
@@ -72,6 +72,35 @@ const Money = () => {
                 <td style={{ border: "1px solid #ddd", padding: "8px" }}>
                   {record.paid ? "Paid" : "Pending"}
                 </td>
+              </tr>
+            ))}
+          </tbody> */}
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Name</th>
+              <th>intra login</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {moneyData.map((record, index) => (
+              <tr
+                key={index}
+                style={{
+                  backgroundColor: index % 2 === 0 ? "#e8f5f9" : "#ffe0b0",
+                }}
+              >
+                <td>{new Date(record.date).toLocaleDateString()}</td>
+                <td>{record.name}</td>
+                <td>
+                  <a href={"https://profile.intra.42.fr/users/" + record.intra}>
+                    {record.intra}
+                  </a>
+                </td>
+                <td>{record.amount} Dhs</td>
+                <td>{record.paid ? "Paid" : "Pending"}</td>
               </tr>
             ))}
           </tbody>

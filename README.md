@@ -1,20 +1,21 @@
 # [Football Registration site](https://42football.replit.com)
 
-This website is a registration site for the 42 Football Club. It is built using react and NextJS 
+This website is a registration site for the 42 Football Club. It is built using react and NextJS
 
 ## how to run
 
 To run this project, you need to have nodejs installed. You can install it from [here](https://nodejs.org/en/)
 
-A .env file is also requied to run this porject. follow the .env.example file to create your own .env file. You will need to have  replit database url and postgresql database url to run this project. 
-- You can get the replit database url from the secrets tab in the left sidebar from after starting a database tool on a [replit project](replit.com) you start. 
+A .env file is also requied to run this porject. follow the .env.example file to create your own .env file. You will need to have replit database url and postgresql database url to run this project.
+
+- You can get the replit database url from the secrets tab in the left sidebar from after starting a database tool on a [replit project](replit.com) you start.
 - You can get the postgresql database url from any postgresql database provider or you run your own postgresql database server.
 
 After installing nodejs, you can run the following commands in the shell to run the project
 
 ```
 npm ci
-npm run dev 
+npm run dev
 ```
 
 The default port is 3000. You can change it by setting port to a different value in the .package.json file
@@ -23,9 +24,10 @@ The default port is 3000. You can change it by setting port to a different value
 
 fork this project and make a pull request. Pull requets will only be merged if the additions are clear, simple and easy to understand. Do not make a multi-purpose pull request. Make a separate pull request for each feature you want to add.
 
-report bugs and request features by creating an issue. 
+report bugs and request features by creating an issue.
 
 ## Under construction
+
 <!-- Welcome to the NextJS base template bootstrapped using the `create-next-app`. This template supports TypeScript, but you can use normal JavaScript as well.
 
 ## Getting Started
