@@ -10,7 +10,8 @@ A .env file is also requied to run this porject. follow the .env.example file to
 
 - You can get the replit database url from the enviroment tab in the right sidebar after starting a [Repl](replit.com).
 
-<video align="center" src="Get%20REPLIT_DB_URL%20-%20Made%20with%20Clipchamp%20(1).mp4" controls title="GET REPLIT_DB_URL"></video>
+
+https://github.com/MahdyZ7/Football-website/assets/17922653/5dfe147a-2f6f-40c9-87bf-4a2bbd37eef2
 
 - You can get the postgresql database url from any postgresql database provider or you run your own postgresql database server.
 
