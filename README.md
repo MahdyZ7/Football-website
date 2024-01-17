@@ -8,7 +8,10 @@ To run this project, you need to have nodejs installed. You can install it from 
 
 A .env file is also requied to run this porject. follow the .env.example file to create your own .env file. You will need to have replit database url and postgresql database url to run this project.
 
-- You can get the replit database url from the secrets tab in the left sidebar from after starting a database tool on a [replit project](replit.com) you start.
+- You can get the replit database url from the enviroment tab in the right sidebar after starting a [Repl](replit.com).
+
+<video align="center" src="Get%20REPLIT_DB_URL%20-%20Made%20with%20Clipchamp%20(1).mp4" controls title="GET REPLIT_DB_URL"></video>
+
 - You can get the postgresql database url from any postgresql database provider or you run your own postgresql database server.
 
 After installing nodejs, you can run the following commands in the shell to run the project
