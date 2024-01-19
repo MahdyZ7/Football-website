@@ -1,5 +1,6 @@
 import React from "react";
 import Navbar from "./Navbar";
+import Footer from "./footer";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -105,32 +106,10 @@ const Money = () => {
             ))}
           </tbody>
         </table>
+	  <Footer />
       </div>
     </div>
   );
 };
 
 export default Money;
-// const Money = () => {
-// 	return (
-// 		<div>
-// 			<Navbar />
-// 			<div className="container">
-// 				<h1>Money Page</h1>
-// 				<ul className="money-list">
-// 					<li style={{color:"#6000ff"}}>04/01/2024	Haben	15 Dhs	Paid</li>
-// 					<li>08/01/2024	Tukka	5 Dhs</li>
-// 					<li>08/01/2024	Hussain	15 Dhs</li>
-// 					<li>08/01/2024	Mekkey	15 Dhs</li>
-// 					<li>11/01/2024	Tukka	15 Dhs</li>
-// 					<li>11/01/2024	Hassan haetahi		15 Dhs</li>
-// 					<li>11/01/2024	Mutasem Mmajid-M	30 Dhs</li>
-// 				</ul>
-
-// 			</div>
-
-// 		</div>
-// 	);
-// }
-
-// export default Money;
