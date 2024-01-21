@@ -24,6 +24,7 @@ export default async function handler(
 
 			// Send the players as a response
 			res.status(200).json(players);
+			client.close();
 		} catch (error) {
 			console.error("Error fetching players:", error);
 			res.status(500).json({ error: "An unexpected error occurred." });
