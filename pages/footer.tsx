@@ -2,7 +2,7 @@ import React from "react";
 import Image from "next/image";
 import { useEffect } from "react";
 
-function footerText() {
+function FooterText() {
 	useEffect(() => {
 		if (typeof window !== "undefined") {
 			let footer = document.getElementById("footer");
@@ -23,5 +23,5 @@ function footerText() {
 }
 
 export default function footer() {
-	return footerText();
+	return FooterText();
 }

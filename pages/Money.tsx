@@ -15,7 +15,7 @@ interface MoneyRecord {
 const Money = () => {
 	const [moneyData, setMoneyData] = useState<MoneyRecord[]>([]);
 
-	const fetchMoneyData = async () => {
+	const FetchMoneyData = async () => {
 		try {
 			const response = await fetch("/api/moneyDb");
 			if (!response.ok) {
@@ -29,7 +29,7 @@ const Money = () => {
 	};
 
 	useEffect(() => {
-		fetchMoneyData();
+		FetchMoneyData();
 	}, []);
 
 	return (
