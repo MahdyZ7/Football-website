@@ -1,63 +1,38 @@
-// pages/api/users.ts
-
 import { NextApiRequest, NextApiResponse } from "next";
-import Database from "@replit/database";
+import { MongoClient, ServerApiVersion } from "mongodb";
 
-const db = new Database();
-
-// Helper function to read users from the Replit Database
-const readUsersFromDatabase = async (): Promise<any[]> => {
-  try {
-    const users: any[] = ((await db.get("users")) as []) || [];
-    return users;
-  } catch (error) {
-    throw error;
-  }
-};
-
-// Helper function to write users to the Replit Database
-const writeUsersToDatabase = async (users: any[]) => {
-  await db.set("users", users);
-};
+const uri = process.env.MONGODB_URI ?? "";
+const client = new MongoClient(uri);
 
 export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
+	req: NextApiRequest,
+	res: NextApiResponse
 ) {
-  if (req.method === "GET") {
-    try {
-      const users = await readUsersFromDatabase();
-      res.status(200).json(users);
-    } catch (error) {
-      res.status(500).json({ error: "An unexpected error occurred." });
-    }
-  } else if (req.method === "POST") {
-    try {
-      const { name, id } = req.body;
-      if (!name || !id) {
-        res.status(400).json({ error: "Name and UID are required." });
-        return;
-      }
+	if (req.method === "GET") {
+		let players = [];
+		try {
+			// Connect to the MongoDB client
+			await client.connect();
 
-      const users = await readUsersFromDatabase();
+			// Get the players collection
+			const playersCollection = client
+				.db("42football")
+				.collection("players");
 
-      if (users.some((user: any) => user.id === id)) {
-        res
-          .status(409)
-          .json({ error: `User with UID "${id}" already exists.` });
-        return;
-      }
+			// Find all players
+			players = await playersCollection.find().toArray();
 
-      const newUser = { name, id };
-      users.push(newUser);
-      await writeUsersToDatabase(users);
-
-      res.status(201).json(newUser);
-    } catch (error) {
-      res.status(500).json({ error: "An unexpected error occurred." });
-    }
-  } else {
-    res.setHeader("Allow", ["GET", "POST"]);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
-  }
+			// Send the players as a response
+			res.status(200).json(players);
+		} catch (error) {
+			console.error("Error fetching players:", error);
+			res.status(500).json({ error: "An unexpected error occurred." });
+		} finally {
+			// Close the MongoDB client
+			//    await client.close();
+		}
+	} else {
+		// Method not allowed
+		res.status(405).end();
+	}
 }
