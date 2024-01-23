@@ -1,200 +1,200 @@
 .container {
-  padding: 4rem;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	padding: 4rem;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 h1 {
-  color: #525f7f;
-  text-align: center;
-  margin-bottom: 2rem;
+	color: #525f7f;
+	text-align: center;
+	margin-bottom: 2rem;
 }
 
 form {
-  max-width: 400px;
-  /* min-width: 300px; */
-  margin: 0 auto;
-  background: #f6f9fc;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+	max-width: 400px;
+	/* min-width: 300px; */
+	margin: 0 auto;
+	background: #f6f9fc;
+	padding: 2rem;
+	border-radius: 8px;
+	box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 label {
-  display: block;
-  margin: 0.5rem 0;
+	display: block;
+	margin: 0.5rem 0;
 }
 
 input {
-  width: 100%;
-  padding: 0.8rem;
-  margin-bottom: 1rem;
-  border-radius: 4px;
-  border: 1px solid #ccd4da;
-  box-sizing: border-box;
+	width: 100%;
+	padding: 0.8rem;
+	margin-bottom: 1rem;
+	border-radius: 4px;
+	border: 1px solid #ccd4da;
+	box-sizing: border-box;
 }
 
 button {
-  width: 100%;
-  background: #805b30;
-  color: white;
-  border: none;
-  padding: 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  position: relative;
-  overflow: hidden;
+	width: 100%;
+	background: #805b30;
+	color: white;
+	border: none;
+	padding: 1rem;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+	position: relative;
+	overflow: hidden;
 }
 
 button::after {
-  content: "";
-  position: absolute;
-  width: 1000px; /* or the size of the glow effect you want */
-  height: 100px; /* or the size of the glow effect you want */
-  background: linear-gradient(
-      217deg,
-      rgb(255 0 0 / 80%),
-      rgb(255 0 0 / 0%) 70.71%
-    ),
-    linear-gradient(127deg, rgb(0 255 0 / 80%), rgb(0 255 0 / 0%) 70.71%),
-    linear-gradient(360deg, rgb(0 0 255 / 80%), rgb(0 0 255 / 0%) 70.71%);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) translate(var(--x), var(--y));
-  pointer-events: none; /* this is so the pseudo-element doesn't interfere with button functionality */
-  border-radius: 10000px;
-  transition: transform 0.1s, opacity 0.1s;
-  opacity: 0;
+	content: "";
+	position: absolute;
+	width: 1000px; /* or the size of the glow effect you want */
+	height: 100px; /* or the size of the glow effect you want */
+	background: linear-gradient(
+			217deg,
+			rgb(255 0 0 / 80%),
+			rgb(255 0 0 / 0%) 70.71%
+		),
+		linear-gradient(127deg, rgb(0 255 0 / 80%), rgb(0 255 0 / 0%) 70.71%),
+		linear-gradient(360deg, rgb(0 0 255 / 80%), rgb(0 0 255 / 0%) 70.71%);
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%) translate(var(--x), var(--y));
+	pointer-events: none; /* this is so the pseudo-element doesn't interfere with button functionality */
+	border-radius: 10000px;
+	transition: transform 0.1s, opacity 0.1s;
+	opacity: 0;
 }
 button:hover::after {
-  opacity: 0.6;
+	opacity: 0.6;
 }
 
 button:hover {
-  cursor: pointer;
-  /* background: #43458b; */
+	cursor: pointer;
+	/* background: #43458b; */
 }
 
 .registered-users {
-  margin-top: 3rem;
+	margin-top: 3rem;
 }
 
 .user-list {
-  list-style: none;
-  padding: 0;
+	list-style: none;
+	padding: 0;
 }
 
 .user-list li {
-  background: #e3ebf6;
-  margin-bottom: 0.5rem;
-  padding: 1rem;
-  border-radius: 4px;
+	background: #e3ebf6;
+	margin-bottom: 0.5rem;
+	padding: 1rem;
+	border-radius: 4px;
 }
 
 .money-list {
-  list-style: none;
-  padding: 0;
+	list-style: none;
+	padding: 0;
 }
 
 .money-list li {
-  background: #e3ebf6;
-  margin-bottom: 0.5rem;
-  padding: 1rem;
-  border-radius: 4px;
-  color: #805b30;
+	background: #e3ebf6;
+	margin-bottom: 0.5rem;
+	padding: 1rem;
+	border-radius: 4px;
+	color: #805b30;
 }
 
 .card {
-  max-width: 800px;
-  /* min-width: 300px; */
-  margin: 0 auto;
-  background: #fff0d4;
-  padding: 1rem;
-  border-radoius: 8px;
-  box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+	max-width: 800px;
+	/* min-width: 300px; */
+	margin: 0 auto;
+	background: #fff0d4;
+	padding: 1rem;
+	border-radoius: 8px;
+	box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .card h3 {
-  color: #525f7f;
-  text-align: center;
-  margin-bottom: 1rem;
+	color: #525f7f;
+	text-align: center;
+	margin-bottom: 1rem;
 }
 table {
-  width: 100%;
-  max-width: 800px;
-  border-collapse: collapse;
-  margin-left: auto;
-  margin-right: auto;
+	width: 100%;
+	max-width: 800px;
+	border-collapse: collapse;
+	margin-left: auto;
+	margin-right: auto;
 }
 
 th,
 td {
-  max-width: 300px;
-  padding: 1rem;
-  text-align: left;
-  border-bottom: 1px solid;
+	max-width: 300px;
+	padding: 1rem;
+	text-align: left;
+	border-bottom: 1px solid;
 }
 
 thead th {
-  background: #f6f9fc;
-  border-bottom: 2px solid #ccd4da;
-  text-aline: center;
-  algin-text: center;
+	background: #f6f9fc;
+	border-bottom: 2px solid #ccd4da;
+	text-aline: center;
+	algin-text: center;
 }
 
 nav {
-  float: left;
-  background: #f6f9fc;
-  padding: 0.4rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
-  @media (max-width: 470px) {
-    padding: 0.4rem;
-  }
+	float: left;
+	background: #f6f9fc;
+	padding: 0.4rem;
+	border-radius: 8px;
+	box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+	@media (max-width: 470px) {
+		padding: 0.4rem;
+	}
 }
 
 nav a {
-  float: left;
-  text-align: center;
-  font-size: 1rem;
-  @media (max-width: 470px) {
-    font-size: 0.8rem;
-    margin-left: 0.1rem;
-    padding: 0.4rem;
-  }
-  color: #525f7f;
-  text-decoration: none;
-  margin-left: 1rem;
-  padding: 14px 16px;
-  border-radius: 14px;
-  transition: background-color 0.3s ease;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	float: left;
+	text-align: center;
+	font-size: 1rem;
+	@media (max-width: 470px) {
+		font-size: 0.8rem;
+		margin-left: 0.1rem;
+		padding: 0.4rem;
+	}
+	color: #525f7f;
+	text-decoration: none;
+	margin-left: 1rem;
+	padding: 14px 16px;
+	border-radius: 14px;
+	transition: background-color 0.3s ease;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 nav a:hover {
-  cursor: pointer;
-  background-color: #e3ebf6;
-  text-shadow: 1px 1px 2px rgba(255, 170, 0, 0.2);
+	cursor: pointer;
+	background-color: #e3ebf6;
+	text-shadow: 1px 1px 2px rgba(255, 170, 0, 0.2);
 }
 
 nav a.active {
-  background-color: #805b30;
-  color: white;
-  /* background-color: #635bff */
+	background-color: #805b30;
+	color: white;
+	/* background-color: #635bff */
 }
 
 .footer1 {
-  display: flex;
-  flex: 1;
-  padding: 1rem 0;
-  border-top: 1px solid #f6f9fc;
-  justify-content: center;
-  align-items: center;
+	display: flex;
+	flex: 1;
+	padding: 1rem 0;
+	border-top: 1px solid #f6f9fc;
+	justify-content: center;
+	align-items: center;
 }
 
 .footer1 a {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-grow: 1;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-grow: 1;
 }

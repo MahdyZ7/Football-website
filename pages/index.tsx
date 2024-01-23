@@ -13,25 +13,23 @@ const Home: React.FC = () => {
 	const [name, setName] = useState<string>("");
 	const [id, setId] = useState<string>("");
 	const [registeredUsers, setRegisteredUsers] = useState<User[]>([]);
+	const [loading, setLoading] = useState(true);
 	const buttonRef = useRef<HTMLButtonElement>(null);
 
 	useEffect(() => {
 		fetch("/api/users")
 			.then((response) => response.json())
 			.then((data) => {
-				// Check if the response data is indeed an array
+				console.log(data);
 				if (Array.isArray(data)) {
 					setRegisteredUsers(data);
-				} else {
-					// Handle case when it's not an array, possibly by setting to an empty array or logging an error
-					console.error("Data received is not an array:", data);
-					// setRegisteredUsers([]); // Set to empty array as a fallback
-				}
+					setLoading(false);
+				} else console.error("Error fetching registered users:", data);
 			})
 			.catch((error) => {
 				// Handle any errors that occur during the request
 				console.error("Error fetching registered users:", error);
-				// setRegisteredUsers([]); // Set to empty array in case of error
+				setRegisteredUsers([]); // Set to empty array in case of error
 			});
 	}, []);
 	const isSubmissionAllowed = () => {
@@ -48,7 +46,7 @@ const Home: React.FC = () => {
 			(currentDay === 3 && currentHour >= 12) ||
 			(currentDay === 4 && currentHour < 21)
 		) {
-			return true;
+		return true;
 		}
 
 		return false;
@@ -67,9 +65,7 @@ const Home: React.FC = () => {
 				return;
 			} catch (error) {
 				// console.error('Error resetting user list:', error);
-				// Optionally alert the user of the failure
 			}
-			// return;
 		}
 		// Check that both name and id are filled before sending the request
 		if (!isSubmissionAllowed()) {
@@ -100,7 +96,6 @@ const Home: React.FC = () => {
 	 the Intra-login ${id} already exists.`);
 			} else {
 				console.error("Error registering user:", error);
-				// You could also show a generic error alert to the user here if you wanted
 			}
 		}
 	};
@@ -126,6 +121,7 @@ const Home: React.FC = () => {
 						type="text"
 						id="name"
 						value={name}
+						autoComplete="name"
 						onChange={(e) => setName(e.target.value)}
 					/>
 
@@ -134,6 +130,7 @@ const Home: React.FC = () => {
 						type="text"
 						id="id"
 						value={id}
+						autoComplete="intra"
 						onChange={(e) => setId(e.target.value)}
 					/>
 
@@ -212,17 +209,21 @@ const Home: React.FC = () => {
 				<div className="registered-users">
 					<h2>Player list</h2>
 					<ul className="user-list">
-						{registeredUsers.map((user, index) => (
-							<li
-								key={user.id}
-								style={{
-									color: index < 16 ? "#306030" : "#805000",
-								}}
-							>
-								{index + 1} {":"} {}
-								{user.name} - {user.id}
-							</li>
-						))}
+						{registeredUsers.length === 0 ? (
+							<li>Loading players...</li>
+						) : (
+							registeredUsers.map((user, index) => (
+								<li
+									key={user.id}
+									style={{
+										color:
+											index < 16 ? "#306030" : "#805000",
+									}}
+								>
+									{index + 1}: {user.name} - {user.id}
+								</li>
+							))
+						)}
 					</ul>
 				</div>
 			</div>

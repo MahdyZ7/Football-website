@@ -51,36 +51,46 @@ const Money = () => {
 						</tr>
 					</thead>
 					<tbody>
-						{moneyData.map((record, index) => (
-							<tr
-								key={index}
-								style={{
-									backgroundColor:
-										index % 2 === 0 ? "#e8f5f9" : "#ffe0b0",
-								}}
-							>
-								<td>
-									{new Date(record.date).toLocaleDateString()}
-								</td>
-								<td>{record.name}</td>
-								<td>
-									<a
-										href={
-											"https://profile.intra.42.fr/users/" +
-											record.intra
-										}
-									>
-										{record.intra}
-									</a>
-								</td>
-								<td>{record.amount} Dhs</td>
-								<td>{record.paid ? "Paid" : "Pending"}</td>
+						{moneyData.length === 0 ? (
+							<tr style={{ backgroundColor: "#e8f5f9" }}>
+								<td colSpan={5}> Loading Data... </td>
 							</tr>
-						))}
+						) : (
+							moneyData.map((record, index) => (
+								<tr
+									key={index}
+									style={{
+										backgroundColor:
+											index % 2 === 0
+												? "#e8f5f9"
+												: "#ffe0b0",
+									}}
+								>
+									<td>
+										{new Date(
+											record.date
+										).toLocaleDateString()}
+									</td>
+									<td>{record.name}</td>
+									<td>
+										<a
+											href={
+												"https://profile.intra.42.fr/users/" +
+												record.intra
+											}
+										>
+											{record.intra}
+										</a>
+									</td>
+									<td>{record.amount} Dhs</td>
+									<td>{record.paid ? "Paid" : "Pending"}</td>
+								</tr>
+							))
+						)}
 					</tbody>
 				</table>
-				<Footer />
 			</div>
+			<Footer />
 		</div>
 	);
 };
