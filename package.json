@@ -12,6 +12,7 @@
 		"@prisma/client": "^5.5.2",
 		"@replit/database": "^2.0.5",
 		"axios": "^1.6.1",
+		"firebase": "^10.7.2",
 		"mongodb": "^6.3.0",
 		"next": "^13.5.1",
 		"next-connect": "^1.0.0",
