@@ -6,14 +6,39 @@ This website is a registration site for the 42 Football Club. It is built using 
 
 To run this project, you need to have nodejs installed. You can install it from [here](https://nodejs.org/en/)
 
-A .env file is also requied to run this porject. follow the .env.example file to create your own .env file. You will need to have replit database url and postgresql database url to run this project.
+A .env file is also requied to run this porject. follow the .env.example file to create your own .env file. You will need to have postgresql database url to run this project.
 
-- You can get the replit database url from the enviroment tab in the right sidebar after starting a [Repl](replit.com).
+- You can get the postgresql database url from any postgresql database [provider](neon.com) or you run your own postgresql database server.
 
+There are two tables in the database. One for players and one for Money.
 
-https://github.com/MahdyZ7/Football-website/assets/17922653/5dfe147a-2f6f-40c9-87bf-4a2bbd37eef2
+- The players table has the following columns and data types:
+	- name: varchar(255)
+	- intra: varchar(255)
 
-- You can get the postgresql database url from any postgresql database provider or you run your own postgresql database server.
+```
+create table players (
+	name varchar(255),
+	intra varchar(255)
+);
+```
+
+- The money table has the following columns and data types:
+	- date: date
+	- name: varchar(255)
+	- intra: varchar(255)
+	- amount: integer
+	- paid: boolean
+
+```
+create table money (
+	date date,
+	name varchar(255),
+	intra varchar(255),
+	amount INT,
+	paid boolean
+);
+```
 
 After installing nodejs, you can run the following commands in the shell to run the project
 
