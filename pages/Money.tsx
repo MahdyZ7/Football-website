@@ -61,9 +61,9 @@ const Money = () => {
 									key={index}
 									style={{
 										backgroundColor:
-											index % 2 === 0
+											record.paid
 												? "#e8f5f9"
-												: "#ffe0b0",
+												: "#ffe0b080",
 									}}
 								>
 									<td>
@@ -83,7 +83,7 @@ const Money = () => {
 										</a>
 									</td>
 									<td>{record.amount} Dhs</td>
-									<td>{record.paid ? "Paid" : "Pending"}</td>
+									<td>{record.paid ? " ✔️ Paid" : ""}</td>
 								</tr>
 							))
 						)}

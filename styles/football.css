@@ -110,7 +110,7 @@ button:hover {
 	margin: 0 auto;
 	background: #fff0d4;
 	padding: 1rem;
-	border-radoius: 8px;
+	border-radius: 10px 10px 10px 10px;
 	box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
@@ -133,6 +133,10 @@ td {
 	padding: 1rem;
 	text-align: left;
 	border-bottom: 1px solid;
+}
+
+th {
+	border-radius: 50px 10px 50px 10px;
 }
 
 thead th {
