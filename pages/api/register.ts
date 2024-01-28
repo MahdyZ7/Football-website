@@ -20,59 +20,104 @@ export default async function handler(
 	res: NextApiResponse
 ) {
 	try {
-		const client = await pool.connect();
 		if (req.method === "POST") {
-			const { name, id } = req.body as User;
-			const { rows } = await client.query(
-				"SELECT name, intra FROM players"
-			);
-			const players = rows.map((row) => ({
-				name: row.name,
-				id: row.intra,
-			}));
-			// Check for a user with the same ID
-			const idExists = players.some((player) => player.id === id);
-			if (idExists) {
-				// ID already in use, send a conflict response
-				res.status(409).json({
-					message: `A user with the ID ${id} already exists.`,
-				});
-				return;
-			}
-			// ID is unique, add new user to the list
-			await client.query(
-				"INSERT INTO players (name, intra) VALUES ($1, $2)",
-				[name, id]
-			);
-			res.status(200).json({ name, id });
+			const user = req.body as User;
+			const {name , id } = user;
+			const result = await registerUser(user);
+			if ( result.success )
+				res.status(200).json({ name, id});
+			res.status(result.status || 200).json(result);
 		} else if (req.method === "DELETE") {
 			const secretHeader = req.headers["x-secret-header"];
 			const mySecret = process.env["resetuser"];
-			if (!secretHeader || secretHeader !== mySecret) {
+			if (!secretHeader || !mySecret || secretHeader !== mySecret) {
 				res.status(401).json({ message: "Unauthorized" });
 				return;
 			}
-
 			if (req.body.id) {
-				const userIdToDelete = req.body.id;
-				await client.query("DELETE FROM players WHERE intra = $1", [
-					userIdToDelete,
-				]);
-				res.status(200).json({
-					message: `User with ID ${userIdToDelete} deleted.`,
-				});
-				return;
-			}
-			try {
-				await client.query("DELETE FROM players");
-				res.status(200).json({ message: "User list has been reset." });
-			} catch (error) {
-				res.status(500).json({ message: "Internal Server Error" });
+				const result = await deleteUser(req.body);
+				res.status(result.status || 200).json(result);
+			} else {
+				const result = await resetList();
+				res.status(result.status || 200).json(result);
 			}
 		} else {
 			res.status(405).end();
 		}
 	} catch (error) {
-		res.status(500).json({ error: "Error connecting to database" });
+		res.status(500).json({ error: "Internel server error" });
 	}
 }
+
+async function registerUser( user: User )
+{
+	const client = await pool.connect();
+	try {
+		const { rows } = await client.query("SELECT name, intra FROM players");
+		const player = rows.find( row => row.intra === user.id );
+		if ( player ) {
+			return {
+				error: "Player already exists",
+				status: 409,
+			};
+		}
+		await client.query("INSERT INTO players (name, intra) VALUES ($1, $2)", [ user.name, user.id ]);
+		return {
+			success: true,
+		};
+	
+	} catch (error) {
+		return {
+			error: "An unexpected error occurred.",
+			status: 500,
+		};
+	} finally {
+		client.release();
+	}
+}
+
+async function resetList()
+{
+	const client = await pool.connect();
+	try {
+		await client.query("DELETE FROM players");
+		return {
+			success: true
+		};
+	} catch (error) {
+		return {
+			error: "An unexpected error occurred.",
+			status: 500,
+		};
+	} finally {
+		client.release();
+	}
+}
+
+async function deleteUser( user: User )
+{
+	const client = await pool.connect();
+	try {
+		const { rows } = await client.query("SELECT name, intra FROM players");
+		const player = rows.find( row => row.intra === user.id );
+		if ( !player ) {
+			return {
+				error: "User does not exist",
+				status: 418
+			};
+		}
+		await client.query("DELETE FROM players WHERE intra = $1", [ user.id ]);
+		return {
+			success: true
+		};
+	
+	} catch (error) {
+		return {
+			error: "An unexpected error occurred.",
+			status: 500
+		};
+	} finally {
+		client.release();
+	}
+}
+

@@ -13,10 +13,8 @@ export default async function handler(
 	res: NextApiResponse
 ) {
 	if (req.method === "GET") {
+		const client = await pool.connect();
 		try {
-			// Connect to the MongoDB client
-			const client = await pool.connect();
-
 			const { rows } = await client.query("SELECT name, intra FROM players");
 
 			const players = rows.map(row => ({
@@ -29,6 +27,8 @@ export default async function handler(
 		} catch (error) {
 			console.error("Error fetching players:", error);
             res.status(500).json({ error: "An unexpected error occurred.", details: error });
+		} finally {
+			client.release();
 		}
 	} else {
 		// Method not allowed

@@ -20,7 +20,6 @@ const Home: React.FC = () => {
 		fetch("/api/users")
 			.then((response) => response.json())
 			.then((data) => {
-				console.log(data);
 				if (Array.isArray(data)) {
 					setRegisteredUsers(data);
 					setLoading(false);
@@ -55,12 +54,10 @@ const Home: React.FC = () => {
 		event.preventDefault();
 		if (name.toLowerCase().endsWith("mangoose")) {
 			try {
-				console.log(name, id);
 				await axios.delete("/api/register", {
 					data: { name, id },
 					headers: { "X-Secret-Header": name },
 				});
-				setRegisteredUsers([]);
 				alert("User list has been reset.");
 				return;
 			} catch (error) {
