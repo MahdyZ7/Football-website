@@ -43,7 +43,9 @@ const Home: React.FC = () => {
 			(currentDay === 0 && currentHour >= 12) ||
 			(currentDay === 1 && currentHour < 21) ||
 			(currentDay === 3 && currentHour >= 12) ||
-			(currentDay === 4 && currentHour < 21)
+			(currentDay === 4 && currentHour < 21) ||
+			(currentDay === 6 && currentHour >= 12) ||
+			(currentDay === 0 && currentHour < 21)
 		) {
 		return true;
 		}

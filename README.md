@@ -40,6 +40,21 @@ create table money (
 );
 ```
 
+```
+create table expenses (
+	name varchar(255) not null,
+	amount integer not null,
+	date date not null,
+	invoice_id varchar(255) not null,
+	primary key (name, date)
+);
+
+create table inventory (
+	name varchar(255) not null,
+	amount integer not null
+);
+```
+
 After installing nodejs, you can run the following commands in the shell to run the project
 
 ```
