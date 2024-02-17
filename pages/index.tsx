@@ -114,6 +114,7 @@ const Home: React.FC = () => {
 			<Navbar />
 			<div className="container">
 				<h1>Football Registration </h1>
+				<h2>Special Sunday Game</h2>
 				<form onSubmit={handleSubmit}>
 					<label htmlFor="name">Name:</label>
 					<input
