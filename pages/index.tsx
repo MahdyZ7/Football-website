@@ -43,9 +43,7 @@ const Home: React.FC = () => {
 			(currentDay === 0 && currentHour >= 12) ||
 			(currentDay === 1 && currentHour < 21) ||
 			(currentDay === 3 && currentHour >= 12) ||
-			(currentDay === 4 && currentHour < 21) ||
-			(currentDay === 6 && currentHour >= 12) ||
-			(currentDay === 0 && currentHour < 21)
+			(currentDay === 4 && currentHour < 21)
 		) {
 		return true;
 		}
@@ -85,6 +83,10 @@ const Home: React.FC = () => {
 			// Reset the form fields
 			setName("");
 			setId("");
+			// Show a flare on the website to indicate successful registration
+			alert('Registration successful!');
+			
+
 		} catch (error) {
 			if (
 				axios.isAxiosError(error) &&
@@ -114,7 +116,6 @@ const Home: React.FC = () => {
 			<Navbar />
 			<div className="container">
 				<h1>Football Registration </h1>
-				<h2>Special Sunday Game</h2>
 				<form onSubmit={handleSubmit}>
 					<label htmlFor="name">Name:</label>
 					<input
