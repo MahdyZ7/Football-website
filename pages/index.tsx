@@ -215,7 +215,7 @@ const Home: React.FC = () => {
 									key={user.id}
 									style={{
 										color:
-											index < 10 ? "#306030" : "#805000",
+											index < 12 ? "#306030" : "#805000",
 									}}
 								>
 									{index + 1}: {user.name} - {user.id}
