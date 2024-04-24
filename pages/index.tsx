@@ -81,12 +81,9 @@ const Home: React.FC = () => {
 			// Add new registered user to the local state to update the list
 			setRegisteredUsers((prevUsers) => [...prevUsers, response.data]);
 			// Reset the form fields
+			alert('Registration successful!');
 			setName("");
 			setId("");
-			// Show a flare on the website to indicate successful registration
-			alert('Registration successful!');
-			
-
 		} catch (error) {
 			if (
 				axios.isAxiosError(error) &&
@@ -208,7 +205,7 @@ const Home: React.FC = () => {
 				</div>
 
 				<div className="registered-users">
-					<h2>Player list</h2>
+					<h2>Player list (orange is waitlist)</h2>
 					<ul className="user-list">
 						{registeredUsers.length === 0 ? (
 							<li>Loading players...</li>
@@ -218,7 +215,7 @@ const Home: React.FC = () => {
 									key={user.id}
 									style={{
 										color:
-											index < 16 ? "#306030" : "#805000",
+											index < 10 ? "#306030" : "#805000",
 									}}
 								>
 									{index + 1}: {user.name} - {user.id}
