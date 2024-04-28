@@ -10,6 +10,7 @@ type User = {
 };
 
 const Home: React.FC = () => {
+	const [showPopup, setShowPopup] = useState(true);
 	const [name, setName] = useState<string>("");
 	const [id, setId] = useState<string>("");
 	const [registeredUsers, setRegisteredUsers] = useState<User[]>([]);
@@ -17,6 +18,9 @@ const Home: React.FC = () => {
 	const buttonRef = useRef<HTMLButtonElement>(null);
 
 	useEffect(() => {
+		const timer = setTimeout(() => {
+			setShowPopup(false);
+		}, 20000);
 		fetch("/api/users")
 			.then((response) => response.json())
 			.then((data) => {
@@ -30,6 +34,7 @@ const Home: React.FC = () => {
 				console.error("Error fetching registered users:", error);
 				setRegisteredUsers([]); // Set to empty array in case of error
 			});
+		return () => clearTimeout(timer);
 	}, []);
 	const isSubmissionAllowed = () => {
 		const currentTime = new Date();
@@ -45,7 +50,7 @@ const Home: React.FC = () => {
 			(currentDay === 3 && currentHour >= 12) ||
 			(currentDay === 4 && currentHour < 21)
 		) {
-		return true;
+			return true;
 		}
 
 		return false;
@@ -111,6 +116,14 @@ const Home: React.FC = () => {
 	return (
 		<div>
 			<Navbar />
+			{showPopup && (
+				<div style={popupStyle}>
+					<h1> New Location Alert</h1>
+					<p>Scuirity at Emirates Palace is strict. Mention that the booking is with "Sport Support Club".</p>
+					<p>Call the pitch admin "0502303707" if nesseary  </p>
+					<button onClick={() => setShowPopup(false)}>Close</button>
+				</div>
+			)}
 			<div className="container">
 				<h1>Football Registration </h1>
 				<form onSubmit={handleSubmit}>
@@ -228,6 +241,19 @@ const Home: React.FC = () => {
 			<Footer />
 		</div>
 	);
+};
+
+// Define some basic styles for the popup
+const popupStyle: React.CSSProperties = {
+	position: 'fixed',
+	top: '20px',
+	left: '20px',
+	width: '300px',
+	backgroundColor: '#fed5aa',
+	borderRadius: '10px',
+	padding: '20px',
+	boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+	zIndex: 1000, // Ensure it appears above other content
 };
 
 export default Home;
