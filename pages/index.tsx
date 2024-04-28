@@ -119,8 +119,8 @@ const Home: React.FC = () => {
 			{showPopup && (
 				<div style={popupStyle}>
 					<h1> New Location Alert</h1>
-					<p>Scuirity at Emirates Palace is strict. Mention that the booking is with "Sport Support Club".</p>
-					<p>Call the pitch admin "0502303707" if nesseary  </p>
+					<p>Security at Emirates Palace is strict. Mention that the booking is with &quot;Sport Support Club&quot;.</p>
+					<p>Call the pitch admin &quot;0502303707&quot; if necessary</p>
 					<button onClick={() => setShowPopup(false)}>Close</button>
 				</div>
 			)}
@@ -249,7 +249,7 @@ const popupStyle: React.CSSProperties = {
 	top: '20px',
 	left: '20px',
 	width: '300px',
-	backgroundColor: '#fed5aa',
+	backgroundColor: '#ffefdd',
 	borderRadius: '10px',
 	padding: '20px',
 	boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
