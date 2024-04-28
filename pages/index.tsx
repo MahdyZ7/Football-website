@@ -114,146 +114,135 @@ const Home: React.FC = () => {
 	};
 
 	return (
-		<div>
-			<Navbar />
+		<>
+			<div className={showPopup ? 'blurry-background' : ''}>
+				<Navbar />
+				<div className="container">
+					<h1>Football Registration </h1>
+					<form onSubmit={handleSubmit}>
+						<label htmlFor="name">Name:</label>
+						<input
+							type="text"
+							id="name"
+							value={name}
+							autoComplete="name"
+							onChange={(e) => setName(e.target.value)}
+						/>
+
+						<label htmlFor="id">Intra login:</label>
+						<input
+							type="text"
+							id="id"
+							value={id}
+							autoComplete="intra"
+							onChange={(e) => setId(e.target.value)}
+						/>
+
+						<button
+							type="submit"
+							ref={buttonRef}
+							onMouseMove={handleMouseMove}
+							onMouseLeave={() => {
+								if (buttonRef.current) {
+									buttonRef.current.style.setProperty(
+										"--x",
+										"0px"
+									);
+									buttonRef.current.style.setProperty(
+										"--y",
+										"0px"
+									);
+								}
+							}}
+							style={
+								{
+									"--x": "0px",
+									"--y": "0px",
+									color: "white",
+								} as React.CSSProperties
+							}
+						>
+							Submit
+						</button>
+					</form>
+
+					<div style={{ height: "3rem" }} />
+
+					<div className="card">
+						<div className="card-header">
+							<h3>Late Fees</h3>
+						</div>
+						<div className="card-body">
+							<table className="table">
+								<thead>
+									<tr>
+										<th>Action</th>
+										<th>Amount</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<th> Not ready when booking time starts</th>
+										<th> 5 AED</th>
+									</tr>
+									<tr>
+										<th> Cancel reservation</th>
+										<th> 5 AED</th>
+									</tr>
+									<tr>
+										<th> Late {">"} 15 minutes</th>
+										<th> 15 AED</th>
+									</tr>
+									<tr>
+										<th>
+											{" "}
+											Cancel reservation on game day after 5
+											PM
+										</th>
+										<th> 15 AED</th>
+									</tr>
+									<tr>
+										<th> No Show without notice</th>
+										<th> 30 AED</th>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+
+					<div className="registered-users">
+						<h2>Player list (orange is waitlist)</h2>
+						<ul className="user-list">
+							{registeredUsers.length === 0 ? (
+								<li>Loading players...</li>
+							) : (
+								registeredUsers.map((user, index) => (
+									<li
+										key={user.id}
+										style={{
+											color:
+												index < 12 ? "#306030" : "#805000",
+										}}
+									>
+										{index + 1}: {user.name} - {user.id}
+									</li>
+								))
+							)}
+						</ul>
+					</div>
+				</div>
+				<Footer />
+			</div>
 			{showPopup && (
-				<div style={popupStyle}>
+				<div className="popup">
 					<h1> New Location Alert</h1>
 					<p>Security at Emirates Palace is strict. Mention that the booking is with &quot;Sport Support Club&quot;.</p>
 					<p>Call the pitch admin &quot;0502303707&quot; if necessary</p>
 					<button onClick={() => setShowPopup(false)}>Close</button>
 				</div>
 			)}
-			<div className="container">
-				<h1>Football Registration </h1>
-				<form onSubmit={handleSubmit}>
-					<label htmlFor="name">Name:</label>
-					<input
-						type="text"
-						id="name"
-						value={name}
-						autoComplete="name"
-						onChange={(e) => setName(e.target.value)}
-					/>
-
-					<label htmlFor="id">Intra login:</label>
-					<input
-						type="text"
-						id="id"
-						value={id}
-						autoComplete="intra"
-						onChange={(e) => setId(e.target.value)}
-					/>
-
-					<button
-						type="submit"
-						ref={buttonRef}
-						onMouseMove={handleMouseMove}
-						onMouseLeave={() => {
-							if (buttonRef.current) {
-								buttonRef.current.style.setProperty(
-									"--x",
-									"0px"
-								);
-								buttonRef.current.style.setProperty(
-									"--y",
-									"0px"
-								);
-							}
-						}}
-						style={
-							{
-								"--x": "0px",
-								"--y": "0px",
-								color: "white",
-							} as React.CSSProperties
-						}
-					>
-						Submit
-					</button>
-				</form>
-
-				<div style={{ height: "3rem" }} />
-
-				<div className="card">
-					<div className="card-header">
-						<h3>Late Fees</h3>
-					</div>
-					<div className="card-body">
-						<table className="table">
-							<thead>
-								<tr>
-									<th>Action</th>
-									<th>Amount</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<th> Not ready when booking time starts</th>
-									<th> 5 AED</th>
-								</tr>
-								<tr>
-									<th> Cancel reservation</th>
-									<th> 5 AED</th>
-								</tr>
-								<tr>
-									<th> Late {">"} 15 minutes</th>
-									<th> 15 AED</th>
-								</tr>
-								<tr>
-									<th>
-										{" "}
-										Cancel reservation on game day after 5
-										PM
-									</th>
-									<th> 15 AED</th>
-								</tr>
-								<tr>
-									<th> No Show without notice</th>
-									<th> 30 AED</th>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-				</div>
-
-				<div className="registered-users">
-					<h2>Player list (orange is waitlist)</h2>
-					<ul className="user-list">
-						{registeredUsers.length === 0 ? (
-							<li>Loading players...</li>
-						) : (
-							registeredUsers.map((user, index) => (
-								<li
-									key={user.id}
-									style={{
-										color:
-											index < 12 ? "#306030" : "#805000",
-									}}
-								>
-									{index + 1}: {user.name} - {user.id}
-								</li>
-							))
-						)}
-					</ul>
-				</div>
-			</div>
-			<Footer />
-		</div>
+		</>
 	);
-};
-
-// Define some basic styles for the popup
-const popupStyle: React.CSSProperties = {
-	position: 'fixed',
-	top: '20px',
-	left: '20px',
-	width: '300px',
-	backgroundColor: '#ffefdd',
-	borderRadius: '10px',
-	padding: '20px',
-	boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-	zIndex: 1000, // Ensure it appears above other content
 };
 
 export default Home;
