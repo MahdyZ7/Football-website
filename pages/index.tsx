@@ -20,7 +20,7 @@ const Home: React.FC = () => {
 	useEffect(() => {
 		const timer = setTimeout(() => {
 			setShowPopup(false);
-		}, 20000);
+		}, 3000);
 		fetch("/api/users")
 			.then((response) => response.json())
 			.then((data) => {
@@ -36,25 +36,16 @@ const Home: React.FC = () => {
 			});
 		return () => clearTimeout(timer);
 	}, []);
-	const isSubmissionAllowed = () => {
-		const currentTime = new Date();
-		const currentDay = currentTime.getDay();
-		const currentHour = currentTime.getHours();
-
-		// Sunday is 0 and Wednesday is 3 in getDay()
-		// Check if the current day is Sunday or Wednesday after 12 PM (noon)
-		// and before 8 PM the next day (20 hours)
-		if (
-			(currentDay === 0 && currentHour >= 12) ||
-			(currentDay === 1 && currentHour < 21) ||
-			(currentDay === 3 && currentHour >= 12) ||
-			(currentDay === 4 && currentHour < 21)
-		) {
-			return true;
+	
+	const isSubmissionAllowed = async() => {
+		const response = await axios.get("/api/allowed");
+			console.log("data is: " + response.data.isAllowed);
+		if (response.status === 200) {
+			return response.data.isAllowed;
 		}
-
 		return false;
 	};
+	
 	const handleSubmit = async (event: FormEvent) => {
 		event.preventDefault();
 		if (name.toLowerCase().endsWith("mangoose")) {
@@ -66,11 +57,12 @@ const Home: React.FC = () => {
 				alert("User list has been reset.");
 				return;
 			} catch (error) {
-				// console.error('Error resetting user list:', error);
+				alert("Error resetting user list.")
 			}
 		}
 		// Check that both name and id are filled before sending the request
-		if (!isSubmissionAllowed()) {
+		const sub_allowed = await isSubmissionAllowed();
+		if (sub_allowed === false) {
 			alert(
 				"Registration is only allowed on Sunday and Wednesday after 12 PM (noon) till 8 PM the next day."
 			);
@@ -103,19 +95,8 @@ const Home: React.FC = () => {
 		}
 	};
 
-	const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
-		if (buttonRef.current) {
-			const rect = buttonRef.current.getBoundingClientRect();
-			const x = e.clientX - rect.left - rect.width / 2; // Center the glow on the button
-			const y = e.clientY - rect.top - rect.height / 2; // Center the glow on the button
-			buttonRef.current.style.setProperty("--x", `${x}px`);
-			buttonRef.current.style.setProperty("--y", `${y}px`);
-		}
-	};
-
 	return (
 		<>
-			<div className={showPopup ? 'blurry-background' : ''}>
 				<Navbar />
 				<div className="container">
 					<h1>Football Registration </h1>
@@ -141,26 +122,6 @@ const Home: React.FC = () => {
 						<button
 							type="submit"
 							ref={buttonRef}
-							onMouseMove={handleMouseMove}
-							onMouseLeave={() => {
-								if (buttonRef.current) {
-									buttonRef.current.style.setProperty(
-										"--x",
-										"0px"
-									);
-									buttonRef.current.style.setProperty(
-										"--y",
-										"0px"
-									);
-								}
-							}}
-							style={
-								{
-									"--x": "0px",
-									"--y": "0px",
-									color: "white",
-								} as React.CSSProperties
-							}
 						>
 							Submit
 						</button>
@@ -232,7 +193,6 @@ const Home: React.FC = () => {
 					</div>
 				</div>
 				<Footer />
-			</div>
 			{showPopup && (
 				<div className="popup">
 					<h1> New Location Alert</h1>

@@ -52,33 +52,9 @@ button {
 	overflow: hidden;
 }
 
-button::after {
-	content: "";
-	position: absolute;
-	width: 1000px; /* or the size of the glow effect you want */
-	height: 100px; /* or the size of the glow effect you want */
-	background: linear-gradient(
-			217deg,
-			rgb(255 0 0 / 80%),
-			rgb(255 0 0 / 0%) 70.71%
-		),
-		linear-gradient(127deg, rgb(0 255 0 / 80%), rgb(0 255 0 / 0%) 70.71%),
-		linear-gradient(360deg, rgb(0 0 255 / 80%), rgb(0 0 255 / 0%) 70.71%);
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%) translate(var(--x), var(--y));
-	pointer-events: none; /* this is so the pseudo-element doesn't interfere with button functionality */
-	border-radius: 10000px;
-	transition: transform 0.1s, opacity 0.1s;
-	opacity: 0;
-}
-button:hover::after {
-	opacity: 0.6;
-}
-
 button:hover {
 	cursor: pointer;
-	/* background: #43458b; */
+	background: #43458b;
 }
 
 .registered-users {
@@ -215,10 +191,10 @@ nav a.active {
 }
 
 .popup {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+	position: fixed;
+	top: 5%;
+	left: 5%;
+  /* transform: translate(-50%, -50%); */
   z-index: 1000;
   background-color: #fff8f0;
   padding: 20px;

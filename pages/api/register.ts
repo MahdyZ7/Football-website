@@ -26,7 +26,8 @@ export default async function handler(
 			const result = await registerUser(user);
 			if ( result.success )
 				res.status(200).json({ name, id});
-			res.status(result.status || 200).json(result);
+			else
+				res.status(result.status || 400).json(result);
 		} else if (req.method === "DELETE") {
 			const secretHeader = req.headers["x-secret-header"];
 			const mySecret = process.env["resetuser"];
