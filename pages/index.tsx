@@ -36,16 +36,16 @@ const Home: React.FC = () => {
 			});
 		return () => clearTimeout(timer);
 	}, []);
-	
-	const isSubmissionAllowed = async() => {
+
+	const isSubmissionAllowed = async () => {
 		const response = await axios.get("/api/allowed");
-			console.log("data is: " + response.data.isAllowed);
+		console.log("data is: " + response.data.isAllowed);
 		if (response.status === 200) {
 			return response.data.isAllowed;
 		}
 		return false;
 	};
-	
+
 	const handleSubmit = async (event: FormEvent) => {
 		event.preventDefault();
 		if (name.toLowerCase().endsWith("mangoose")) {
@@ -97,85 +97,95 @@ const Home: React.FC = () => {
 
 	return (
 		<>
-				<Navbar />
-				<div className="container">
-					<h1>Football Registration </h1>
-					<form onSubmit={handleSubmit}>
-						<label htmlFor="name">Name:</label>
-						<input
-							type="text"
-							id="name"
-							value={name}
-							autoComplete="name"
-							onChange={(e) => setName(e.target.value)}
-						/>
+			<Navbar />
+			<div className="container">
+				<h1>Football Registration </h1>
+				<form onSubmit={handleSubmit}>
+					<label htmlFor="name">Name:</label>
+					<input
+						type="text"
+						id="name"
+						value={name}
+						autoComplete="name"
+						onChange={(e) => setName(e.target.value)}
+					/>
 
-						<label htmlFor="id">Intra login:</label>
-						<input
-							type="text"
-							id="id"
-							value={id}
-							autoComplete="intra"
-							onChange={(e) => setId(e.target.value)}
-						/>
+					<label htmlFor="id">Intra login:</label>
+					<input
+						type="text"
+						id="id"
+						value={id}
+						autoComplete="intra"
+						onChange={(e) => setId(e.target.value)}
+					/>
 
-						<button
-							type="submit"
-							ref={buttonRef}
-						>
-							Submit
-						</button>
-					</form>
+					<button
+						type="submit"
+						ref={buttonRef}
+					>
+						Submit
+					</button>
+				</form>
 
-					<div style={{ height: "3rem" }} />
+				<div style={{ height: "3rem" }} />
 
-					<div className="card">
-						<div className="card-header">
-							<h3>Late Fees</h3>
-						</div>
-						<div className="card-body">
-							<table className="table">
-								<thead>
-									<tr>
-										<th>Action</th>
-										<th>Amount</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr>
-										<th> Not ready when booking time starts</th>
-										<th> 5 AED</th>
-									</tr>
-									<tr>
-										<th> Cancel reservation</th>
-										<th> 5 AED</th>
-									</tr>
-									<tr>
-										<th> Late {">"} 15 minutes</th>
-										<th> 15 AED</th>
-									</tr>
-									<tr>
-										<th>
-											{" "}
-											Cancel reservation on game day after 5
-											PM
-										</th>
-										<th> 15 AED</th>
-									</tr>
-									<tr>
-										<th> No Show without notice</th>
-										<th> 30 AED</th>
-									</tr>
-								</tbody>
-							</table>
-						</div>
+				<div className="card">
+					<div className="card-header">
+						<h3>Late Fees</h3>
 					</div>
+					<div className="card-body">
+						<table className="table">
+							<thead>
+								<tr>
+									<th>Action</th>
+									<th>Amount</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<th> Not ready when booking time starts</th>
+									<th> 5 AED</th>
+								</tr>
+								<tr>
+									<th> Cancel reservation</th>
+									<th> 5 AED</th>
+								</tr>
+								<tr>
+									<th> Late {">"} 15 minutes</th>
+									<th> 15 AED</th>
+								</tr>
+								<tr>
+									<th>
+										{" "}
+										Cancel reservation on game day after 5
+										PM
+									</th>
+									<th> 15 AED</th>
+								</tr>
+								<tr>
+									<th> No Show without notice</th>
+									<th> 30 AED</th>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
 
-					<div className="registered-users">
-						<h2>Player list (orange is waitlist)</h2>
-						<ul className="user-list">
-							{registeredUsers.length === 0 ? (
-								<li>Loading players...</li>
+				<div className="registered-users">
+					<h2>Player list (orange is waitlist)</h2>
+					<ul className="user-list">
+						{loading === true ? (
+							<li>Loading players...</li>
+						) : (
+							registeredUsers.length === 0 ? (
+								<li
+									style={{
+										color: "#ffaa99",
+										fontWeight: "bold",
+										textAlign: "center",
+									}}
+									>Dare to be First</li>
+								
 							) : (
 								registeredUsers.map((user, index) => (
 									<li
@@ -188,11 +198,11 @@ const Home: React.FC = () => {
 										{index + 1}: {user.name} - {user.id}
 									</li>
 								))
-							)}
-						</ul>
-					</div>
+							))}
+					</ul>
 				</div>
-				<Footer />
+			</div>
+			<Footer />
 			{showPopup && (
 				<div className="popup">
 					<h1> New Location Alert</h1>
