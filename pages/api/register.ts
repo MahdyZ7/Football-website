@@ -17,24 +17,24 @@ type User = {
 	id: string;
 };
 
-const isSubmissionAllowed = async () => {
-	const response = await axios.get("/api/allowed");
-	console.log("data is: " + response.data.isAllowed);
-	if (response.status === 200) {
-		return response.data.isAllowed;
-	}
-	return false;
-}
+// const isSubmissionAllowed_1 = async () => {
+// 	const response = await axios.get("/api/allowed");
+// 	if (response.status === 200) {
+// 		return response.data.isAllowed;
+// 	}
+// 	return false;
+// }
 
 export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse
 ) {
 	try {
-		if (!(await isSubmissionAllowed())) {
-			res.status(403).json({ error: "Submission not allowed" });
-			return;
-		}
+		// if (!(await isSubmissionAllowed_1())) {
+		// 	res.status(403).json({ error: "Submission not allowed" });
+		// 	return;
+		// }
+		// // return
 		if (req.method === "POST") {
 			const user = req.body as User;
 			const { name, id } = user;
