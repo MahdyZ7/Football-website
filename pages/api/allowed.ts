@@ -10,7 +10,7 @@ export default function handler(
 		res.status(405).end('Method Not Allowed');
 		return;
 	}
-	const currentTime = new Date();
+	const currentTime = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Dubai' }));
 	const currentDay = currentTime.getDay();
 	const currentHour = currentTime.getHours();
 
