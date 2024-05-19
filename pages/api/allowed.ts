@@ -4,8 +4,7 @@ export default function handler(
 	req: NextApiRequest,
 	res: NextApiResponse<{ isAllowed: boolean }>
 ) {
-	if (req.method != "GET")
-	{
+	if (req.method != "GET") {
 		res.setHeader('Allow', ['GET']);
 		res.status(405).end('Method Not Allowed');
 		return;

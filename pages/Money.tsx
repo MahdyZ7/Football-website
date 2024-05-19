@@ -90,7 +90,7 @@ const Money = () => {
 						<tr style={{ backgroundColor: "#000000" }}>
 							<td colSpan={5}> </td>
 						</tr>
-						<tr style={{ backgroundColor: "#f0f0f0", borderCollapse: "collapse"  }}>
+						<tr style={{ backgroundColor: "#f0f0f0", borderCollapse: "collapse" }}>
 							<td colSpan={3}>Total Paid</td>
 							<td>{moneyData.reduce((acc, record) => record.paid ? acc + record.amount : acc, 0)} Dhs</td>
 							<td></td>

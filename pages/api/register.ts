@@ -22,10 +22,10 @@ export default async function handler(
 	try {
 		if (req.method === "POST") {
 			const user = req.body as User;
-			const {name , id } = user;
+			const { name, id } = user;
 			const result = await registerUser(user);
-			if ( result.success )
-				res.status(200).json({ name, id});
+			if (result.success)
+				res.status(200).json({ name, id });
 			else
 				res.status(result.status || 400).json(result);
 		} else if (req.method === "DELETE") {
@@ -50,23 +50,22 @@ export default async function handler(
 	}
 }
 
-async function registerUser( user: User )
-{
+async function registerUser(user: User) {
 	const client = await pool.connect();
 	try {
 		const { rows } = await client.query("SELECT name, intra FROM players");
-		const player = rows.find( row => row.intra === user.id );
-		if ( player ) {
+		const player = rows.find(row => row.intra === user.id);
+		if (player) {
 			return {
 				error: "Player already exists",
 				status: 409,
 			};
 		}
-		await client.query("INSERT INTO players (name, intra) VALUES ($1, $2)", [ user.name, user.id ]);
+		await client.query("INSERT INTO players (name, intra) VALUES ($1, $2)", [user.name, user.id]);
 		return {
 			success: true,
 		};
-	
+
 	} catch (error) {
 		return {
 			error: "An unexpected error occurred.",
@@ -77,8 +76,7 @@ async function registerUser( user: User )
 	}
 }
 
-async function resetList()
-{
+async function resetList() {
 	const client = await pool.connect();
 	try {
 		await client.query("DELETE FROM players");
@@ -95,23 +93,22 @@ async function resetList()
 	}
 }
 
-async function deleteUser( user: User )
-{
+async function deleteUser(user: User) {
 	const client = await pool.connect();
 	try {
 		const { rows } = await client.query("SELECT name, intra FROM players");
-		const player = rows.find( row => row.intra === user.id );
-		if ( !player ) {
+		const player = rows.find(row => row.intra === user.id);
+		if (!player) {
 			return {
 				error: "User does not exist",
 				status: 418
 			};
 		}
-		await client.query("DELETE FROM players WHERE intra = $1", [ user.id ]);
+		await client.query("DELETE FROM players WHERE intra = $1", [user.id]);
 		return {
 			success: true
 		};
-	
+
 	} catch (error) {
 		return {
 			error: "An unexpected error occurred.",

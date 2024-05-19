@@ -184,8 +184,8 @@ const Home: React.FC = () => {
 										fontWeight: "bold",
 										textAlign: "center",
 									}}
-									>Dare to be First</li>
-								
+								>Dare to be First</li>
+
 							) : (
 								registeredUsers.map((user, index) => (
 									<li
