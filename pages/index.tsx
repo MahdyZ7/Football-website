@@ -21,7 +21,7 @@ const Home: React.FC = () => {
 		const timer = setTimeout(() => {
 			setShowPopup(false);
 		}, 3000);
-		fetch("/api/users")
+		fetch("/api/users", {next: {revalidate: 360 }})
 			.then((response) => response.json())
 			.then((data) => {
 				if (Array.isArray(data)) {
@@ -39,7 +39,6 @@ const Home: React.FC = () => {
 
 	const isSubmissionAllowed = async () => {
 		const response = await axios.get("/api/allowed");
-		console.log("data is: " + response.data.isAllowed);
 		if (response.status === 200) {
 			return response.data.isAllowed;
 		}

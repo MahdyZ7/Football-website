@@ -17,13 +17,13 @@ type User = {
 	id: string;
 };
 
-// const isSubmissionAllowed_1 = async () => {
-// 	const response = await axios.get("/api/allowed");
-// 	if (response.status === 200) {
-// 		return response.data.isAllowed;
-// 	}
-// 	return false;
-// }
+const isSubmissionAllowed_1 = async () => {
+	const response = await axios.get("/api/allowed");
+	if (response.status === 200) {
+		return response.data.isAllowed;
+	}
+	return false;
+}
 
 export default async function handler(
 	req: NextApiRequest,
