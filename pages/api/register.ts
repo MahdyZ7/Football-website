@@ -1,8 +1,7 @@
-// pages/api/register.ts
-
 import { NextApiRequest, NextApiResponse } from "next";
 import { Pool } from "pg";
 import axios from "axios";
+import allowed_times from "../utils/allowed_times";
 
 
 const pool = new Pool({
@@ -17,24 +16,15 @@ type User = {
 	id: string;
 };
 
-const isSubmissionAllowed_1 = async () => {
-	const response = await axios.get("/api/allowed");
-	if (response.status === 200) {
-		return response.data.isAllowed;
-	}
-	return false;
-}
-
 export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse
 ) {
 	try {
-		// if (!(await isSubmissionAllowed_1())) {
-		// 	res.status(403).json({ error: "Submission not allowed" });
-		// 	return;
-		// }
-		// // return
+		if (!allowed_times()) {
+			res.status(403).json({ error: "Registration is not allowed at this time." });
+			return;
+		}
 		if (req.method === "POST") {
 			const user = req.body as User;
 			const { name, id } = user;
