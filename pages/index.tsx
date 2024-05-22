@@ -73,6 +73,10 @@ const Home: React.FC = () => {
 		}
 		// Send the name and id to the API to register the user
 		try {
+			const trimmedName = name.trim();
+			const trimmedId = id.trim();
+			setName(trimmedName);
+			setId(trimmedId);
 			const response = await axios.post("/api/register", { name, id });
 			// Add new registered user to the local state to update the list
 			setRegisteredUsers((prevUsers) => [...prevUsers, response.data]);

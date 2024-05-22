@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { Pool } from "pg";
-import axios from "axios";
 import allowed_times from "../utils/allowed_times";
 
 
@@ -21,11 +20,11 @@ export default async function handler(
 	res: NextApiResponse
 ) {
 	try {
-		if (!allowed_times()) {
-			res.status(403).json({ error: "Registration is not allowed at this time." });
-			return;
-		}
 		if (req.method === "POST") {
+			if (!allowed_times()) {
+				res.status(403).json({ error: "Registration is not allowed at this time." });
+				return;
+			}
 			const user = req.body as User;
 			const { name, id } = user;
 			const result = await registerUser(user);
