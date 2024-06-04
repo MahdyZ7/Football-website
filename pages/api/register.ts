@@ -27,6 +27,9 @@ export default async function handler(
 			}
 			const user = req.body as User;
 			const { name, id } = user;
+			// let name_md: string, id_md: string = validInput(user);
+			// if (!name_md || !id_md)
+			// 	res.status(400).json({ error: "Invalid input." });
 			const result = await registerUser(user);
 			if (result.success)
 				res.status(200).json({ name, id });
@@ -123,3 +126,10 @@ async function deleteUser(user: User) {
 	}
 }
 
+// async function validInput(user: User){
+// 	pt_name = user.name;
+// 	pt_id = user.id;
+// 	pt_name = pt_name.trim().toLowerCase();
+// 	pt_id = pt_id.trim().toLowerCase();
+// 	return pt_name && pt_id;
+// }

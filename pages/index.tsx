@@ -21,7 +21,7 @@ const Home: React.FC = () => {
 		const timer = setTimeout(() => {
 			setShowPopup(false);
 		}, 3000);
-		fetch("/api/users", {next: {revalidate: 360 }})
+		fetch("/api/users")
 			.then((response) => response.json())
 			.then((data) => {
 				if (Array.isArray(data)) {
@@ -73,10 +73,6 @@ const Home: React.FC = () => {
 		}
 		// Send the name and id to the API to register the user
 		try {
-			const trimmedName = name.trim();
-			const trimmedId = id.trim();
-			setName(trimmedName);
-			setId(trimmedId);
 			const response = await axios.post("/api/register", { name, id });
 			// Add new registered user to the local state to update the list
 			setRegisteredUsers((prevUsers) => [...prevUsers, response.data]);
