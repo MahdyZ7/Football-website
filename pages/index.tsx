@@ -191,7 +191,7 @@ const Home: React.FC = () => {
 										key={user.id}
 										style={{
 											color:
-												index < 12 ? "#306030" : "#805000",
+												index < 14 ? "#306030" : "#805000",
 										}}
 									>
 										{index + 1}: {user.name} - {user.id}
@@ -204,9 +204,8 @@ const Home: React.FC = () => {
 			<Footer />
 			{showPopup && (
 				<div className="popup">
-					<h1> New Location Alert</h1>
-					<p>Security at Emirates Palace is strict. Mention that the booking is with &quot;Sport Support Club&quot;.</p>
-					<p>Call the pitch admin &quot;0502303707&quot; if necessary</p>
+					<h1> Active Mariah Alert</h1>
+					<p>We are back to Active Mariah pitches.</p>
 					<button onClick={() => setShowPopup(false)}>Close</button>
 				</div>
 			)}
