@@ -14,6 +14,7 @@ interface MoneyRecord {
 
 const Money = () => {
 	const [moneyData, setMoneyData] = useState<MoneyRecord[]>([]);
+	const tbodyRef = React.useRef<HTMLTableSectionElement>(null);
 
 	const FetchMoneyData = async () => {
 		try {
@@ -21,7 +22,9 @@ const Money = () => {
 			if (!response.ok) {
 				throw new Error("Network response was not ok");
 			}
-			const data = await response.json();
+			let data = await response.json();
+			// // Sort data by date in descending order
+			// data = data.sort((a: MoneyRecord, b: MoneyRecord) => new Date(b.date).getTime() - new Date(a.date).getTime());
 			setMoneyData(data);
 		} catch (error) {
 			console.error("Error fetching money data:", error);
@@ -32,13 +35,22 @@ const Money = () => {
 		FetchMoneyData();
 	}, []);
 
+	useEffect(() => {
+		// Scroll the tbody to bottom after data is fetched
+		if (tbodyRef.current) {
+			tbodyRef.current.scrollTop = tbodyRef.current.scrollHeight;
+		}
+	}, [moneyData]);
+
+	// const displayedData = moneyData.slice(-20);
+
 	return (
 		<div>
 			<Navbar />
 			<div className="container">
 				<h1>Money Page</h1>
 				<table
-					className="money-table"
+					className="money-table" ref={tbodyRef}
 					style={{ borderCollapse: "collapse", width: "100%" }}
 				>
 					<thead>
@@ -56,7 +68,7 @@ const Money = () => {
 								<td colSpan={5}> Loading Data... </td>
 							</tr>
 						) : (
-							moneyData.map((record, index) => (
+					moneyData.map((record, index) => (
 								<tr
 									key={index}
 									style={{
@@ -67,9 +79,7 @@ const Money = () => {
 									}}
 								>
 									<td>
-										{new Date(
-											record.date
-										).toLocaleDateString()}
+										{new Date(record.date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
 									</td>
 									<td>{record.name}</td>
 									<td>

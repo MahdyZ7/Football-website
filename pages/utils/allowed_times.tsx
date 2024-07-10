@@ -2,8 +2,8 @@
 
 export default function allowed_times() {
 	const currentTime = new Date(Date.now()); //utc time
-	var currentDay = currentTime.getDay();
-	var currentHour = currentTime.getHours() + 4; //time utc+4
+	let currentDay = currentTime.getDay();
+	let currentHour = currentTime.getHours() + 4; //time utc+4
 
 	if (currentHour >= 24)
 		currentDay = currentDay + 1

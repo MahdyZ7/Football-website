@@ -207,3 +207,28 @@ nav a.active {
 .blurry-background > :not(.popup) {
   pointer-events: none;
 }
+
+.money-table {
+	max-height: 45rem; /* Adjust the height as needed */
+	overflow-y: auto;
+	display: block;
+	width: 100%;
+}
+
+.money-table tr {
+	display: table;
+	width: 100%;
+	table-layout: fixed;
+}
+
+.money-table thead {
+	/* position: -webkit-sticky; */
+	position: sticky;
+	top: 0;
+	z-index: 1;
+
+	background: #ffffff;
+	/* border-bottom: 2px solid #ccd4da; */
+	text-aline: center;
+	algin-text: center;
+}
