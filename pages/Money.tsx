@@ -14,7 +14,7 @@ interface MoneyRecord {
 
 const Money = () => {
 	const [moneyData, setMoneyData] = useState<MoneyRecord[]>([]);
-	const tbodyRef = React.useRef<HTMLTableSectionElement>(null);
+	const tbodyRef = React.useRef<HTMLTableElement>(null);
 
 	const FetchMoneyData = async () => {
 		try {
