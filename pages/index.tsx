@@ -81,12 +81,14 @@ const Home: React.FC = () => {
 			setName("");
 			setId("");
 		} catch (error) {
+			if (axios.isAxiosError(error) && error.response && error.response.status === 403)
+				alert(`Players limit reached. Better luck next time!`)
 			if (
 				axios.isAxiosError(error) &&
 				error.response &&
 				error.response.status === 409
 			) {
-				alert(`A user 
+				alert(`A user with
 	 the Intra-login ${id} already exists.`);
 			} else {
 				console.error("Error registering user:", error);

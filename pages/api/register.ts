@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { Pool } from "pg";
 import allowed_times from "../utils/allowed_times";
+import player_limit_reached from "../utils/player_limit";
 
 
 const pool = new Pool({
@@ -62,6 +63,11 @@ async function registerUser(user: User) {
 	try {
 		const { rows } = await client.query("SELECT name, intra FROM players");
 		const player = rows.find(row => row.intra === user.id);
+		if (player_limit_reached(rows.length))
+			return {
+				error: "Player limit reached",
+				status: 403,
+			};
 		if (player) {
 			return {
 				error: "Player already exists",
