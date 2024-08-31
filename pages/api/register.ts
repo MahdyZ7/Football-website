@@ -68,6 +68,11 @@ async function registerUser(user: User) {
 			user.id = verified_info.intra;
 			user.name = verified_info.name;
 		}
+		if (!verified_info.valid && !user.name)
+			return {
+				error: "Intra not found",
+				status: 404,
+			}
 
 		const { rows } = await client.query("SELECT name, intra FROM players");
 		const player = rows.find(row => row.intra === user.id);

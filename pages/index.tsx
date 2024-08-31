@@ -68,7 +68,7 @@ const Home: React.FC = () => {
 			);
 			return;
 		}
-		if (!name || !id) {
+		if (!id) {
 			alert("Please fill in both name and ID fields");
 			return;
 		}
@@ -83,18 +83,20 @@ const Home: React.FC = () => {
 			setName("");
 			setId("");
 		} catch (error) {
-			if (axios.isAxiosError(error) && error.response && error.response.status === 403)
-				alert(`Players limit reached. Better luck next time!`)
-			if (
-				axios.isAxiosError(error) &&
-				error.response &&
-				error.response.status === 409
-			) {
-				alert(`A user with
+			if (axios.isAxiosError(error) && error.response)
+				if (error.response.status === 403)
+					alert(`Players limit reached. Better luck next time!`)
+				else if (
+					error.response.status === 409
+				) {
+					alert(`A user with
 	 the Intra-login ${id} already exists.`);
-			} else {
-				console.error("Error registering user:", error);
-			}
+				} else if (error.response.status === 404) {
+					alert(`User with Intra-login ${id} not found. please enter name aslo`);
+				}
+				else {
+					console.error("Error registering user:", error);
+				}
 		}
 	};
 
@@ -198,7 +200,7 @@ const Home: React.FC = () => {
 												index < 14 ? "#306030" : "#805000",
 										}}
 									>
-										{index + 1}: {user.name} - {user.id} - {user.verified ? "✅" : <span style={{ color: '#ff8080' }}>Invalid Intra</span> }
+										{index + 1}: {user.name} - {user.id} - {user.verified ? "✅" : <span style={{ color: '#ff8080' }}>Invalid Intra</span>}
 									</li>
 								))
 							))}

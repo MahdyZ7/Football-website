@@ -61,5 +61,4 @@ export default async function verifyLogin(intra: string): Promise<UserInfo> {
 		console.error('Error retrieving access token', error);
 		return {name: "", intra: "", valid: false, error: true};
 	}
-	return {name: "", intra: "", valid: false, error: true};
 }
