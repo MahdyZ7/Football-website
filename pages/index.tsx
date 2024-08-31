@@ -7,6 +7,7 @@ import Footer from "./footer";
 type User = {
 	name: string;
 	id: string;
+	verified: boolean;
 };
 
 const Home: React.FC = () => {
@@ -75,7 +76,8 @@ const Home: React.FC = () => {
 		try {
 			const response = await axios.post("/api/register", { name, id });
 			// Add new registered user to the local state to update the list
-			setRegisteredUsers((prevUsers) => [...prevUsers, response.data]);
+			const updatedUsers = await fetch('/api/users').then(response => response.json());
+			setRegisteredUsers(updatedUsers);
 			// Reset the form fields
 			alert('Registration successful!');
 			setName("");
@@ -196,7 +198,7 @@ const Home: React.FC = () => {
 												index < 14 ? "#306030" : "#805000",
 										}}
 									>
-										{index + 1}: {user.name} - {user.id}
+										{index + 1}: {user.name} - {user.id} - {user.verified ? "✅" : <span style={{ color: '#ff8080' }}>Invalid Intra</span> }
 									</li>
 								))
 							))}

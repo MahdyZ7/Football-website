@@ -1,7 +1,9 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { Pool } from "pg";
+import { UserInfo } from "../../types/user";
 import allowed_times from "../utils/allowed_times";
 import player_limit_reached from "../utils/player_limit";
+import  verifyLogin  from "../../utils/verify_login";
 
 
 const pool = new Pool({
@@ -61,6 +63,12 @@ export default async function handler(
 async function registerUser(user: User) {
 	const client = await pool.connect();
 	try {
+		var verified_info: UserInfo = await verifyLogin(user.id);
+		if (verified_info.valid && !verified_info.error) {
+			user.id = verified_info.intra;
+			user.name = verified_info.name;
+		}
+
 		const { rows } = await client.query("SELECT name, intra FROM players");
 		const player = rows.find(row => row.intra === user.id);
 		if (player_limit_reached(rows.length))
@@ -74,12 +82,13 @@ async function registerUser(user: User) {
 				status: 409,
 			};
 		}
-		await client.query("INSERT INTO players (name, intra) VALUES ($1, $2)", [user.name, user.id]);
+		await client.query("INSERT INTO players (name, intra, verified) VALUES ($1, $2, $3)", [user.name, user.id, verified_info.valid ]);
 		return {
 			success: true,
 		};
 
 	} catch (error) {
+		console.error("Error fetching players:", error);
 		return {
 			error: "An unexpected error occurred.",
 			status: 500,
@@ -123,6 +132,7 @@ async function deleteUser(user: User) {
 		};
 
 	} catch (error) {
+		console.error(error);
 		return {
 			error: "An unexpected error occurred.",
 			status: 500
