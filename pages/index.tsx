@@ -11,7 +11,7 @@ type User = {
 };
 
 const Home: React.FC = () => {
-	const [showPopup, setShowPopup] = useState(true);
+	const [showPopup, setShowPopup] = useState(false);
 	const [name, setName] = useState<string>("");
 	const [id, setId] = useState<string>("");
 	const [registeredUsers, setRegisteredUsers] = useState<User[]>([]);
