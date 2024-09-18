@@ -197,7 +197,7 @@ const Home: React.FC = () => {
 										key={user.id}
 										style={{
 											color:
-												index < 14 ? "#306030" : "#805000",
+												index < 18 ? "#306030" : "#805000",
 										}}
 									>
 										{index + 1}: {user.name} - {user.id} - {user.verified ? "✅" : <span style={{ color: '#ff8080' }}>Invalid Intra</span>}
