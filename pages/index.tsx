@@ -8,6 +8,7 @@ type User = {
 	name: string;
 	id: string;
 	verified: boolean;
+	created_at: string;
 };
 
 const Home: React.FC = () => {

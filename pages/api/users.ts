@@ -15,12 +15,13 @@ export default async function handler(
 	if (req.method === "GET") {
 		const client = await pool.connect();
 		try {
-			const { rows } = await client.query("SELECT name, intra, verified FROM players");
+			const { rows } = await client.query("SELECT name, intra, verified, created_at FROM players ORDER BY created_at ASC");
 
 			const players = rows.map(row => ({
 				name: row.name,
 				id: row.intra,
 				verified: row.verified,
+				created_at: row.created_at,
 			}));
 
 			res.status(200).json(players);

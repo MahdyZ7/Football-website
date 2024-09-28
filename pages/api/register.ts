@@ -87,7 +87,10 @@ async function registerUser(user: User) {
 				status: 409,
 			};
 		}
-		await client.query("INSERT INTO players (name, intra, verified) VALUES ($1, $2, $3)", [user.name, user.id, verified_info.valid ]);
+		const date = new Date();
+		if ( !verified_info.valid)
+			date.setSeconds(date.getSeconds() + 10)
+		await client.query("INSERT INTO players (name, intra, verified, created_at) VALUES ($1, $2, $3, $4)", [user.name, user.id, verified_info.valid, date]);
 		return {
 			success: true,
 		};
