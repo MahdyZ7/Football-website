@@ -26,10 +26,10 @@ export default function Navbar() {
 				>
 					Money
 				</Link>
-				<Link href="https://maps.app.goo.gl/a7SD3xtixhniPMPm7">
+				<Link href="https://maps.app.goo.gl/4WGjdGhPTvWdqiYE6">
 					Location
 				</Link>
-				<Link href="https://www.google.com/maps/dir/42+Abu+Dhabi+-+Al+Mutawakileen+St+-+Abu+Dhabi/Al+Maryah+Sports+Center+-+Nahil+-+13460+-+Al+Maryah+Island+-+Abu+Dhabi">
+				<Link href="https://maps.app.goo.gl/JbC1ERsQFyeLDkxk9">
 					Directions
 				</Link>
 			</nav>

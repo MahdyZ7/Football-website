@@ -12,7 +12,7 @@ type User = {
 };
 
 const Home: React.FC = () => {
-	const [showPopup, setShowPopup] = useState(false);
+	const [showPopup, setShowPopup] = useState(true);
 	const [name, setName] = useState<string>("");
 	const [id, setId] = useState<string>("");
 	const [registeredUsers, setRegisteredUsers] = useState<User[]>([]);
@@ -211,8 +211,8 @@ const Home: React.FC = () => {
 			<Footer />
 			{showPopup && (
 				<div className="popup">
-					<h1> Active Mariah Alert</h1>
-					<p>We are back to Active Mariah pitches.</p>
+					<h1> New location Alert</h1>
+					<p>Game @ Pitch C, 321 club. Check The location from the nav bar</p>
 					<button onClick={() => setShowPopup(false)}>Close</button>
 				</div>
 			)}
