@@ -17,6 +17,37 @@ const Home: React.FC = () => {
 	const [id, setId] = useState<string>("");
 	const [registeredUsers, setRegisteredUsers] = useState<User[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [timeUntilNext, setTimeUntilNext] = useState<string>("");
+	const [isSubmissionAllowed, setIsSubmissionAllowed] = useState(false);
+	
+	useEffect(() => {
+		const updateCountdown = () => {
+			const now = new Date();
+			const next = getNextRegistration();
+			const diff = next.getTime() - now.getTime();
+			
+			if (diff > 0) {
+				const hours = Math.floor(diff / (1000 * 60 * 60));
+				const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+				setTimeUntilNext(`${hours}h ${minutes}m`);
+			}
+		};
+		
+		const checkAllowed = async () => {
+			const allowed = await isSubmissionAllowed();
+			setIsSubmissionAllowed(allowed);
+		};
+		
+		const timer = setInterval(() => {
+			updateCountdown();
+			checkAllowed();
+		}, 60000);
+		
+		updateCountdown();
+		checkAllowed();
+		
+		return () => clearInterval(timer);
+	}, []);
 	const buttonRef = useRef<HTMLButtonElement>(null);
 
 	useEffect(() => {
@@ -125,12 +156,21 @@ const Home: React.FC = () => {
 						onChange={(e) => setId(e.target.value)}
 					/>
 
-					<button
-						type="submit"
-						ref={buttonRef}
-					>
-						Submit
-					</button>
+					{!loading && (
+            <>
+              <button
+                type="submit"
+                ref={buttonRef}
+              >
+                Submit
+              </button>
+              {!isSubmissionAllowed && (
+                <p style={{ textAlign: 'center', marginTop: '10px', color: '#805b30' }}>
+                  Next registration opens in: {timeUntilNext}
+                </p>
+              )}
+            </>
+          )}
 				</form>
 
 				<div style={{ height: "3rem" }} />
