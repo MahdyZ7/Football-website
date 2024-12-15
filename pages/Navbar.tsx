@@ -26,10 +26,10 @@ export default function Navbar() {
 				>
 					Money
 				</Link>
-				<Link href="https://maps.app.goo.gl/4WGjdGhPTvWdqiYE6">
+				<Link href="https://maps.app.goo.gl/Xem3GbnvzNjhheD37">
 					Location
 				</Link>
-				<Link href="https://maps.app.goo.gl/JbC1ERsQFyeLDkxk9">
+				<Link href="https://maps.app.goo.gl/iEZR2Fia2xf4cdQ87">
 					Directions
 				</Link>
 			</nav>
