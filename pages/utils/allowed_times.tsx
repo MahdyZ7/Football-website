@@ -16,7 +16,7 @@ export default function allowed_times() {
 export function getNextRegistration() {
   const now = new Date();
   const day = now.getDay();
-  const hour = now.getHours() + 4;
+  const hour = now.getHours();
   
   let nextDate = new Date(now);
   
@@ -31,6 +31,6 @@ export function getNextRegistration() {
     nextDate.setDate(nextDate.getDate() + ((7 - day) % 7));
   }
   
-  nextDate.setHours(12 - 4, 0, 0, 0); // Set to noon UTC
+  nextDate.setHours(12, 0, 0, 0); // Set to noon UTC
   return nextDate;
 }

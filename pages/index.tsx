@@ -3,6 +3,7 @@ import React, { useState, useEffect, FormEvent, useRef } from "react";
 import axios from "axios";
 import Navbar from "./Navbar";
 import Footer from "./footer";
+import { getNextRegistration } from "./utils/allowed_times";
 
 type User = {
 	name: string;
