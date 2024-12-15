@@ -34,7 +34,7 @@ const Home: React.FC = () => {
 		};
 		
 		const checkAllowed = async () => {
-			const allowed = await isSubmissionAllowed();
+			const allowed = await checkSubmissionAllowed();
 			setIsSubmissionAllowed(allowed);
 		};
 		
@@ -70,7 +70,7 @@ const Home: React.FC = () => {
 		return () => clearTimeout(timer);
 	}, []);
 
-	const isSubmissionAllowed = async () => {
+	const checkSubmissionAllowed = async () => {
 		const response = await axios.get("/api/allowed");
 		if (response.status === 200) {
 			return response.data.isAllowed;
@@ -93,7 +93,7 @@ const Home: React.FC = () => {
 			}
 		}
 		// Check that both name and id are filled before sending the request
-		const sub_allowed = await isSubmissionAllowed();
+		const sub_allowed = await checkSubmissionAllowed();
 		if (sub_allowed === false) {
 			alert(
 				"Registration is only allowed on Sunday and Wednesday after 12 PM (noon) till 8 PM the next day."
