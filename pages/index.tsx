@@ -30,7 +30,8 @@ const Home: React.FC = () => {
 			if (diff > 0) {
 				const hours = Math.floor(diff / (1000 * 60 * 60));
 				const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-				setTimeUntilNext(`${hours}h ${minutes}m`);
+				const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+				setTimeUntilNext(`${hours}h ${minutes}m ${seconds}s`);
 			}
 		};
 		
