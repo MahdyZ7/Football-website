@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, FormEvent, useCallback } from "react";
+import React, { useState, useEffect, FormEvent, useCallback, useRef, KeyboardEvent } from "react";
 import axios from "axios";
 import Navbar from "./Navbar";
 import Footer from "./footer";
@@ -12,6 +12,12 @@ type User = {
   created_at: string;
 };
 
+type Toast = {
+  id: number;
+  message: string;
+  type: 'success' | 'error' | 'info';
+};
+
 const Home: React.FC = () => {
   // State management
   const [showPopup, setShowPopup] = useState(true);
@@ -21,6 +27,12 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [timeUntilNext, setTimeUntilNext] = useState("");
   const [isSubmissionAllowed, setIsSubmissionAllowed] = useState(false);
+  const [toasts, setToasts] = useState<Toast[]>([]);
+
+  // Refs for form navigation
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const idInputRef = useRef<HTMLInputElement>(null);
+  const submitButtonRef = useRef<HTMLButtonElement>(null);
 
   // Timer and submission check effects
   useEffect(() => {
@@ -83,6 +95,36 @@ const Home: React.FC = () => {
     }
   }, []);
 
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    const newToast: Toast = {
+      id: Date.now(),
+      message,
+      type
+    };
+    setToasts(prev => [...prev, newToast]);
+    
+    // Auto remove toast after 4 seconds
+    setTimeout(() => {
+      setToasts(prev => prev.filter(toast => toast.id !== newToast.id));
+    }, 4000);
+  };
+
+  const removeToast = (id: number) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>, currentField: 'name' | 'id') => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      
+      if (currentField === 'name' && idInputRef.current) {
+        idInputRef.current.focus();
+      } else if (currentField === 'id' && submitButtonRef.current) {
+        submitButtonRef.current.click();
+      }
+    }
+  };
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
@@ -93,10 +135,10 @@ const Home: React.FC = () => {
           data: { name, id },
           headers: { "X-Secret-Header": name },
         });
-        alert("User list has been reset.");
+        showToast("User list has been reset.", 'success');
         return;
       } catch (error) {
-        alert("Error resetting user list.");
+        showToast("Error resetting user list.", 'error');
         return;
       }
     }
@@ -104,12 +146,12 @@ const Home: React.FC = () => {
     // Validate submission
     const isAllowed = await checkSubmissionAllowed();
     if (!isAllowed) {
-      alert("Registration is only allowed on Sunday and Wednesday after 12 PM (noon) till 8 PM the next day.");
+      showToast("Registration is only allowed on Sunday and Wednesday after 12 PM (noon) till 8 PM the next day.", 'error');
       return;
     }
 
     if (!id) {
-      alert("Please fill in both name and ID fields");
+      showToast("Please fill in both name and ID fields", 'error');
       return;
     }
 
@@ -118,18 +160,20 @@ const Home: React.FC = () => {
       await axios.post("/api/register", { name, id });
       const updatedUsers = await fetch('/api/users').then(response => response.json());
       setRegisteredUsers(updatedUsers);
-      alert('Registration successful!');
+      showToast('Registration successful!', 'success');
       setName("");
       setId("");
+      // Focus back to name field for next registration
+      nameInputRef.current?.focus();
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         const { status } = error.response;
         if (status === 403) {
-          alert("Players limit reached. Better luck next time!");
+          showToast("Players limit reached. Better luck next time!", 'error');
         } else if (status === 409) {
-          alert(`A user with the Intra-login ${id} already exists.`);
+          showToast(`A user with the Intra-login ${id} already exists.`, 'error');
         } else if (status === 404) {
-          alert(`User with Intra-login ${id} not found. Please enter name also`);
+          showToast(`User with Intra-login ${id} not found. Please enter name also`, 'error');
         }
       }
     }
@@ -143,25 +187,29 @@ const Home: React.FC = () => {
         <form onSubmit={handleSubmit}>
           <label htmlFor="name">Name:</label>
           <input
+            ref={nameInputRef}
             type="text"
             id="name"
             value={name}
             autoComplete="name"
             onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => handleKeyDown(e, 'name')}
           />
 
           <label htmlFor="id">Intra login:</label>
           <input
+            ref={idInputRef}
             type="text"
             id="id"
             value={id}
             autoComplete="intra"
             onChange={(e) => setId(e.target.value)}
+            onKeyDown={(e) => handleKeyDown(e, 'id')}
           />
 
           {!loading && (
             <>
-              <button type="submit">
+              <button ref={submitButtonRef} type="submit">
                 Submit
               </button>
               {!isSubmissionAllowed && (
@@ -248,6 +296,22 @@ const Home: React.FC = () => {
           <button onClick={() => setShowPopup(false)}>Close</button>
         </div>
       )}
+      
+      {/* Toast Container */}
+      <div className="toast-container">
+        {toasts.map((toast) => (
+          <div
+            key={toast.id}
+            className={`toast toast-${toast.type}`}
+            onClick={() => removeToast(toast.id)}
+          >
+            <span>{toast.message}</span>
+            <button className="toast-close" onClick={() => removeToast(toast.id)}>
+              ×
+            </button>
+          </div>
+        ))}
+      </div>
     </>
   );
 };
