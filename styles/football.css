@@ -29,6 +29,9 @@
   --shadow: rgba(50, 50, 93, 0.11);
   --paid-bg: #e8f5f9;
   --unpaid-bg: #ffe0b080;
+  --waitlist-txt: #805000
+  --registered-txt: #306030
+	
 }
 
 /* Dark Theme */
@@ -48,6 +51,8 @@
   --shadow: rgba(0, 0, 0, 0.3);
   --paid-bg: #1a3a3a;
   --unpaid-bg: #3a2a1a;
+  --waitlist-txt: #ff8780
+  --registered-txt: #80f080
 }
 
 body {
@@ -327,6 +332,14 @@ nav a.active {
 
 .unpaid-row {
 	background-color: var(--unpaid-bg);
+}
+
+.waitlist {
+	color: var(--waitlist-txt)
+}
+
+.registered {
+	color: var(--registered-txt)
 }
 
 .toast-container {

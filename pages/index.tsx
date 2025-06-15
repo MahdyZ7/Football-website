@@ -297,7 +297,7 @@ const Home: React.FC = () => {
               registeredUsers.map((user, index) => (
                 <li
                   key={user.id}
-                  style={{ color: index < 16 ? "#306030" : "#805000" }}
+                  style={{ color: index < 3 ? "#306030" : "#805000" }}
                 >
                   {index + 1}: {user.name} - {user.id} -{" "}
                   {user.verified ? (
