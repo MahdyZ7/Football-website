@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import ThemeToggle from "../components/ThemeToggle";
 
 interface NavLinkProps {
   href: string;
@@ -44,6 +45,7 @@ export default function Navbar() {
 					Directions
 				</NavLink>
 			</nav>
+			<ThemeToggle />
 			{/* <div style={{ height: '1rem' }} /> */}
 		</div>
 	);
