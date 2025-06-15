@@ -17,7 +17,7 @@ XDG_CONFIG_HOME = "$REPL_HOME/.config"
 PATH = "$REPL_HOME/.config/npm/node_global/bin:$REPL_HOME/node_modules/.bin"
 npm_config_prefix = "$REPL_HOME/.config/npm/node_global"
 NEXT_TELEMETRY_DISABLED = "1"
-
+node = "18.18.0"
 [packager]
 language = "nodejs"
 
