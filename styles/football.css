@@ -170,6 +170,14 @@ button:hover {
 	color: var(--text-primary);
 }
 
+.user-list li.waitlist {
+	color: var(--waitlist-txt);
+}
+
+.user-list li.registered {
+	color: var(--registered-txt);
+}
+
 .money-list {
 	list-style: none;
 	padding: 0;

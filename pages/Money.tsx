@@ -64,7 +64,7 @@ const Money = () => {
 					</thead>
 					<tbody>
 						{moneyData.length === 0 ? (
-							<tr style={{ backgroundColor: "#e8f5f9" }}>
+							<tr className="paid-row">
 								<td colSpan={5}> Loading Data... </td>
 							</tr>
 						) : (
@@ -92,23 +92,23 @@ const Money = () => {
 								</tr>
 							))
 						)}
-						<tr style={{ backgroundColor: "#000000" }}>
+						<tr style={{ backgroundColor: "var(--bg-primary)" }}>
 							<td colSpan={5}> </td>
 						</tr>
-						<tr style={{ backgroundColor: "#f0f0f0", borderCollapse: "collapse" }}>
+						<tr style={{ backgroundColor: "var(--bg-secondary)", borderCollapse: "collapse" }}>
 							<td colSpan={3}>Total Paid</td>
 							<td>{moneyData.reduce((acc, record) => record.paid ? acc + record.amount : acc, 0)} Dhs</td>
 							<td></td>
 						</tr>
-						<tr style={{ backgroundColor: "#f0f0f0" }}>
+						<tr style={{ backgroundColor: "var(--bg-secondary)" }}>
 							<td colSpan={3}>Total Unpaid</td>
 							<td>{moneyData.reduce((acc, record) => !record.paid ? acc + record.amount : acc, 0)} Dhs</td>
 							<td></td>
 						</tr>
-						<tr style={{ backgroundColor: "#000000" }}>
+						<tr style={{ backgroundColor: "var(--bg-primary)" }}>
 							<td colSpan={5}> </td>
 						</tr>
-						<tr style={{ backgroundColor: "#f0f0f0" }}>
+						<tr style={{ backgroundColor: "var(--bg-secondary)" }}>
 							<td colSpan={3}>Total</td>
 							<td>{moneyData.reduce((acc, record) => acc + record.amount, 0)} Dhs</td>
 							<td></td>
