@@ -22,7 +22,7 @@ const Money = () => {
 			if (!response.ok) {
 				throw new Error("Network response was not ok");
 			}
-			let data = await response.json();
+			const data = await response.json();
 			// // Sort data by date in descending order
 			// data = data.sort((a: MoneyRecord, b: MoneyRecord) => new Date(b.date).getTime() - new Date(a.date).getTime());
 			setMoneyData(data);
