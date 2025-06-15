@@ -5,6 +5,7 @@ import Navbar from "./Navbar";
 import Footer from "./footer";
 import { getNextRegistration } from "./utils/allowed_times";
 
+const Guaranteed_spot = 18;
 type User = {
   name: string;
   id: string;
@@ -248,36 +249,36 @@ const Home: React.FC = () => {
 
         <div className="card">
           <div className="card-header">
-            <h3>Late Fees</h3>
+            <h3>Late TIG</h3>
           </div>
           <div className="card-body">
             <table className="table">
               <thead>
                 <tr>
                   <th>Action</th>
-                  <th>Amount</th>
+                  <th>Ban Amount</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
                   <th>Not ready when booking time starts</th>
-                  <th>5 AED</th>
+                  <th>Half a week</th>
                 </tr>
                 <tr>
                   <th>Cancel reservation</th>
-                  <th>5 AED</th>
+                  <th>One week</th>
                 </tr>
                 <tr>
                   <th>Late {">"} 15 minutes</th>
-                  <th>15 AED</th>
+                  <th>One week</th>
                 </tr>
                 <tr>
                   <th>Cancel reservation on game day after 5 PM</th>
-                  <th>15 AED</th>
+                  <th>Two weeks</th>
                 </tr>
                 <tr>
                   <th>No Show without notice</th>
-                  <th>30 AED</th>
+                  <th>Four weeks</th>
                 </tr>
               </tbody>
             </table>
@@ -286,6 +287,7 @@ const Home: React.FC = () => {
 
         <div className="registered-users">
           <h2>Player list (orange is waitlist)</h2>
+          <p>Max Spots: {Guaranteed_spot}, playing: {registeredUsers.length % Guaranteed_spot}, waitlist: { registeredUsers.length - Guaranteed_spot > 0 ? registeredUsers.length - Guaranteed_spot : 0 } </p>
           <ul className="user-list">
             {loading ? (
               <li>Loading players...</li>
@@ -297,7 +299,7 @@ const Home: React.FC = () => {
               registeredUsers.map((user, index) => (
                 <li
                   key={user.id}
-                  className={index < 3 ? "registered" : "waitlist"}
+                  className={index < Guaranteed_spot ? "registered" : "waitlist"}
                 >
                   {index + 1}: {user.name} - {user.id} -{" "}
                   {user.verified ? (

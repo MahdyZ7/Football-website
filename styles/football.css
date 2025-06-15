@@ -28,7 +28,7 @@
   --shadow: rgba(50, 50, 93, 0.11);
   --paid-bg: #e8f5f9;
   --unpaid-bg: #ffe0b080;
-  --waitlist-txt: #805000;
+  --waitlist-txt: #744525;
   --registered-txt: #306030;
 
 }
@@ -50,7 +50,7 @@
   --shadow: rgba(0, 0, 0, 0.3);
   --paid-bg: #1a3a3a;
   --unpaid-bg: #3a2a1a;
-  --waitlist-txt: #ff8780;
+  --waitlist-txt: #ff8050;
   --registered-txt: #80f080;
 }
 
