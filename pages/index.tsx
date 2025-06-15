@@ -287,7 +287,10 @@ const Home: React.FC = () => {
 
         <div className="registered-users">
           <h2>Player list (orange is waitlist)</h2>
-          <p>Max Spots: {Guaranteed_spot}, playing: {registeredUsers.length % Guaranteed_spot}, waitlist: { registeredUsers.length - Guaranteed_spot > 0 ? registeredUsers.length - Guaranteed_spot : 0 } </p>
+          <p>Max Spots: {Guaranteed_spot},
+             playing: {Math.min(registeredUsers.length, Guaranteed_spot)},
+             open spots: {Math.max(Guaranteed_spot - registeredUsers.length, 0)},
+             waitlist: {Math.max(registeredUsers.length - Guaranteed_spot, 0)} </p>
           <ul className="user-list">
             {loading ? (
               <li>Loading players...</li>
