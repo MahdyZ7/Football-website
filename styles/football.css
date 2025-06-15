@@ -350,7 +350,7 @@ nav a.active {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  animation: slideIn 0.3s ease-out;
+  animation: slideIn 0.1s ease-out;
   cursor: pointer;
   transition: transform 0.2s ease;
 }
