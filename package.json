@@ -10,7 +10,7 @@
 	},
 	"dependencies": {
 		"@prisma/client": "^5.20.0",
-		"@replit/database": "^2.1.0",
+		"@replit/database": "^2.0.5",
 		"axios": "^1.7.7",
 		"firebase": "^10.14.0",
 		"mongodb": "^6.9.0",
