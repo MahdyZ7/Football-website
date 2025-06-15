@@ -20,4 +20,3 @@ export default function Footer() {
 
   return <div className="footer1" ref={footerRef}></div>;
 }
-</new_str>
