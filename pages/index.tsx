@@ -130,14 +130,18 @@ const Home: React.FC = () => {
 
     // Handle admin reset
     if (name.toLowerCase().endsWith("mangoose")) {
+      const loadingToastId = Date.now();
+      showToast("Resetting user list...", 'info');
       try {
         await axios.delete("/api/register", {
           data: { name, id },
           headers: { "X-Secret-Header": name },
         });
+        removeToast(loadingToastId);
         showToast("User list has been reset.", 'success');
         return;
       } catch (error) {
+        removeToast(loadingToastId);
         showToast("Error resetting user list.", 'error');
         return;
       }
@@ -155,17 +159,32 @@ const Home: React.FC = () => {
       return;
     }
 
+    // Show immediate loading toast
+    const loadingToastId = Date.now();
+    const loadingToast: Toast = {
+      id: loadingToastId,
+      message: 'Registering player...',
+      type: 'info'
+    };
+    setToasts(prev => [...prev, loadingToast]);
+
     // Submit registration
     try {
       await axios.post("/api/register", { name, id });
       const updatedUsers = await fetch('/api/users').then(response => response.json());
       setRegisteredUsers(updatedUsers);
+      
+      // Remove loading toast and show success
+      removeToast(loadingToastId);
       showToast('Registration successful!', 'success');
       setName("");
       setId("");
       // Focus back to name field for next registration
       nameInputRef.current?.focus();
     } catch (error) {
+      // Remove loading toast first
+      removeToast(loadingToastId);
+      
       if (axios.isAxiosError(error) && error.response) {
         const { status } = error.response;
         if (status === 403) {
@@ -174,7 +193,11 @@ const Home: React.FC = () => {
           showToast(`A user with the Intra-login ${id} already exists.`, 'error');
         } else if (status === 404) {
           showToast(`User with Intra-login ${id} not found. Please enter name also`, 'error');
+        } else {
+          showToast("Registration failed. Please try again.", 'error');
         }
+      } else {
+        showToast("Registration failed. Please try again.", 'error');
       }
     }
   };
