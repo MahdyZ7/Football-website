@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, FormEvent, useRef } from "react";
+import React, { useState, useEffect, FormEvent, useCallback } from "react";
 import axios from "axios";
 import Navbar from "./Navbar";
 import Footer from "./footer";
@@ -21,7 +21,6 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [timeUntilNext, setTimeUntilNext] = useState("");
   const [isSubmissionAllowed, setIsSubmissionAllowed] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement>(null);
 
   // Timer and submission check effects
   useEffect(() => {
@@ -74,10 +73,15 @@ const Home: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const checkSubmissionAllowed = async () => {
-    const response = await axios.get("/api/allowed");
-    return response.status === 200 ? response.data.isAllowed : false;
-  };
+  const checkSubmissionAllowed = useCallback(async () => {
+    try {
+      const response = await axios.get("/api/allowed");
+      return response.status === 200 ? response.data.isAllowed : false;
+    } catch (error) {
+      console.error("Error checking submission allowed:", error);
+      return false;
+    }
+  }, []);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -157,7 +161,7 @@ const Home: React.FC = () => {
 
           {!loading && (
             <>
-              <button type="submit" ref={buttonRef}>
+              <button type="submit">
                 Submit
               </button>
               {!isSubmissionAllowed && (
