@@ -1,4 +1,3 @@
-
 /* 42 School Color Variables */
 :root {
   /* 42 School Colors */
@@ -31,7 +30,7 @@
   --unpaid-bg: #ffe0b080;
   --waitlist-txt: #805000
   --registered-txt: #306030
-	
+
 }
 
 /* Dark Theme */
@@ -335,11 +334,11 @@ nav a.active {
 }
 
 .waitlist {
-	color: var(--waitlist-txt)
+	color: var(--waitlist-txt);
 }
 
 .registered {
-	color: var(--registered-txt)
+	color: var(--registered-txt);
 }
 
 .toast-container {
