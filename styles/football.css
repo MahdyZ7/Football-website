@@ -27,6 +27,8 @@
   --table-bg: #ffffff;
   --input-bg: #ffffff;
   --shadow: rgba(50, 50, 93, 0.11);
+  --paid-bg: #e8f5f9;
+  --unpaid-bg: #ffe0b080;
 }
 
 /* Dark Theme */
@@ -44,6 +46,8 @@
   --table-bg: #2a2a2a;
   --input-bg: #3a3a3a;
   --shadow: rgba(0, 0, 0, 0.3);
+  --paid-bg: #1a3a3a;
+  --unpaid-bg: #3a2a1a;
 }
 
 body {
@@ -315,6 +319,14 @@ nav a.active {
 	z-index: 1;
 	background: var(--table-bg);
 	text-align: center;
+}
+
+.paid-row {
+	background-color: var(--paid-bg);
+}
+
+.unpaid-row {
+	background-color: var(--unpaid-bg);
 }
 
 .admin-panel {

@@ -71,12 +71,7 @@ const Money = () => {
 					moneyData.map((record, index) => (
 								<tr
 									key={index}
-									style={{
-										backgroundColor:
-											record.paid
-												? "#e8f5f9"
-												: "#ffe0b080",
-									}}
+									className={record.paid ? "paid-row" : "unpaid-row"}
 								>
 									<td>
 										{new Date(record.date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
