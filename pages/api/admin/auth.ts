@@ -10,7 +10,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const userName = req.headers['x-replit-user-name'];
     
     if (!userId || !userName) {
-      return res.status(401).json({ authenticated: false });
+      return res.status(401).json({ 
+        authenticated: false, 
+        message: 'Not logged in with Replit' 
+      });
     }
 
     // Check if user is in admin list
@@ -18,7 +21,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json({ authenticated: true, user: userName });
     }
     
-    return res.status(403).json({ authenticated: false, message: 'Access denied: Admin privileges required' });
+    return res.status(403).json({ 
+      authenticated: false, 
+      message: `Access denied: User '${userName}' does not have admin privileges` 
+    });
   }
   
   res.status(405).end();

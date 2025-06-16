@@ -49,6 +49,14 @@ const Admin: React.FC = () => {
 
   const checkAuth = async () => {
     try {
+      // First check if user is logged in with Replit
+      const userResponse = await fetch('/__replauthuser');
+      if (userResponse.status !== 200) {
+        setIsAuthenticated(false);
+        return;
+      }
+      
+      // Then check admin privileges
       const response = await axios.get('/api/admin/auth');
       setIsAuthenticated(response.data.authenticated);
     } catch (error) {
@@ -155,15 +163,41 @@ const Admin: React.FC = () => {
     return (
       <>
         <Navbar />
-        <div className="container">
+        <div className="container admin-auth-container">
           <h1>Admin Access Required</h1>
-          <p>Please authenticate with Replit to access the admin panel.</p>
-          <div>
-            <script
-              authed="location.reload()"
-              src="https://auth.util.repl.co/script.js"
-            ></script>
-          </div>
+          <p>Please log in with your Replit account to access the admin panel.</p>
+          <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+            Only authorized users (MahdyZ7) can access admin features.
+          </p>
+          <button 
+            onClick={() => {
+              window.addEventListener("message", (e) => {
+                if (e.data === "auth_complete") {
+                  window.location.reload();
+                }
+              });
+              const h = 500, w = 350;
+              const left = screen.width / 2 - w / 2;
+              const top = screen.height / 2 - h / 2;
+              window.open(
+                "https://replit.com/auth_with_repl_site?domain=" + location.host,
+                "_blank",
+                `modal=yes, toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=${w}, height=${h}, top=${top}, left=${left}`
+              );
+            }}
+            style={{
+              background: 'var(--ft-primary)',
+              color: 'white',
+              padding: '1rem 2rem',
+              border: 'none',
+              borderRadius: '6px',
+              fontSize: '1rem',
+              cursor: 'pointer',
+              marginTop: '1rem'
+            }}
+          >
+            Login with Replit
+          </button>
         </div>
         <Footer />
       </>
