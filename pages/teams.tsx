@@ -43,6 +43,13 @@ const Teams: React.FC = () => {
   }, []);
 
   const addToTeam = (player: User, teamNumber: 1 | 2) => {
+    const targetTeam = teamNumber === 1 ? team1 : team2;
+    
+    // Check if team already has 9 players
+    if (targetTeam.players.length >= 9) {
+      return; // Don't add if team is full
+    }
+    
     if (teamNumber === 1) {
       setTeam1(prev => ({ ...prev, players: [...prev.players, player] }));
     } else {
@@ -64,10 +71,14 @@ const Teams: React.FC = () => {
     const allPlayers = [...availablePlayers, ...team1.players, ...team2.players];
     const shuffled = [...allPlayers].sort(() => Math.random() - 0.5);
     
-    const mid = Math.ceil(shuffled.length / 2);
-    setTeam1({ name: "Team 1", players: shuffled.slice(0, mid) });
-    setTeam2({ name: "Team 2", players: shuffled.slice(mid) });
-    setAvailablePlayers([]);
+    // Assign up to 9 players per team
+    const team1Players = shuffled.slice(0, 9);
+    const team2Players = shuffled.slice(9, 18);
+    const remainingPlayers = shuffled.slice(18);
+    
+    setTeam1({ name: "Team 1", players: team1Players });
+    setTeam2({ name: "Team 2", players: team2Players });
+    setAvailablePlayers(remainingPlayers);
   };
 
   const clearTeams = () => {
@@ -126,7 +137,7 @@ const Teams: React.FC = () => {
         }}>
           {/* Available Players */}
           <div className="card">
-            <h3>Available Players ({availablePlayers.length})</h3>
+            <h3>Waiting List ({availablePlayers.length})</h3>
             <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
               {availablePlayers.length === 0 ? (
                 <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
@@ -150,24 +161,30 @@ const Teams: React.FC = () => {
                     <div>
                       <button
                         onClick={() => addToTeam(player, 1)}
+                        disabled={team1.players.length >= 9}
                         style={{
                           padding: '0.3rem 0.6rem',
                           fontSize: '0.8rem',
                           marginRight: '0.5rem',
-                          background: 'var(--ft-primary)'
+                          background: team1.players.length >= 9 ? '#666' : 'var(--ft-primary)',
+                          cursor: team1.players.length >= 9 ? 'not-allowed' : 'pointer',
+                          opacity: team1.players.length >= 9 ? 0.6 : 1
                         }}
                       >
-                        Team 1
+                        Team 1 {team1.players.length >= 9 ? '(Full)' : ''}
                       </button>
                       <button
                         onClick={() => addToTeam(player, 2)}
+                        disabled={team2.players.length >= 9}
                         style={{
                           padding: '0.3rem 0.6rem',
                           fontSize: '0.8rem',
-                          background: 'var(--ft-secondary)'
+                          background: team2.players.length >= 9 ? '#666' : 'var(--ft-secondary)',
+                          cursor: team2.players.length >= 9 ? 'not-allowed' : 'pointer',
+                          opacity: team2.players.length >= 9 ? 0.6 : 1
                         }}
                       >
-                        Team 2
+                        Team 2 {team2.players.length >= 9 ? '(Full)' : ''}
                       </button>
                     </div>
                   </div>
@@ -193,7 +210,7 @@ const Teams: React.FC = () => {
                 }}
               />
               <span style={{ marginLeft: '0.5rem', color: 'var(--text-secondary)' }}>
-                ({team1.players.length})
+                ({team1.players.length}/9)
               </span>
             </div>
             <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
@@ -251,7 +268,7 @@ const Teams: React.FC = () => {
                 }}
               />
               <span style={{ marginLeft: '0.5rem', color: 'var(--text-secondary)' }}>
-                ({team2.players.length})
+                ({team2.players.length}/9)
               </span>
             </div>
             <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
@@ -311,7 +328,7 @@ const Teams: React.FC = () => {
               <p>{team2.players.length} players</p>
             </div>
             <div>
-              <h4 style={{ color: 'var(--text-secondary)' }}>Available</h4>
+              <h4 style={{ color: 'var(--text-secondary)' }}>Waiting List</h4>
               <p>{availablePlayers.length} players</p>
             </div>
           </div>
