@@ -1,37 +1,24 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
-import { Pool } from 'pg';
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-});
-
-const ADMIN_LOGINS = ['login1', 'login2']; // Add 42 logins of admins here
+const ADMIN_USERS = ['MahdyZ7']; // Add Replit usernames of admins here
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
-    const session = req.cookies['admin_session'];
-    if (!session) {
+    // Check for Replit authentication headers
+    const userId = req.headers['x-replit-user-id'];
+    const userName = req.headers['x-replit-user-name'];
+    
+    if (!userId || !userName) {
       return res.status(401).json({ authenticated: false });
     }
 
-    try {
-      const client = await pool.connect();
-      const { rows } = await client.query(
-        'SELECT intra FROM admin_sessions WHERE session_id = $1',
-        [session]
-      );
-      client.release();
-
-      if (rows.length > 0 && ADMIN_LOGINS.includes(rows[0].intra)) {
-        return res.status(200).json({ authenticated: true });
-      }
-      
-      return res.status(401).json({ authenticated: false });
-    } catch (error) {
-      return res.status(500).json({ error: 'Database error' });
+    // Check if user is in admin list
+    if (ADMIN_USERS.includes(userName as string)) {
+      return res.status(200).json({ authenticated: true, user: userName });
     }
+    
+    return res.status(403).json({ authenticated: false, message: 'Access denied: Admin privileges required' });
   }
   
   res.status(405).end();

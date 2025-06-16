@@ -509,3 +509,35 @@ nav a.active {
 .card-body {
   color: var(--text-primary);
 }
+
+
+/* Admin Authentication Styles */
+.admin-auth-container {
+  max-width: 500px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 2rem;
+}
+
+.admin-auth-container h1 {
+  color: var(--ft-primary);
+  margin-bottom: 1rem;
+}
+
+.admin-auth-container p {
+  margin-bottom: 2rem;
+  color: var(--text-secondary);
+}
+
+/* Admin panel info boxes */
+.admin-info-box {
+  background: var(--bg-card);
+  border-left: 4px solid var(--ft-primary);
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 4px;
+}
+
+.admin-info-box strong {
+  color: var(--ft-primary);
+}

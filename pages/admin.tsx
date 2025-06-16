@@ -151,17 +151,19 @@ const Admin: React.FC = () => {
     }
   };
 
-  const login42 = () => {
-    window.location.href = '/api/admin/auth/42';
-  };
-
   if (!isAuthenticated) {
     return (
       <>
         <Navbar />
         <div className="container">
-          <h1>Admin Login</h1>
-          <button onClick={login42}>Login with 42</button>
+          <h1>Admin Access Required</h1>
+          <p>Please authenticate with Replit to access the admin panel.</p>
+          <div>
+            <script
+              authed="location.reload()"
+              src="https://auth.util.repl.co/script.js"
+            ></script>
+          </div>
         </div>
         <Footer />
       </>
@@ -311,6 +313,19 @@ const Admin: React.FC = () => {
         {activeTab === 'banned' && (
           <div className="admin-panel">
             <h2>Banned Users ({bannedUsers.length})</h2>
+            
+            {/* Admin Info */}
+            <div style={{ 
+              background: 'var(--bg-card)', 
+              padding: '1rem', 
+              borderRadius: '8px', 
+              marginBottom: '1rem',
+              fontSize: '0.9rem',
+              color: 'var(--text-secondary)'
+            }}>
+              <strong>Admin Access:</strong> Currently only 'MahdyZ7' has admin privileges. 
+              To add more admins, update the ADMIN_USERS array in /pages/api/admin/auth.ts
+            </div>
             <div style={{ overflowX: 'auto' }}>
               <table className="admin-table">
                 <thead>
