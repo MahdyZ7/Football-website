@@ -32,8 +32,8 @@ const Teams: React.FC = () => {
         if (Array.isArray(data)) {
           // Only include verified players and first 18 for team selection
           const verifiedPlayers = data.filter(user => user.verified);
-          const eligiblePlayers = verifiedPlayers.slice(0, MAXPLAYERS);
-          const waitingPlayers = verifiedPlayers.slice(MAXPLAYERS);
+          const eligiblePlayers = data.slice(0, MAXPLAYERS);
+          const waitingPlayers = data.slice(MAXPLAYERS);
           
           setRegisteredUsers(data);
           setAvailablePlayers(eligiblePlayers);
@@ -89,7 +89,8 @@ const Teams: React.FC = () => {
   };
 
   const clearTeams = () => {
-    const verifiedPlayers = registeredUsers.filter(user => user.verified);
+    // const verifiedPlayers = registeredUsers.filter(user => user.verified);
+    const verifiedPlayers = registeredUsers.filter(user => user);
     const eligiblePlayers = verifiedPlayers.slice(0, MAXPLAYERS);
     
     setAvailablePlayers(eligiblePlayers);
