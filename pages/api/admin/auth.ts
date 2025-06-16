@@ -2,6 +2,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const ADMIN_USERS = ['MahdyZ7']; // Add Replit usernames of admins here
+// To add more admins, add their Replit usernames to this array:
+// const ADMIN_USERS = ['MahdyZ7', 'another_username', 'third_admin'];
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {

@@ -80,7 +80,6 @@ const Teams: React.FC = () => {
     // Shuffle players randomly for fair distribution
     allEligiblePlayers.sort(() => Math.random() - 0.5);
 
-    // Assign up to 9 players per team from the first 18 eligible players
     const team1Players = allEligiblePlayers.slice(0, 9);
     const team2Players = allEligiblePlayers.slice(9, 18);
     const remainingPlayers = allEligiblePlayers.slice(18);
