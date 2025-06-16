@@ -18,7 +18,7 @@ const NavLink: React.FC<NavLinkProps> = ({ href, isActive, children, external = 
       </Link>
     );
   }
-  
+
   return (
     <Link href={href} className={isActive ? "active" : "non-active"}>
       {children}
@@ -28,7 +28,7 @@ const NavLink: React.FC<NavLinkProps> = ({ href, isActive, children, external = 
 
 export default function Navbar() {
 	const currentRoute = usePathname();
-	
+
 	return (
 		<div>
 			<nav>
@@ -37,6 +37,9 @@ export default function Navbar() {
 				</NavLink>
 				<NavLink href="/Money" isActive={currentRoute === "/Money"}>
 					Money
+				</NavLink>
+				<NavLink href="/teams" isActive={currentRoute === "/teams"}>
+					Teams
 				</NavLink>
 				<NavLink href="https://maps.app.goo.gl/Xem3GbnvzNjhheD37" isActive={false} external>
 					Location
