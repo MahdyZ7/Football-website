@@ -29,8 +29,8 @@ const Teams: React.FC = () => {
         if (Array.isArray(data)) {
           // Only include verified players for team selection
           const verifiedPlayers = data.filter(user => user.verified);
-          setRegisteredUsers(verifiedPlayers);
-          setAvailablePlayers(verifiedPlayers);
+          setRegisteredUsers(data);
+          setAvailablePlayers(data);
           setLoading(false);
         }
       })
