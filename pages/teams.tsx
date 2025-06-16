@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import Footer from "./footer";
 
+const MAXPLAYERS = 18;
 type User = {
   name: string;
   id: string;
@@ -72,9 +73,9 @@ const Teams: React.FC = () => {
     const shuffled = [...allPlayers].sort(() => Math.random() - 0.5);
     
     // Assign up to 9 players per team
-    const team1Players = shuffled.slice(0, 9);
-    const team2Players = shuffled.slice(9, 18);
-    const remainingPlayers = shuffled.slice(18);
+    const team1Players = shuffled.slice(0, MAXPLAYERS/2);
+    const team2Players = shuffled.slice(MAXPLAYERS/2, MAXPLAYERS);
+    const remainingPlayers = shuffled.slice(MAXPLAYERS);
     
     setTeam1({ name: "Team 1", players: team1Players });
     setTeam2({ name: "Team 2", players: team2Players });
