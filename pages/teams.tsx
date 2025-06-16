@@ -4,6 +4,7 @@ import Navbar from "./Navbar";
 import Footer from "./footer";
 
 const MAXPLAYERS = 18;
+
 type User = {
   name: string;
   id: string;
@@ -19,6 +20,7 @@ type Team = {
 const Teams: React.FC = () => {
   const [registeredUsers, setRegisteredUsers] = useState<User[]>([]);
   const [availablePlayers, setAvailablePlayers] = useState<User[]>([]);
+  const [waitingListPlayers, setWaitingListPlayers] = useState<User[]>([]);
   const [team1, setTeam1] = useState<Team>({ name: "Team 1", players: [] });
   const [team2, setTeam2] = useState<Team>({ name: "Team 2", players: [] });
   const [loading, setLoading] = useState(true);
@@ -28,10 +30,14 @@ const Teams: React.FC = () => {
       .then((response) => response.json())
       .then((data) => {
         if (Array.isArray(data)) {
-          // Only include verified players for team selection
+          // Only include verified players and first 18 for team selection
           const verifiedPlayers = data.filter(user => user.verified);
+          const eligiblePlayers = verifiedPlayers.slice(0, MAXPLAYERS);
+          const waitingPlayers = verifiedPlayers.slice(MAXPLAYERS);
+          
           setRegisteredUsers(data);
-          setAvailablePlayers(data);
+          setAvailablePlayers(eligiblePlayers);
+          setWaitingListPlayers(waitingPlayers);
           setLoading(false);
         }
       })
@@ -39,6 +45,7 @@ const Teams: React.FC = () => {
         console.error("Error fetching registered users:", error);
         setRegisteredUsers([]);
         setAvailablePlayers([]);
+        setWaitingListPlayers([]);
         setLoading(false);
       });
   }, []);
@@ -69,13 +76,12 @@ const Teams: React.FC = () => {
   };
 
   const autoBalance = () => {
-    const allPlayers = [...availablePlayers, ...team1.players, ...team2.players];
-    const shuffled = [...allPlayers].sort(() => Math.random() - 0.5);
+    const allEligiblePlayers = [...availablePlayers, ...team1.players, ...team2.players];
     
-    // Assign up to 9 players per team
-    const team1Players = shuffled.slice(0, MAXPLAYERS/2);
-    const team2Players = shuffled.slice(MAXPLAYERS/2, MAXPLAYERS);
-    const remainingPlayers = shuffled.slice(MAXPLAYERS);
+    // Assign up to 9 players per team from the first 18 eligible players
+    const team1Players = allEligiblePlayers.slice(0, 9);
+    const team2Players = allEligiblePlayers.slice(9, 18);
+    const remainingPlayers = allEligiblePlayers.slice(18);
     
     setTeam1({ name: "Team 1", players: team1Players });
     setTeam2({ name: "Team 2", players: team2Players });
@@ -83,7 +89,10 @@ const Teams: React.FC = () => {
   };
 
   const clearTeams = () => {
-    setAvailablePlayers(registeredUsers);
+    const verifiedPlayers = registeredUsers.filter(user => user.verified);
+    const eligiblePlayers = verifiedPlayers.slice(0, MAXPLAYERS);
+    
+    setAvailablePlayers(eligiblePlayers);
     setTeam1({ name: "Team 1", players: [] });
     setTeam2({ name: "Team 2", players: [] });
   };
@@ -136,16 +145,16 @@ const Teams: React.FC = () => {
           gap: '2rem',
           marginBottom: '2rem'
         }}>
-          {/* Available Players */}
+          {/* Available Players for Team Selection */}
           <div className="card">
-            <h3>Waiting List ({availablePlayers.length})</h3>
+            <h3>Available for Teams ({availablePlayers.length})</h3>
             <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
               {availablePlayers.length === 0 ? (
                 <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-                  All players assigned to teams
+                  All eligible players assigned to teams
                 </p>
               ) : (
-                availablePlayers.map((player) => (
+                availablePlayers.map((player, index) => (
                   <div
                     key={player.id}
                     style={{
@@ -158,7 +167,7 @@ const Teams: React.FC = () => {
                       alignItems: 'center'
                     }}
                   >
-                    <span>{player.name} ({player.id})</span>
+                    <span>#{index + 1} {player.name} ({player.id})</span>
                     <div>
                       <button
                         onClick={() => addToTeam(player, 1)}
@@ -311,6 +320,32 @@ const Teams: React.FC = () => {
           </div>
         </div>
 
+        {/* Waiting List for players beyond 18 */}
+        {waitingListPlayers.length > 0 && (
+          <div className="card">
+            <h3>Waiting List ({waitingListPlayers.length})</h3>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+              Players beyond the first 18 registered (not eligible for current game)
+            </p>
+            <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+              {waitingListPlayers.map((player, index) => (
+                <div
+                  key={player.id}
+                  style={{
+                    background: 'var(--bg-secondary)',
+                    margin: '0.5rem 0',
+                    padding: '0.8rem',
+                    borderRadius: '4px',
+                    opacity: 0.7
+                  }}
+                >
+                  #{MAXPLAYERS + index + 1} {player.name} ({player.id})
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Summary */}
         <div className="card">
           <h3>Team Summary</h3>
@@ -329,9 +364,15 @@ const Teams: React.FC = () => {
               <p>{team2.players.length} players</p>
             </div>
             <div>
-              <h4 style={{ color: 'var(--text-secondary)' }}>Waiting List</h4>
+              <h4 style={{ color: 'var(--text-secondary)' }}>Available</h4>
               <p>{availablePlayers.length} players</p>
             </div>
+            {waitingListPlayers.length > 0 && (
+              <div>
+                <h4 style={{ color: 'var(--text-secondary)' }}>Waiting List</h4>
+                <p>{waitingListPlayers.length} players</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
