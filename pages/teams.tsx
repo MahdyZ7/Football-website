@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import Footer from "./footer";
@@ -34,7 +33,7 @@ const Teams: React.FC = () => {
           const verifiedPlayers = data.filter(user => user.verified);
           const eligiblePlayers = data.slice(0, MAXPLAYERS);
           const waitingPlayers = data.slice(MAXPLAYERS);
-          
+
           setRegisteredUsers(data);
           setAvailablePlayers(eligiblePlayers);
           setWaitingListPlayers(waitingPlayers);
@@ -52,12 +51,12 @@ const Teams: React.FC = () => {
 
   const addToTeam = (player: User, teamNumber: 1 | 2) => {
     const targetTeam = teamNumber === 1 ? team1 : team2;
-    
+
     // Check if team already has 9 players
     if (targetTeam.players.length >= 9) {
       return; // Don't add if team is full
     }
-    
+
     if (teamNumber === 1) {
       setTeam1(prev => ({ ...prev, players: [...prev.players, player] }));
     } else {
@@ -77,12 +76,15 @@ const Teams: React.FC = () => {
 
   const autoBalance = () => {
     const allEligiblePlayers = [...availablePlayers, ...team1.players, ...team2.players];
-    
+
+    // Shuffle players randomly for fair distribution
+    allEligiblePlayers.sort(() => Math.random() - 0.5);
+
     // Assign up to 9 players per team from the first 18 eligible players
     const team1Players = allEligiblePlayers.slice(0, 9);
     const team2Players = allEligiblePlayers.slice(9, 18);
     const remainingPlayers = allEligiblePlayers.slice(18);
-    
+
     setTeam1({ name: "Team 1", players: team1Players });
     setTeam2({ name: "Team 2", players: team2Players });
     setAvailablePlayers(remainingPlayers);
@@ -92,7 +94,7 @@ const Teams: React.FC = () => {
     // const verifiedPlayers = registeredUsers.filter(user => user.verified);
     const verifiedPlayers = registeredUsers.filter(user => user);
     const eligiblePlayers = verifiedPlayers.slice(0, MAXPLAYERS);
-    
+
     setAvailablePlayers(eligiblePlayers);
     setTeam1({ name: "Team 1", players: [] });
     setTeam2({ name: "Team 2", players: [] });
@@ -124,7 +126,7 @@ const Teams: React.FC = () => {
       <Navbar />
       <div className="container">
         <h1>Team Selection</h1>
-        
+
         <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
           <button 
             onClick={autoBalance}

@@ -66,6 +66,20 @@ async function registerUser(user: User) {
   const client = await pool.connect();
   
   try {
+    // Check if user is banned
+    const banCheck = await client.query(
+      "SELECT banned_until FROM banned_users WHERE id = $1 AND banned_until > NOW()",
+      [user.id]
+    );
+    
+    if (banCheck.rows.length > 0) {
+      const bannedUntil = new Date(banCheck.rows[0].banned_until);
+      return { 
+        error: `You are banned until ${bannedUntil.toLocaleDateString()}`, 
+        status: 403 
+      };
+    }
+
     const verifiedInfo: UserInfo = await verifyLogin(user.id);
     
     if (verifiedInfo.valid && !verifiedInfo.error) {

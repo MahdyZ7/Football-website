@@ -412,6 +412,57 @@ nav a.active {
   background: transparent;
 }
 
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.toast {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 1rem;
+  min-width: 300px;
+  box-shadow: 0 4px 12px var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  animation: slideIn 0.3s ease-out;
+  cursor: pointer;
+}
+
+.toast-success {
+  border-left: 4px solid #4CAF50;
+}
+
+.toast-error {
+  border-left: 4px solid #f44336;
+}
+
+.toast-info {
+  border-left: 4px solid var(--ft-primary);
+}
+
+.toast-close {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  margin-left: 1rem;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 @keyframes slideIn {
   from {
     transform: translateX(100%);
