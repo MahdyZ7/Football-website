@@ -2,32 +2,53 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const ADMIN_USERS = ['MahdyZ7']; // Add Replit usernames of admins here
-// To add more admins, add their Replit usernames to this array:
-// const ADMIN_USERS = ['MahdyZ7', 'another_username', 'third_admin'];
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
-    // Check for Replit authentication headers
-    const userId = req.headers['x-replit-user-id'];
-    const userName = req.headers['x-replit-user-name'];
-    console.log(userId, userName)
-    
-    if (!userId || !userName) {
-      return res.status(401).json({ 
+    try {
+      // Get user info from Replit's user endpoint
+      const userResponse = await fetch('https://replit.com/@api/user', {
+        headers: {
+          'Cookie': req.headers.cookie || ''
+        }
+      });
+
+      if (!userResponse.ok) {
+        return res.status(401).json({ 
+          authenticated: false, 
+          message: 'Not logged in with Replit' 
+        });
+      }
+
+      const userData = await userResponse.json();
+      const userName = userData.username;
+
+      if (!userName) {
+        return res.status(401).json({ 
+          authenticated: false, 
+          message: 'Unable to get user information' 
+        });
+      }
+
+      console.log('Authenticated user:', userName);
+
+      // Check if user is in admin list
+      if (ADMIN_USERS.includes(userName)) {
+        return res.status(200).json({ authenticated: true, user: userName });
+      }
+      
+      return res.status(403).json({ 
         authenticated: false, 
-        message: 'Not logged in with Replit' 
+        message: `Access denied: User '${userName}' does not have admin privileges` 
+      });
+
+    } catch (error) {
+      console.error('Authentication error:', error);
+      return res.status(500).json({ 
+        authenticated: false, 
+        message: 'Authentication service error' 
       });
     }
-
-    // Check if user is in admin list
-    if (ADMIN_USERS.includes(userName as string)) {
-      return res.status(200).json({ authenticated: true, user: userName });
-    }
-    
-    return res.status(403).json({ 
-      authenticated: false, 
-      message: `Access denied: User '${userName}' does not have admin privileges` 
-    });
   }
   
   res.status(405).end();
