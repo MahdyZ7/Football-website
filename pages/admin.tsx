@@ -382,7 +382,7 @@ const Admin: React.FC = () => {
               fontSize: '0.9rem',
               color: 'var(--text-secondary)'
             }}>
-              <strong>Admin Access:</strong> Currently only 'MahdyZ7' has admin privileges. 
+              <strong>Admin Access:</strong> Currently only &apos;MahdyZ7&apos; has admin privileges. 
               To add more admins, update the ADMIN_USERS array in /pages/api/admin/auth.ts
             </div>
             <div className="responsive-table-container">
