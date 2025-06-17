@@ -10,6 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Check for Replit authentication headers
     const userId = req.headers['x-replit-user-id'];
     const userName = req.headers['x-replit-user-name'];
+    console.log(userId, userName)
     
     if (!userId || !userName) {
       return res.status(401).json({ 

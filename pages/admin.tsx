@@ -58,6 +58,7 @@ const Admin: React.FC = () => {
       
       // Then check admin privileges
       const response = await axios.get('/api/admin/auth');
+      console.log(response.data)
       setIsAuthenticated(response.data.authenticated);
     } catch (error) {
       setIsAuthenticated(false);
