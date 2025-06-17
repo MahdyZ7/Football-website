@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Navbar from './Navbar';
@@ -31,7 +30,7 @@ const Admin: React.FC = () => {
   const [bannedUsers, setBannedUsers] = useState<BannedUser[]>([]);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [activeTab, setActiveTab] = useState<'users' | 'banned'>('users');
-  
+
   // Form states
   const [banForm, setBanForm] = useState({
     userId: '',
@@ -55,7 +54,7 @@ const Admin: React.FC = () => {
         setIsAuthenticated(false);
         return;
       }
-      
+
       // Then check admin privileges
       const response = await axios.get('/api/admin/auth');
       setIsAuthenticated(response.data.authenticated);
@@ -89,7 +88,7 @@ const Admin: React.FC = () => {
       type
     };
     setToasts(prev => [...prev, newToast]);
-    
+
     setTimeout(() => {
       setToasts(prev => prev.filter(toast => toast.id !== newToast.id));
     }, 4000);
@@ -101,7 +100,7 @@ const Admin: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this user?')) return;
-    
+
     try {
       await axios.delete('/api/admin/users', { data: { id } });
       await fetchUsers();
@@ -126,7 +125,7 @@ const Admin: React.FC = () => {
 
   const handleBanUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!banForm.userId || !banForm.reason) {
       showToast('Please fill in all required fields', 'error');
       return;
@@ -138,7 +137,7 @@ const Admin: React.FC = () => {
         reason: banForm.reason,
         duration: banForm.duration
       });
-      
+
       setBanForm({ userId: '', reason: '', duration: 7 });
       await fetchBannedUsers();
       showToast('User banned successfully', 'success');
@@ -149,7 +148,7 @@ const Admin: React.FC = () => {
 
   const handleUnban = async (id: string) => {
     if (!confirm('Are you sure you want to unban this user?')) return;
-    
+
     try {
       await axios.delete('/api/admin/ban', { data: { id } });
       await fetchBannedUsers();
@@ -209,7 +208,7 @@ const Admin: React.FC = () => {
       <Navbar />
       <div className="container">
         <h1>Admin Dashboard</h1>
-        
+
         {/* Tab Navigation */}
         <div style={{ marginBottom: '2rem' }}>
           <button 
@@ -237,7 +236,7 @@ const Admin: React.FC = () => {
         {activeTab === 'users' && (
           <div className="admin-panel">
             <h2>Registered Users ({users.length})</h2>
-            
+
             {/* Ban User Form */}
             <div style={{ 
               background: 'var(--bg-card)', 
@@ -347,7 +346,7 @@ const Admin: React.FC = () => {
         {activeTab === 'banned' && (
           <div className="admin-panel">
             <h2>Banned Users ({bannedUsers.length})</h2>
-            
+
             {/* Admin Info */}
             <div style={{ 
               background: 'var(--bg-card)', 
@@ -413,7 +412,7 @@ const Admin: React.FC = () => {
         )}
       </div>
       <Footer />
-      
+
       {/* Toast Container */}
       <div className="toast-container">
         {toasts.map((toast) => (
