@@ -481,6 +481,12 @@ nav a.active {
   box-shadow: 0 4px 6px var(--shadow);
 }
 
+@media (max-width: 768px) {
+  .admin-panel {
+    padding: 1rem;
+  }
+}
+
 .admin-table {
   width: 100%;
   border-collapse: collapse;
@@ -494,6 +500,72 @@ nav a.active {
   text-align: left;
   border-bottom: 1px solid var(--border-color);
   color: var(--text-primary);
+}
+
+.responsive-table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile responsive table styles */
+@media (max-width: 768px) {
+  .responsive-table-container {
+    overflow-x: visible;
+  }
+  
+  .admin-table {
+    border: none;
+  }
+  
+  .admin-table thead {
+    display: none;
+  }
+  
+  .admin-table tr {
+    display: block;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    background: var(--bg-card);
+  }
+  
+  .admin-table td {
+    display: block;
+    padding: 0.5rem 0;
+    border: none;
+    text-align: left;
+    position: relative;
+    padding-left: 40%;
+  }
+  
+  .admin-table td:before {
+    content: attr(data-label) ": ";
+    position: absolute;
+    left: 0;
+    width: 35%;
+    font-weight: bold;
+    color: var(--text-secondary);
+  }
+  
+  .admin-table td:first-child {
+    margin-top: 0;
+  }
+}
+
+/* Mobile form adjustments */
+@media (max-width: 600px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  h1 {
+    font-size: 1.5rem;
+  }
+  
+  h2 {
+    font-size: 1.3rem;
+  }
 }
 
 .delete-btn {

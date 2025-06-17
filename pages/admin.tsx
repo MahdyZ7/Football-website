@@ -210,11 +210,17 @@ const Admin: React.FC = () => {
         <h1>Admin Dashboard</h1>
 
         {/* Tab Navigation */}
-        <div style={{ marginBottom: '2rem' }}>
+        <div style={{ 
+          marginBottom: '2rem',
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '0.5rem'
+        }}>
           <button 
             onClick={() => setActiveTab('users')}
             style={{ 
-              marginRight: '1rem',
+              flex: '1',
+              minWidth: '120px',
               background: activeTab === 'users' ? 'var(--ft-primary)' : 'var(--bg-secondary)',
               color: activeTab === 'users' ? 'white' : 'var(--text-primary)'
             }}
@@ -224,6 +230,8 @@ const Admin: React.FC = () => {
           <button 
             onClick={() => setActiveTab('banned')}
             style={{ 
+              flex: '1',
+              minWidth: '120px',
               background: activeTab === 'banned' ? 'var(--ft-primary)' : 'var(--bg-secondary)',
               color: activeTab === 'banned' ? 'white' : 'var(--text-primary)'
             }}
@@ -245,7 +253,12 @@ const Admin: React.FC = () => {
               marginBottom: '2rem' 
             }}>
               <h3>Ban User</h3>
-              <form onSubmit={handleBanUser} style={{ display: 'flex', gap: '1rem', alignItems: 'end' }}>
+              <form onSubmit={handleBanUser} style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '1rem',
+                alignItems: 'end'
+              }}>
                 <div>
                   <label>User ID:</label>
                   <input
@@ -253,7 +266,7 @@ const Admin: React.FC = () => {
                     value={banForm.userId}
                     onChange={(e) => setBanForm(prev => ({ ...prev, userId: e.target.value }))}
                     placeholder="Enter user intra login"
-                    style={{ width: '200px' }}
+                    style={{ width: '100%' }}
                   />
                 </div>
                 <div>
@@ -263,7 +276,7 @@ const Admin: React.FC = () => {
                     value={banForm.reason}
                     onChange={(e) => setBanForm(prev => ({ ...prev, reason: e.target.value }))}
                     placeholder="Ban reason"
-                    style={{ width: '250px' }}
+                    style={{ width: '100%' }}
                   />
                 </div>
                 <div>
@@ -274,16 +287,19 @@ const Admin: React.FC = () => {
                     onChange={(e) => setBanForm(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
                     min="1"
                     max="365"
-                    style={{ width: '100px' }}
+                    style={{ width: '100%' }}
                   />
                 </div>
-                <button type="submit" style={{ background: 'var(--ft-accent)' }}>
+                <button type="submit" style={{ 
+                  background: 'var(--ft-accent)',
+                  gridColumn: 'span 1'
+                }}>
                   Ban User
                 </button>
               </form>
             </div>
 
-            <div style={{ overflowX: 'auto' }}>
+            <div className="responsive-table-container">
               <table className="admin-table">
                 <thead>
                   <tr>
@@ -297,9 +313,9 @@ const Admin: React.FC = () => {
                 <tbody>
                   {users.map((user) => (
                     <tr key={user.id}>
-                      <td>{user.name}</td>
-                      <td>{user.id}</td>
-                      <td>
+                      <td data-label="Name">{user.name}</td>
+                      <td data-label="ID">{user.id}</td>
+                      <td data-label="Verified">
                         <button
                           onClick={() => handleVerifyToggle(user.id, user.verified)}
                           style={{
@@ -308,31 +324,41 @@ const Admin: React.FC = () => {
                             border: 'none',
                             padding: '0.3rem 0.8rem',
                             borderRadius: '4px',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            fontSize: '0.8rem'
                           }}
                         >
                           {user.verified ? '✅ Verified' : '❌ Unverified'}
                         </button>
                       </td>
-                      <td>{new Date(user.created_at).toLocaleDateString()}</td>
-                      <td>
-                        <button 
-                          onClick={() => handleDelete(user.id)}
-                          className="delete-btn"
-                          style={{ marginRight: '0.5rem' }}
-                        >
-                          Delete
-                        </button>
-                        <button
-                          onClick={() => setBanForm(prev => ({ ...prev, userId: user.id }))}
-                          style={{ 
-                            background: 'var(--ft-accent)', 
-                            padding: '0.5rem 1rem',
-                            fontSize: '0.9rem'
-                          }}
-                        >
-                          Quick Ban
-                        </button>
+                      <td data-label="Registered">{new Date(user.created_at).toLocaleDateString()}</td>
+                      <td data-label="Actions">
+                        <div style={{ 
+                          display: 'flex', 
+                          flexDirection: 'column',
+                          gap: '0.3rem'
+                        }}>
+                          <button 
+                            onClick={() => handleDelete(user.id)}
+                            className="delete-btn"
+                            style={{ 
+                              fontSize: '0.8rem',
+                              padding: '0.4rem 0.8rem'
+                            }}
+                          >
+                            Delete
+                          </button>
+                          <button
+                            onClick={() => setBanForm(prev => ({ ...prev, userId: user.id }))}
+                            style={{ 
+                              background: 'var(--ft-accent)', 
+                              padding: '0.4rem 0.8rem',
+                              fontSize: '0.8rem'
+                            }}
+                          >
+                            Quick Ban
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -359,7 +385,7 @@ const Admin: React.FC = () => {
               <strong>Admin Access:</strong> Currently only 'MahdyZ7' has admin privileges. 
               To add more admins, update the ADMIN_USERS array in /pages/api/admin/auth.ts
             </div>
-            <div style={{ overflowX: 'auto' }}>
+            <div className="responsive-table-container">
               <table className="admin-table">
                 <thead>
                   <tr>
@@ -377,12 +403,12 @@ const Admin: React.FC = () => {
                     const isExpired = new Date(user.banned_until) < new Date();
                     return (
                       <tr key={user.id} style={{ opacity: isExpired ? 0.6 : 1 }}>
-                        <td>{user.name}</td>
-                        <td>{user.id}</td>
-                        <td>{user.reason}</td>
-                        <td>{new Date(user.banned_at).toLocaleDateString()}</td>
-                        <td>{new Date(user.banned_until).toLocaleDateString()}</td>
-                        <td>
+                        <td data-label="Name">{user.name}</td>
+                        <td data-label="ID">{user.id}</td>
+                        <td data-label="Reason">{user.reason}</td>
+                        <td data-label="Banned Date">{new Date(user.banned_at).toLocaleDateString()}</td>
+                        <td data-label="Ban Expires">{new Date(user.banned_until).toLocaleDateString()}</td>
+                        <td data-label="Status">
                           <span style={{ 
                             color: isExpired ? '#4CAF50' : '#ff6b6b',
                             fontWeight: 'bold'
@@ -390,13 +416,13 @@ const Admin: React.FC = () => {
                             {isExpired ? 'Expired' : 'Active'}
                           </span>
                         </td>
-                        <td>
+                        <td data-label="Actions">
                           <button 
                             onClick={() => handleUnban(user.id)}
                             style={{ 
                               background: '#4CAF50', 
-                              padding: '0.5rem 1rem',
-                              fontSize: '0.9rem'
+                              padding: '0.4rem 0.8rem',
+                              fontSize: '0.8rem'
                             }}
                           >
                             Unban
