@@ -1,4 +1,3 @@
-
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Pool } from 'pg';
 
@@ -17,16 +16,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       const { id, verified } = req.body;
       const client = await pool.connect();
-      
-      await client.query(
-        'UPDATE players SET verified = $1 WHERE intra = $2',
-        [verified, id]
-      );
-      
+
+      // Get user name for logging
+      const userResult = await client.query('SELECT name FROM players WHERE intra = $1', [id]);
+      const userName = userResult.rows[0]?.name || 'Unknown';
+
+      await client.query('UPDATE players SET verified = $1 WHERE intra = $2', [verified, id]);
       client.release();
-      res.status(200).json({ message: 'User verification status updated' });
+
+      // Log the action
+      await logAdminAction({
+        adminUser: req.headers['x-replit-user-name'] as string || 'Unknown Admin',
+        action: verified ? 'user_verified' : 'user_unverified',
+        targetUser: id,
+        targetName: userName,
+        details: `User verification status changed to: ${verified ? 'verified' : 'unverified'}`
+      });
+
+      res.status(200).json({ message: 'User verification updated' });
     } catch (error) {
-      console.error('Error updating verification:', error);
       res.status(500).json({ error: 'Database error' });
     }
   } else {

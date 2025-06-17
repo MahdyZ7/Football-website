@@ -41,6 +41,12 @@ export default function Navbar() {
 				<NavLink href="/teams" isActive={currentRoute === "/teams"}>
 					Teams
 				</NavLink>
+				<NavLink href="/admin" isActive={currentRoute === "/admin"}>
+					Admin
+				</NavLink>
+				<NavLink href="/admin-logs" isActive={currentRoute === "/admin-logs"}>
+					Admin Logs
+				</NavLink>
 				<NavLink href="https://maps.app.goo.gl/Xem3GbnvzNjhheD37" isActive={false} external>
 					Location
 				</NavLink>
