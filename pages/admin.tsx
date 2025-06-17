@@ -49,11 +49,17 @@ const Admin: React.FC = () => {
 
   const checkAuth = async () => {
     try {
+      // First check if user is logged in with Replit
+      const userResponse = await fetch('/__replauthuser');
+      if (userResponse.status !== 200) {
+        setIsAuthenticated(false);
+        return;
+      }
+      
+      // Then check admin privileges
       const response = await axios.get('/api/admin/auth');
-      console.log('Auth response:', response.data);
       setIsAuthenticated(response.data.authenticated);
     } catch (error) {
-      console.error('Auth check failed:', error);
       setIsAuthenticated(false);
     }
   };
