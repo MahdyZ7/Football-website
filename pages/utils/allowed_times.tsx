@@ -23,9 +23,9 @@ export function getNextRegistration() {
   if (day < 0 || (day === 0 && hour < 12)) {
     // Next is Sunday
     nextDate.setDate(nextDate.getDate() + ((0 - day + 7) % 7));
-  } else if (day < 2 || (day === 2 && hour < 12)) {
-    // Next is Wednesday
-    nextDate.setDate(nextDate.getDate() + ((2 - day + 7) % 7));
+  } else if (day < 3 || (day === 3 && hour < 12)) {
+    // Next is Thursday
+    nextDate.setDate(nextDate.getDate() + ((3 - day + 7) % 7));
   } else {
     // Next is Sunday
     nextDate.setDate(nextDate.getDate() + ((7 - day) % 7));
