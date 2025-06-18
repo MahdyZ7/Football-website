@@ -5,7 +5,7 @@ import Navbar from "./Navbar";
 import Footer from "./footer";
 import { getNextRegistration } from "./utils/allowed_times";
 
-const Guaranteed_spot = 18;
+const Guaranteed_spot = 21;
 type User = {
   name: string;
   id: string;
