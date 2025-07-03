@@ -3,16 +3,32 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { Pool } from 'pg';
 import { logAdminAction } from '../../../utils/adminLogger';
 
+const ADMIN_USERS = ['MahdyZ7'];
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = req.cookies['admin_session'];
-  if (!session) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+  // const session = req.cookies['admin_session'];
+  // if (!session) {
+  //   return res.status(401).json({ error: 'Unauthorized' });
+  // }
+//   const userInfoResponse = await
+// fetch(`${req.headers.origin}/__replauthuser`, {
+//     headers: {
+//       'Cookie': req.headers.cookie || ''
+//     }
+//   });
+//   if (!userInfoResponse.ok)
+//     return res.status(401).json({ error: 'Unauthorized' });
+//   const userData = await userInfoResponse.json();
+//   const clientUserName = userData.name;
+//   if (!clientUserName)
+//     return res.status(401).json({ error: 'Unauthorized' });
+//   if (!ADMIN_USERS.includes(clientUserName))
+//     return res.status(401).json({ error: 'Unauthorized' });
 
   if (req.method === 'DELETE') {
     try {
