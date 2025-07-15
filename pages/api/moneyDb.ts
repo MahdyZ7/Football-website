@@ -1,13 +1,6 @@
 // pages/api/money.js
 import { NextApiRequest, NextApiResponse } from "next";
-import { Pool } from "pg";
-
-const pool = new Pool({
-	connectionString: process.env.DATABASE_URL,
-	ssl: {
-		rejectUnauthorized: false,
-	},
-});
+import pool from "../../utils/db";
 
 export default async function handler(
 	req: NextApiRequest,
@@ -19,7 +12,7 @@ export default async function handler(
 			"SELECT date, name, intra, amount, paid FROM money ORDER BY date"
 		);
 		res.status(200).json(rows);
-	} catch (error) {
+	} catch {
 		res.status(500).json({ error: "Error fetching money data" });
 	} finally {
 		client.release();

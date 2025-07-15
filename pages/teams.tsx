@@ -33,7 +33,6 @@ const Teams: React.FC = () => {
       .then((data) => {
         if (Array.isArray(data)) {
           // Only include verified players and first 21 for team selection
-          const verifiedPlayers = data.filter(user => user.verified);
           const eligiblePlayers = data.slice(0, MAXPLAYERS).map(user => ({ ...user, rating: 1 }));
           const waitingPlayers = data.slice(MAXPLAYERS);
 

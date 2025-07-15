@@ -35,6 +35,16 @@ const Home: React.FC = () => {
   const idInputRef = useRef<HTMLInputElement>(null);
   const submitButtonRef = useRef<HTMLButtonElement>(null);
 
+  const checkSubmissionAllowed = useCallback(async () => {
+    try {
+      const response = await axios.get("/api/allowed");
+      return response.status === 200 ? response.data.isAllowed : false;
+    } catch (error) {
+      console.error("Error checking submission allowed:", error);
+      return false;
+    }
+  }, []);
+
   // Timer and submission check effects
   useEffect(() => {
     const updateCountdown = () => {
@@ -64,7 +74,7 @@ const Home: React.FC = () => {
     checkAllowed();
 
     return () => clearInterval(timer);
-  }, []);
+  }, [checkSubmissionAllowed]);
 
   // Initial data fetch and popup timer
   useEffect(() => {
@@ -84,16 +94,6 @@ const Home: React.FC = () => {
       });
 
     return () => clearTimeout(timer);
-  }, []);
-
-  const checkSubmissionAllowed = useCallback(async () => {
-    try {
-      const response = await axios.get("/api/allowed");
-      return response.status === 200 ? response.data.isAllowed : false;
-    } catch (error) {
-      console.error("Error checking submission allowed:", error);
-      return false;
-    }
   }, []);
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
@@ -141,7 +141,7 @@ const Home: React.FC = () => {
         removeToast(loadingToastId);
         showToast("User list has been reset.", 'success');
         return;
-      } catch (error) {
+      } catch {
         removeToast(loadingToastId);
         showToast("Error resetting user list.", 'error');
         return;

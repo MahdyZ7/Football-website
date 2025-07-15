@@ -7,7 +7,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === 'GET') {
     try {
       // Check for Replit authentication headers (server-side)
-      const userId = req.headers['x-replit-user-id'];
       const userName = req.headers['x-replit-user-name'] as string;
       
       // If no server headers, try client-side approach

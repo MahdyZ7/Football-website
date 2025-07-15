@@ -1,21 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { Pool } from 'pg';
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-});
-
-async function logAdminAction(actionDetails: {
-  adminUser: string;
-  action: string;
-  targetUser: string;
-  targetName: string;
-  details: string;
-}) {
-  // Example implementation: log to console (replace with actual logging)
-  console.log(`[Log] Action: ${actionDetails.action}, Admin: ${actionDetails.adminUser}, Target: ${actionDetails.targetUser} (${actionDetails.targetName}), Details: ${actionDetails.details}`);
-}
+import pool from '../../../../utils/db';
+import { logAdminAction } from '../../../../utils/adminLogger';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = req.cookies['admin_session'];
@@ -35,9 +20,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       await client.query('UPDATE players SET verified = $1 WHERE intra = $2', [verified, id]);
       client.release();
 
+      // Get authenticated admin user
+      const userInfoResponse = await fetch(`${req.headers.origin}/__replauthuser`, {
+        headers: {
+          'Cookie': req.headers.cookie || ''
+        }
+      });
+      
+      const userData = await userInfoResponse.json();
+      const adminUser = userData.name || 'Unknown Admin';
+
       // Log the action
       await logAdminAction({
-        adminUser: req.headers['x-replit-user-name'] as string || 'Unknown Admin',
+        adminUser: adminUser,
         action: verified ? 'user_verified' : 'user_unverified',
         targetUser: id,
         targetName: userName,
@@ -45,7 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
 
       res.status(200).json({ message: 'User verification updated' });
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: 'Database error' });
     }
   } else {

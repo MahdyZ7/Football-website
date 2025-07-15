@@ -1,25 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { Pool } from 'pg';
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-});
-
-// Utility function to log admin actions (implementation needed, add to the file for it to be runnable)
-async function logAdminAction(logEntry: any) {
-  const client = await pool.connect();
-  try {
-    await client.query(
-      'INSERT INTO admin_logs (admin_user, action, target_user, target_name, details, timestamp) VALUES ($1, $2, $3, $4, $5, NOW())',
-      [logEntry.adminUser, logEntry.action, logEntry.targetUser, logEntry.targetName, logEntry.details]
-    );
-  } catch (error) {
-    console.error('Error logging admin action:', error);
-  } finally {
-    client.release();
-  }
-}
+import pool from '../../../utils/db';
+import { logAdminAction } from '../../../utils/adminLogger';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = req.cookies['admin_session'];
@@ -55,9 +36,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         DO UPDATE SET reason = $2, banned_at = NOW(), banned_until = $4
       `, [userId, userName, reason, bannedUntil]);
 
+      // Get authenticated admin user
+      const userInfoResponse = await fetch(`${req.headers.origin}/__replauthuser`, {
+        headers: {
+          'Cookie': req.headers.cookie || ''
+        }
+      });
+      
+      const userData = await userInfoResponse.json();
+      const adminUser = userData.name || 'Unknown Admin';
+
       // Log the action
       await logAdminAction({
-        adminUser: req.headers['x-replit-user-name'] as string || 'Unknown Admin',
+        adminUser: adminUser,
         action: 'user_banned',
         targetUser: userId,
         targetName: userName,

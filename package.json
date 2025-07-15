@@ -15,13 +15,8 @@
     "db:setup": "chmod +x scripts/setup-database.sh && ./scripts/setup-database.sh"
   },
   "dependencies": {
-    "@prisma/client": "^5.20.0",
-    "@replit/database": "^2.0.5",
     "axios": "^1.7.7",
-    "firebase": "^10.14.0",
-    "mongodb": "^6.9.0",
     "next": "^15.0.0",
-    "next-connect": "^1.0.0",
     "pg": "^8.12.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -35,7 +30,6 @@
     "@types/simple-oauth2": "^5.0.7",
     "eslint": "^9.12.0",
     "eslint-config-next": "^15.0.0",
-    "prisma": "^5.20.0",
     "typescript": "^5.6.2"
   },
   "description": "This website is a registration site for the 42 Football Club. It is built using react and NextJS",

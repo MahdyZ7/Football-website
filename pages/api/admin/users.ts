@@ -1,34 +1,36 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
-import { Pool } from 'pg';
+import pool from '../../../utils/db';
 import { logAdminAction } from '../../../utils/adminLogger';
 
 const ADMIN_USERS = ['MahdyZ7'];
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-});
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // const session = req.cookies['admin_session'];
-  // if (!session) {
-  //   return res.status(401).json({ error: 'Unauthorized' });
-  // }
-//   const userInfoResponse = await
-// fetch(`${req.headers.origin}/__replauthuser`, {
-//     headers: {
-//       'Cookie': req.headers.cookie || ''
-//     }
-//   });
-//   if (!userInfoResponse.ok)
-//     return res.status(401).json({ error: 'Unauthorized' });
-//   const userData = await userInfoResponse.json();
-//   const clientUserName = userData.name;
-//   if (!clientUserName)
-//     return res.status(401).json({ error: 'Unauthorized' });
-//   if (!ADMIN_USERS.includes(clientUserName))
-//     return res.status(401).json({ error: 'Unauthorized' });
+  const session = req.cookies['admin_session'];
+  if (!session) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  const userInfoResponse = await fetch(`${req.headers.origin}/__replauthuser`, {
+    headers: {
+      'Cookie': req.headers.cookie || ''
+    }
+  });
+  
+  if (!userInfoResponse.ok) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  const userData = await userInfoResponse.json();
+  const clientUserName = userData.name;
+  
+  if (!clientUserName) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  if (!ADMIN_USERS.includes(clientUserName)) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
 
   if (req.method === 'DELETE') {
     try {
@@ -44,7 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       // Log the action
       await logAdminAction({
-        adminUser: req.headers['x-replit-user-name'] as string || 'Unknown Admin',
+        adminUser: clientUserName,
         action: 'user_deleted',
         targetUser: id,
         targetName: userName,
@@ -52,7 +54,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
       
       res.status(200).json({ message: 'User deleted' });
-    } catch (error) {
+    } catch {
       res.status(500).json({ error: 'Database error' });
     }
   } else {

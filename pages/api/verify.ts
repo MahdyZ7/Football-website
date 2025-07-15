@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import verifyLogin from "../../utils/verify_login";
-import { UserInfo } from "../../types/user";
 
 type ResponseData = {
 	isAllowed: boolean;
@@ -16,7 +15,7 @@ export default async function handler(
 		return;
 	}
 	
-	const {name, intra, valid, error } = await verifyLogin("Ahsalem");
+	const {valid, error } = await verifyLogin("Ahsalem");
 	if (error)
 		res.status(500);
 	else if (!valid)

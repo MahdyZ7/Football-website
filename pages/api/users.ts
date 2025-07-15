@@ -1,12 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { Pool } from "pg";
-
-const pool = new Pool({
-	connectionString: process.env.DATABASE_URL,
-	ssl: {
-		rejectUnauthorized: false,
-	},
-});
+import pool from "../../utils/db";
 
 export default async function handler(
 	req: NextApiRequest,
@@ -28,7 +21,7 @@ export default async function handler(
 
 		} catch (error) {
 			console.error("Error fetching players:", error);
-			res.status(500).json({ error: "An unexpected error occurred.", details: error });
+			res.status(500).json({ error: "Database error" });
 		} finally {
 			client.release();
 		}

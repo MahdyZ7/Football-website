@@ -1,11 +1,6 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
-import { Pool } from 'pg';
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-});
+import pool from '../../../utils/db';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = req.cookies['admin_session'];

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Navbar from './Navbar';
 import Footer from './footer';
@@ -38,14 +38,6 @@ const Admin: React.FC = () => {
     duration: 7 // days
   });
 
-  useEffect(() => {
-    checkAuth();
-    if (isAuthenticated) {
-      fetchUsers();
-      fetchBannedUsers();
-    }
-  }, [isAuthenticated]);
-
   const checkAuth = async () => {
     try {
       // First check if user is logged in with Replit
@@ -58,28 +50,36 @@ const Admin: React.FC = () => {
       // Then check admin privileges
       const response = await axios.get('/api/admin/auth');
       setIsAuthenticated(response.data.authenticated);
-    } catch (error) {
+    } catch {
       setIsAuthenticated(false);
     }
   };
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       const response = await axios.get('/api/users');
       setUsers(response.data);
-    } catch (error) {
+    } catch {
       showToast('Failed to fetch users', 'error');
     }
-  };
+  }, []);
 
-  const fetchBannedUsers = async () => {
+  const fetchBannedUsers = useCallback(async () => {
     try {
       const response = await axios.get('/api/admin/banned');
       setBannedUsers(response.data);
-    } catch (error) {
+    } catch {
       showToast('Failed to fetch banned users', 'error');
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    checkAuth();
+    if (isAuthenticated) {
+      fetchUsers();
+      fetchBannedUsers();
+    }
+  }, [isAuthenticated, fetchUsers, fetchBannedUsers]);
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
     const newToast: Toast = {
@@ -105,7 +105,7 @@ const Admin: React.FC = () => {
       await axios.delete('/api/admin/users', { data: { id } });
       await fetchUsers();
       showToast('User deleted successfully', 'success');
-    } catch (error) {
+    } catch {
       showToast('Failed to delete user', 'error');
     }
   };
@@ -118,7 +118,7 @@ const Admin: React.FC = () => {
       });
       await fetchUsers();
       showToast(`User ${!currentStatus ? 'verified' : 'unverified'} successfully`, 'success');
-    } catch (error) {
+    } catch {
       showToast('Failed to update verification status', 'error');
     }
   };
@@ -141,7 +141,7 @@ const Admin: React.FC = () => {
       setBanForm({ userId: '', reason: '', duration: 7 });
       await fetchBannedUsers();
       showToast('User banned successfully', 'success');
-    } catch (error) {
+    } catch {
       showToast('Failed to ban user', 'error');
     }
   };
@@ -153,7 +153,7 @@ const Admin: React.FC = () => {
       await axios.delete('/api/admin/ban', { data: { id } });
       await fetchBannedUsers();
       showToast('User unbanned successfully', 'success');
-    } catch (error) {
+    } catch {
       showToast('Failed to unban user', 'error');
     }
   };

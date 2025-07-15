@@ -1,15 +1,10 @@
 
 import { NextApiRequest, NextApiResponse } from "next";
-import { Pool } from "pg";
+import pool from "../../utils/db";
 import { UserInfo } from "../../types/user";
 import allowed_times from "../utils/allowed_times";
 import player_limit_reached from "../utils/player_limit";
 import verifyLogin from "../../utils/verify_login";
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-});
 
 type User = {
   name: string;
@@ -26,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       default:
         res.status(405).end();
     }
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -37,6 +32,26 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse) {
   }
 
   const user = req.body as User;
+  
+  // Input validation
+  if (!user || typeof user !== 'object') {
+    return res.status(400).json({ error: "Invalid request body" });
+  }
+  
+  if (!user.id || typeof user.id !== 'string' || user.id.trim().length === 0) {
+    return res.status(400).json({ error: "User ID is required" });
+  }
+  
+  if (user.name && typeof user.name !== 'string') {
+    return res.status(400).json({ error: "Invalid name format" });
+  }
+  
+  // Sanitize inputs
+  user.id = user.id.trim();
+  if (user.name) {
+    user.name = user.name.trim();
+  }
+  
   const result = await registerUser(user);
   
   if (result.success) {
@@ -54,7 +69,12 @@ async function handleDelete(req: NextApiRequest, res: NextApiResponse) {
   }
 
   if (req.body.id) {
-    const result = await deleteUser(req.body);
+    // Input validation for delete
+    if (typeof req.body.id !== 'string' || req.body.id.trim().length === 0) {
+      return res.status(400).json({ error: "Valid user ID is required" });
+    }
+    
+    const result = await deleteUser({ ...req.body, id: req.body.id.trim() });
     return res.status(result.status || 200).json(result);
   }
   
@@ -73,9 +93,8 @@ async function registerUser(user: User) {
     );
     
     if (banCheck.rows.length > 0) {
-      const bannedUntil = new Date(banCheck.rows[0].banned_until);
       return { 
-        error: `You are banned until ${bannedUntil.toLocaleDateString()}`, 
+        error: "Access denied", 
         status: 403 
       };
     }
@@ -115,7 +134,7 @@ async function registerUser(user: User) {
     return { success: true };
   } catch (error) {
     console.error("Error registering user:", error);
-    return { error: "An unexpected error occurred.", status: 500 };
+    return { error: "Registration failed", status: 500 };
   } finally {
     client.release();
   }
@@ -126,8 +145,8 @@ async function resetList() {
   try {
     await client.query("DELETE FROM players");
     return { success: true };
-  } catch (error) {
-    return { error: "An unexpected error occurred.", status: 500 };
+  } catch {
+    return { error: "Operation failed", status: 500 };
   } finally {
     client.release();
   }
@@ -147,7 +166,7 @@ async function deleteUser(user: User) {
     return { success: true };
   } catch (error) {
     console.error("Error deleting user:", error);
-    return { error: "An unexpected error occurred.", status: 500 };
+    return { error: "Delete operation failed", status: 500 };
   } finally {
     client.release();
   }
