@@ -38,6 +38,19 @@ const Admin: React.FC = () => {
     duration: 7 // days
   });
 
+  // Predefined ban reasons with durations
+  const banReasons = [
+    { label: 'Select a reason...', value: '', duration: 7 },
+    { label: 'Not ready when booking time starts', value: 'Not ready when booking time starts', duration: 3.5 },
+    { label: 'Cancel reservation', value: 'Cancel reservation', duration: 7 },
+    { label: 'Late > 15 minutes', value: 'Late > 15 minutes', duration: 7 },
+    { label: 'Cancel reservation on game day after 5 PM', value: 'Cancel reservation on game day after 5 PM', duration: 14 },
+    { label: 'No Show without notice', value: 'No Show without notice', duration: 28 },
+    { label: 'Custom reason', value: 'custom', duration: 7 }
+  ];
+
+  const [isCustomReason, setIsCustomReason] = useState(false);
+
   const checkAuth = async () => {
     try {
       // Use relative URL to avoid hostname mismatch
@@ -128,7 +141,7 @@ const Admin: React.FC = () => {
   const handleBanUser = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!banForm.userId || !banForm.reason) {
+    if (!banForm.userId || !banForm.reason || banForm.reason === '') {
       showToast('Please fill in all required fields', 'error');
       return;
     }
@@ -141,6 +154,7 @@ const Admin: React.FC = () => {
       });
 
       setBanForm({ userId: '', reason: '', duration: 7 });
+      setIsCustomReason(false);
       await fetchBannedUsers();
       showToast('User banned successfully', 'success');
     } catch {
@@ -273,23 +287,63 @@ const Admin: React.FC = () => {
                 </div>
                 <div>
                   <label>Reason:</label>
-                  <input
-                    type="text"
-                    value={banForm.reason}
-                    onChange={(e) => setBanForm(prev => ({ ...prev, reason: e.target.value }))}
-                    placeholder="Ban reason"
-                    style={{ width: '100%' }}
-                  />
+                  <select
+                    value={isCustomReason ? 'custom' : banForm.reason}
+                    onChange={(e) => {
+                      const selectedReason = banReasons.find(r => r.value === e.target.value);
+                      if (selectedReason) {
+                        if (selectedReason.value === 'custom') {
+                          setIsCustomReason(true);
+                          setBanForm(prev => ({ ...prev, reason: '', duration: 7 }));
+                        } else {
+                          setIsCustomReason(false);
+                          setBanForm(prev => ({ 
+                            ...prev, 
+                            reason: selectedReason.value,
+                            duration: selectedReason.duration
+                          }));
+                        }
+                      }
+                    }}
+                    style={{ 
+                      width: '100%',
+                      padding: '0.5rem',
+                      borderRadius: '4px',
+                      border: '1px solid var(--bg-secondary)',
+                      background: 'var(--bg-primary)',
+                      color: 'var(--text-primary)'
+                    }}
+                  >
+                    {banReasons.map((reason) => (
+                      <option key={reason.value} value={reason.value}>
+                        {reason.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
+                {isCustomReason && (
+                  <div>
+                    <label>Custom Reason:</label>
+                    <input
+                      type="text"
+                      value={banForm.reason}
+                      onChange={(e) => setBanForm(prev => ({ ...prev, reason: e.target.value }))}
+                      placeholder="Enter custom ban reason"
+                      style={{ width: '100%' }}
+                    />
+                  </div>
+                )}
                 <div>
                   <label>Duration (days):</label>
                   <input
                     type="number"
                     value={banForm.duration}
-                    onChange={(e) => setBanForm(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
-                    min="1"
+                    onChange={(e) => setBanForm(prev => ({ ...prev, duration: parseFloat(e.target.value) }))}
+                    min="0.5"
                     max="365"
+                    step="0.5"
                     style={{ width: '100%' }}
+                    disabled={!isCustomReason && banForm.reason !== ''}
                   />
                 </div>
                 <button type="submit" style={{ 
