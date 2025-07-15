@@ -15,21 +15,57 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         try {
           const protocol = req.headers['x-forwarded-proto'] || 'https';
           const host = req.headers.host;
-          const userInfoResponse = await fetch(`${protocol}://${host}/__replauthuser`, {
+          const origin = req.headers.origin;
+          const referer = req.headers.referer;
+          
+          console.log('Debug - Headers for auth request:');
+          console.log('- Protocol:', protocol);
+          console.log('- Host:', host);
+          console.log('- Origin:', origin);
+          console.log('- Referer:', referer);
+          console.log('- User-Agent:', req.headers['user-agent']);
+          console.log('- All headers:', JSON.stringify(req.headers, null, 2));
+          
+          const authUrl = `${protocol}://${host}/__replauthuser`;
+          console.log('- Attempting auth request to:', authUrl);
+          
+          const userInfoResponse = await fetch(authUrl, {
             headers: {
-              'Cookie': req.headers.cookie || ''
+              'Cookie': req.headers.cookie || '',
+              'User-Agent': req.headers['user-agent'] || 'NextJS-Admin',
+              'Referer': referer || `${protocol}://${host}/admin`,
+              'Origin': origin || `${protocol}://${host}`
             }
           });
           
+          console.log('- Auth response status:', userInfoResponse.status);
+          console.log('- Auth response headers:', JSON.stringify([...userInfoResponse.headers.entries()], null, 2));
+          
           if (!userInfoResponse.ok) {
-            return res.status(401).json({ error: 'Unauthorized - Not logged in' });
+            const errorText = await userInfoResponse.text();
+            console.error('Auth request failed:', errorText);
+            return res.status(401).json({ 
+              error: 'Unauthorized - Not logged in',
+              debug: {
+                status: userInfoResponse.status,
+                authUrl,
+                errorText: errorText.substring(0, 200)
+              }
+            });
           }
           
           const userData = await userInfoResponse.json();
+          console.log('- Auth response data:', userData);
           adminUser = userData.name;
         } catch (fetchError) {
           console.error('Error fetching user info:', fetchError);
-          return res.status(401).json({ error: 'Unauthorized - Authentication failed' });
+          return res.status(401).json({ 
+            error: 'Unauthorized - Authentication failed',
+            debug: {
+              message: fetchError.message,
+              stack: fetchError.stack?.substring(0, 300)
+            }
+          });
         }
       }
 
