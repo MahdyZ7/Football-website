@@ -40,12 +40,8 @@ const Admin: React.FC = () => {
 
   const checkAuth = async () => {
     try {
-      const protocol = window.location.protocol;
-      const host = window.location.host;
-      const authUrl = `${protocol}//${host}/__replauthuser`;
-
-      // Fetch the authenticated user
-      const userResponse = await fetch(authUrl);
+      // Use relative URL to avoid hostname mismatch
+      const userResponse = await fetch('/__replauthuser');
       if (userResponse.status !== 200) {
         setIsAuthenticated(false);
         console.log("User not authenticated - A")
