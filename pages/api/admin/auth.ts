@@ -50,12 +50,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           console.log('- Successfully authenticated user:', userName);
 
         } catch (fetchError) {
-          console.error('- Fetch error:', fetchError.message);
+          const errorMessage = fetchError instanceof Error ? fetchError.message : 'Unknown error';
+          console.error('- Fetch error:', errorMessage);
           return res.status(401).json({ 
             authenticated: false, 
             message: 'Authentication service error',
             debug: {
-              error: fetchError.message
+              error: errorMessage
             }
           });
         }
