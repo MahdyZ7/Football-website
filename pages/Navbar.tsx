@@ -35,6 +35,9 @@ export default function Navbar() {
 				<NavLink href="/" isActive={currentRoute === "/"}>
 					Home
 				</NavLink>
+				<NavLink href="/banned-players" isActive={currentRoute === "/banned-players"}>
+					Banned Players
+				</NavLink>
 				<NavLink href="/Money" isActive={currentRoute === "/Money"}>
 					Money
 				</NavLink>
