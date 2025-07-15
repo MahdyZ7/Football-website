@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import Navbar from './Navbar';
 import Footer from './footer';
 
@@ -61,7 +62,7 @@ const BannedPlayersPage: React.FC = () => {
         <h1>Banned Players</h1>
         
         <div style={{ marginBottom: '2rem' }}>
-          <a 
+          <Link 
             href="/" 
             style={{ 
               color: 'var(--ft-primary)', 
@@ -70,7 +71,7 @@ const BannedPlayersPage: React.FC = () => {
             }}
           >
             ← Back to Registration
-          </a>
+          </Link>
         </div>
 
         {loading ? (

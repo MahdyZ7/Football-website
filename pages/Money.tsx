@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import Navbar from "./Navbar";
 import Footer from "./footer";
 import { useEffect, useState } from "react";
@@ -77,14 +78,14 @@ const Money = () => {
 									</td>
 									<td>{record.name}</td>
 									<td>
-										<a
-											href={
-												"https://profile.intra.42.fr/users/" +
-												record.intra
-											}
-										>
-											{record.intra}
-										</a>
+<Link
+	href={
+		"https://profile.intra.42.fr/users/" +
+		record.intra
+	}
+>
+	{record.intra}
+</Link>
 									</td>
 									<td>{record.amount} Dhs</td>
 									<td>{record.paid ? " ✔️ Paid" : ""}</td>

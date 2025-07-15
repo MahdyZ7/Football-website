@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, FormEvent, useCallback, useRef, KeyboardEvent } from "react";
+import Link from "next/link";
 import axios from "axios";
 import Navbar from "./Navbar";
 import Footer from "./footer";
@@ -337,9 +338,9 @@ const Home: React.FC = () => {
               Players currently banned from registering
             </p>
             <div style={{ textAlign: 'center' }}>
-              <a 
-                href="/banned-players" 
-                style={{ 
+              <Link
+                href="/banned-players"
+                style={{
                   display: 'inline-block',
                   padding: '0.8rem 1.5rem',
                   background: 'var(--ft-primary)',
@@ -353,7 +354,7 @@ const Home: React.FC = () => {
                 onMouseLeave={(e) => e.target.style.background = 'var(--ft-primary)'}
               >
                 View Banned Players List
-              </a>
+              </Link>
             </div>
           </div>
         </div>
