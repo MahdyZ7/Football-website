@@ -4,72 +4,51 @@ import { logAdminAction } from '../../../../utils/adminLogger';
 
 const ADMIN_USERS = ['MahdyZ7'];
 
+async function getAuthenticatedUser(req: NextApiRequest): Promise<string | null> {
+  // Check for Replit authentication headers first (more reliable)
+  let adminUser = req.headers['x-replit-user-name'] as string;
+
+  // If no server headers, try client-side approach
+  if (!adminUser) {
+    try {
+      const protocol = req.headers['x-forwarded-proto'] || 'https';
+      const host = req.headers.host;
+      const authUrl = `${protocol}://${host}/__replauthuser`;
+
+      const userInfoResponse = await fetch(authUrl, {
+        headers: {
+          'Cookie': req.headers.cookie || '',
+          'User-Agent': req.headers['user-agent'] || 'NextJS-Admin',
+          'Referer': req.headers.referer || `${protocol}://${host}/admin`
+        }
+      });
+
+      if (!userInfoResponse.ok) {
+        console.error('Auth request failed:', userInfoResponse.status);
+        return null;
+      }
+
+      const userData = await userInfoResponse.json();
+      adminUser = userData.name;
+    } catch (fetchError) {
+      console.error('Error fetching user info:', fetchError);
+      return null;
+    }
+  }
+
+  return adminUser;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'PATCH') {
     try {
-      // Check for Replit authentication headers first (more reliable)
-      let adminUser = req.headers['x-replit-user-name'] as string;
-      
-      // If no server headers, try client-side approach with proper hostname
+      const adminUser = await getAuthenticatedUser(req);
+
       if (!adminUser) {
-        try {
-          const protocol = req.headers['x-forwarded-proto'] || 'https';
-          const host = req.headers.host;
-          const origin = req.headers.origin;
-          const referer = req.headers.referer;
-          
-          console.log('Debug - Headers for auth request:');
-          console.log('- Protocol:', protocol);
-          console.log('- Host:', host);
-          console.log('- Origin:', origin);
-          console.log('- Referer:', referer);
-          console.log('- User-Agent:', req.headers['user-agent']);
-          console.log('- All headers:', JSON.stringify(req.headers, null, 2));
-          
-          const authUrl = `${protocol}://${host}/__replauthuser`;
-          console.log('- Attempting auth request to:', authUrl);
-          
-          const userInfoResponse = await fetch(authUrl, {
-            headers: {
-              'Cookie': req.headers.cookie || '',
-              'User-Agent': req.headers['user-agent'] || 'NextJS-Admin',
-              'Referer': referer || `${protocol}://${host}/admin`,
-              'Origin': origin || `${protocol}://${host}`
-            }
-          });
-          
-          console.log('- Auth response status:', userInfoResponse.status);
-          console.log('- Auth response headers:', JSON.stringify([...userInfoResponse.headers.entries()], null, 2));
-          
-          if (!userInfoResponse.ok) {
-            const errorText = await userInfoResponse.text();
-            console.error('Auth request failed:', errorText);
-            return res.status(401).json({ 
-              error: 'Unauthorized - Not logged in',
-              debug: {
-                status: userInfoResponse.status,
-                authUrl,
-                errorText: errorText.substring(0, 200)
-              }
-            });
-          }
-          
-          const userData = await userInfoResponse.json();
-          console.log('- Auth response data:', userData);
-          adminUser = userData.name;
-        } catch (fetchError) {
-          console.error('Error fetching user info:', fetchError);
-          return res.status(401).json({ 
-            error: 'Unauthorized - Authentication failed',
-            debug: {
-              message: fetchError.message,
-              stack: fetchError.stack?.substring(0, 300)
-            }
-          });
-        }
+        return res.status(401).json({ error: 'Unauthorized - Not logged in' });
       }
 
-      if (!adminUser || !ADMIN_USERS.includes(adminUser)) {
+      if (!ADMIN_USERS.includes(adminUser)) {
         return res.status(403).json({ error: 'Forbidden - Admin access required' });
       }
 

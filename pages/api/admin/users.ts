@@ -5,31 +5,48 @@ import { logAdminAction } from '../../../utils/adminLogger';
 
 const ADMIN_USERS = ['MahdyZ7'];
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = req.cookies['admin_session'];
-  if (!session) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+async function getAuthenticatedUser(req: NextApiRequest): Promise<string | null> {
+  // Check for Replit authentication headers first (more reliable)
+  let adminUser = req.headers['x-replit-user-name'] as string;
   
-  const userInfoResponse = await fetch(`${req.headers.origin}/__replauthuser`, {
-    headers: {
-      'Cookie': req.headers.cookie || ''
+  // If no server headers, try client-side approach
+  if (!adminUser) {
+    try {
+      const protocol = req.headers['x-forwarded-proto'] || 'https';
+      const host = req.headers.host;
+      const authUrl = `${protocol}://${host}/__replauthuser`;
+      
+      const userInfoResponse = await fetch(authUrl, {
+        headers: {
+          'Cookie': req.headers.cookie || '',
+          'User-Agent': req.headers['user-agent'] || 'NextJS-Admin'
+        }
+      });
+      
+      if (!userInfoResponse.ok) {
+        return null;
+      }
+      
+      const userData = await userInfoResponse.json();
+      adminUser = userData.name;
+    } catch (error) {
+      console.error('Error fetching user info:', error);
+      return null;
     }
-  });
+  }
+
+  return adminUser;
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const adminUser = await getAuthenticatedUser(req);
   
-  if (!userInfoResponse.ok) {
-    return res.status(401).json({ error: 'Unauthorized' });
+  if (!adminUser) {
+    return res.status(401).json({ error: 'Unauthorized - Not logged in' });
   }
   
-  const userData = await userInfoResponse.json();
-  const clientUserName = userData.name;
-  
-  if (!clientUserName) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-  
-  if (!ADMIN_USERS.includes(clientUserName)) {
-    return res.status(401).json({ error: 'Unauthorized' });
+  if (!ADMIN_USERS.includes(adminUser)) {
+    return res.status(403).json({ error: 'Forbidden - Admin access required' });
   }
 
   if (req.method === 'DELETE') {
@@ -46,7 +63,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       // Log the action
       await logAdminAction({
-        adminUser: clientUserName,
+        adminUser: adminUser,
         action: 'user_deleted',
         targetUser: id,
         targetName: userName,
@@ -54,7 +71,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
       
       res.status(200).json({ message: 'User deleted' });
-    } catch {
+    } catch (error) {
+      console.error('Database error:', error);
       res.status(500).json({ error: 'Database error' });
     }
   } else {
