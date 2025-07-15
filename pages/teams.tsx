@@ -25,6 +25,7 @@ const Teams: React.FC = () => {
   const [team1, setTeam1] = useState<Team>({ name: "Team 1", players: [] });
   const [team2, setTeam2] = useState<Team>({ name: "Team 2", players: [] });
   const [team3, setTeam3] = useState<Team>({ name: "Team 3", players: [] });
+  const [removedPlayers, setRemovedPlayers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -170,6 +171,9 @@ const Teams: React.FC = () => {
 
     const updatedAvailable = availablePlayers.filter(p => p.id !== playerId);
     
+    // Add to removed players list
+    setRemovedPlayers(prev => [...prev, removedPlayer]);
+    
     // Promote next player from waiting list if any
     if (waitingListPlayers.length > 0) {
       const nextPlayer = waitingListPlayers[0];
@@ -182,6 +186,25 @@ const Teams: React.FC = () => {
     }
   };
 
+  const restoreRemovedPlayer = (playerId: string) => {
+    const playerToRestore = removedPlayers.find(p => p.id === playerId);
+    if (!playerToRestore) return;
+
+    // Remove from removed players list
+    setRemovedPlayers(prev => prev.filter(p => p.id !== playerId));
+    
+    // Check if we need to move someone to waiting list
+    if (availablePlayers.length >= MAXPLAYERS) {
+      // Move the last available player to waiting list
+      const playerToWaitingList = availablePlayers[availablePlayers.length - 1];
+      setWaitingListPlayers(prev => [playerToWaitingList, ...prev]);
+      setAvailablePlayers(prev => [...prev.slice(0, -1), playerToRestore]);
+    } else {
+      // Simply add back to available players
+      setAvailablePlayers(prev => [...prev, playerToRestore]);
+    }
+  };
+
   const clearTeams = () => {
     const verifiedPlayers = registeredUsers.filter(user => user);
     const eligiblePlayers = verifiedPlayers.slice(0, MAXPLAYERS).map(user => ({ ...user, rating: user.rating || 1 }));
@@ -190,6 +213,7 @@ const Teams: React.FC = () => {
     setTeam1({ name: "Team 1", players: [] });
     setTeam2({ name: "Team 2", players: [] });
     setTeam3({ name: "Team 3", players: [] });
+    setRemovedPlayers([]);
   };
 
   const updateTeamName = (teamNumber: 1 | 2 | 3, newName: string) => {
@@ -522,6 +546,47 @@ const Teams: React.FC = () => {
           </div>
         </div>
 
+        {/* Removed Players Section */}
+        {removedPlayers.length > 0 && (
+          <div className="card">
+            <h3>Recently Removed Players ({removedPlayers.length})</h3>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+              Players removed from team selection (can be restored)
+            </p>
+            <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+              {removedPlayers.map((player, index) => (
+                <div
+                  key={player.id}
+                  style={{
+                    background: 'var(--bg-secondary)',
+                    margin: '0.5rem 0',
+                    padding: '0.8rem',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    opacity: 0.8
+                  }}
+                >
+                  <span>{player.name} ({player.id})</span>
+                  <button
+                    onClick={() => restoreRemovedPlayer(player.id)}
+                    style={{
+                      padding: '0.3rem 0.8rem',
+                      fontSize: '0.8rem',
+                      background: 'var(--ft-primary)',
+                      color: 'white',
+                      borderRadius: '3px'
+                    }}
+                  >
+                    Restore
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Waiting List for players beyond 21 */}
         {waitingListPlayers.length > 0 && (
           <div className="card">
@@ -580,6 +645,12 @@ const Teams: React.FC = () => {
               <div>
                 <h4 style={{ color: 'var(--text-secondary)' }}>Waiting List</h4>
                 <p>{waitingListPlayers.length} players</p>
+              </div>
+            )}
+            {removedPlayers.length > 0 && (
+              <div>
+                <h4 style={{ color: 'var(--ft-accent)' }}>Removed</h4>
+                <p>{removedPlayers.length} players</p>
               </div>
             )}
           </div>
