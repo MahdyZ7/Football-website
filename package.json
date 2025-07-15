@@ -6,7 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:migrate": "node scripts/database-migration.js migrate",
+    "db:backup": "node scripts/database-migration.js backup",
+    "db:restore": "node scripts/database-migration.js restore",
+    "db:status": "node scripts/database-migration.js status",
+    "db:list-backups": "node scripts/database-migration.js list-backups",
+    "db:setup": "chmod +x scripts/setup-database.sh && ./scripts/setup-database.sh"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",
