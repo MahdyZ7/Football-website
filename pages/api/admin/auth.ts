@@ -12,9 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // If no server headers, try client-side approach
       if (!userName) {
         // Try to get user info from Replit's client endpoint
-        const protocol = req.headers['x-forwarded-proto'] || 'https';
-        const host = req.headers.host;
-        const userInfoResponse = await fetch(`${protocol}://${host}/__replauthuser`, {
+        const userInfoResponse = await fetch(`${req.headers.origin}/__replauthuser`, {
           headers: {
             'Cookie': req.headers.cookie || ''
           }
