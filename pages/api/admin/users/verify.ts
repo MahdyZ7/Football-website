@@ -2,14 +2,41 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import pool from '../../../../utils/db';
 import { logAdminAction } from '../../../../utils/adminLogger';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = req.cookies['admin_session'];
-  if (!session) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+const ADMIN_USERS = ['MahdyZ7'];
 
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'PATCH') {
     try {
+      // Check for Replit authentication headers first (more reliable)
+      let adminUser = req.headers['x-replit-user-name'] as string;
+      
+      // If no server headers, try client-side approach with proper hostname
+      if (!adminUser) {
+        try {
+          const protocol = req.headers['x-forwarded-proto'] || 'https';
+          const host = req.headers.host;
+          const userInfoResponse = await fetch(`${protocol}://${host}/__replauthuser`, {
+            headers: {
+              'Cookie': req.headers.cookie || ''
+            }
+          });
+          
+          if (!userInfoResponse.ok) {
+            return res.status(401).json({ error: 'Unauthorized - Not logged in' });
+          }
+          
+          const userData = await userInfoResponse.json();
+          adminUser = userData.name;
+        } catch (fetchError) {
+          console.error('Error fetching user info:', fetchError);
+          return res.status(401).json({ error: 'Unauthorized - Authentication failed' });
+        }
+      }
+
+      if (!adminUser || !ADMIN_USERS.includes(adminUser)) {
+        return res.status(403).json({ error: 'Forbidden - Admin access required' });
+      }
+
       const { id, verified } = req.body;
       const client = await pool.connect();
 
@@ -19,16 +46,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       await client.query('UPDATE players SET verified = $1 WHERE intra = $2', [verified, id]);
       client.release();
-
-      // Get authenticated admin user
-      const userInfoResponse = await fetch(`${req.headers.origin}/__replauthuser`, {
-        headers: {
-          'Cookie': req.headers.cookie || ''
-        }
-      });
-      
-      const userData = await userInfoResponse.json();
-      const adminUser = userData.name || 'Unknown Admin';
 
       // Log the action
       await logAdminAction({
@@ -40,10 +57,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
 
       res.status(200).json({ message: 'User verification updated' });
-    } catch {
+    } catch (error) {
+      console.error('Database error:', error);
       res.status(500).json({ error: 'Database error' });
     }
   } else {
-    res.status(405).end();
+    res.status(405).json({ error: 'Method not allowed' });
   }
 }
