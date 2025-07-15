@@ -345,15 +345,7 @@ const Admin: React.FC = () => {
                     style={{ width: '100%' }}
                     disabled={!isCustomReason && banForm.reason !== ''}
                   />
-                </div>
-                <button type="submit" style={{ 
-                  background: 'var(--ft-accent)',
-                  gridColumn: 'span 1'
-                }}>
-                  Ban User
-                </button>
-              </form>
-              {banForm.duration > 0 && (
+                  {banForm.duration > 0 && (
                     <div className="ban-end-date">
                       Ban ends: {(() => {
                         const endDate = new Date();
@@ -366,6 +358,14 @@ const Admin: React.FC = () => {
                       })()}
                     </div>
                   )}
+                </div>
+                <button type="submit" style={{ 
+                  background: 'var(--ft-accent)',
+                  gridColumn: 'span 1'
+                }}>
+                  Ban User
+                </button>
+              </form>
             </div>
 
             <div className="responsive-table-container">

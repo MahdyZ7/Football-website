@@ -583,9 +583,13 @@ nav a.active {
 }
 
 .ban-end-date {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--text-secondary);
-  margin-top: 0.3rem;
+  margin-top: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  background: var(--bg-secondary);
+  border-radius: 4px;
+  border-left: 3px solid var(--ft-primary);
 }
 
 
