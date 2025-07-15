@@ -350,8 +350,8 @@ const Home: React.FC = () => {
                   fontWeight: 'bold',
                   transition: 'background 0.2s'
                 }}
-                onMouseEnter={(e) => e.target.style.background = '#005580'}
-                onMouseLeave={(e) => e.target.style.background = 'var(--ft-primary)'}
+                onMouseEnter={(e) => (e.target as HTMLElement).style.background = '#005580'}
+                onMouseLeave={(e) => (e.target as HTMLElement).style.background = 'var(--ft-primary)'}
               >
                 View Banned Players List
               </Link>
