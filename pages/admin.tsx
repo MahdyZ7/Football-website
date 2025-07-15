@@ -405,14 +405,19 @@ const Admin: React.FC = () => {
                             Delete
                           </button>
                           <button
-                            onClick={() => setBanForm(prev => ({ ...prev, userId: user.id }))}
+                            onClick={() => setBanForm(prev => ({ 
+                              ...prev, 
+                              userId: user.id,
+                              reason: 'Quick ban - 2 days',
+                              duration: 2
+                            }))}
                             style={{ 
                               background: 'var(--ft-accent)', 
                               padding: '0.4rem 0.8rem',
                               fontSize: '0.8rem'
                             }}
                           >
-                            Quick Ban
+                            Quick Ban (2d)
                           </button>
                         </div>
                       </td>
