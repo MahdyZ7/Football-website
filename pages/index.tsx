@@ -53,18 +53,10 @@ const Home: React.FC = () => {
       const diff = next.getTime() - now.getTime();
 
       if (diff > 0) {
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        
-        if (days > 0) {
-          setTimeUntilNext(`${days}d ${hours}h ${minutes}m ${seconds}s`);
-        } else {
-          setTimeUntilNext(`${hours}h ${minutes}m ${seconds}s`);
-        }
-      } else {
-        setTimeUntilNext("Registration should be open now");
+        setTimeUntilNext(`${hours}h ${minutes}m ${seconds}s`);
       }
     };
 
@@ -73,19 +65,15 @@ const Home: React.FC = () => {
       setIsSubmissionAllowed(allowed);
     };
 
-    // Update countdown every second for accurate display
-    const countdownTimer = setInterval(updateCountdown, 1000);
-    
-    // Check submission allowed every minute
-    const checkTimer = setInterval(checkAllowed, 60000);
+    const timer = setInterval(() => {
+      updateCountdown();
+      checkAllowed();
+    }, 60000);
 
     updateCountdown();
     checkAllowed();
 
-    return () => {
-      clearInterval(countdownTimer);
-      clearInterval(checkTimer);
-    };
+    return () => clearInterval(timer);
   }, [checkSubmissionAllowed]);
 
   // Initial data fetch and popup timer
