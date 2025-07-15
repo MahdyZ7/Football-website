@@ -353,6 +353,19 @@ const Admin: React.FC = () => {
                   Ban User
                 </button>
               </form>
+              {banForm.duration > 0 && (
+                    <div className="ban-end-date">
+                      Ban ends: {(() => {
+                        const endDate = new Date();
+                        endDate.setDate(endDate.getDate() + banForm.duration);
+                        return endDate.toLocaleDateString('en-US', { 
+                          weekday: 'short', 
+                          day: 'numeric', 
+                          month: 'short' 
+                        });
+                      })()}
+                    </div>
+                  )}
             </div>
 
             <div className="responsive-table-container">

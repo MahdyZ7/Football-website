@@ -582,6 +582,12 @@ nav a.active {
   color: var(--text-primary);
 }
 
+.ban-end-date {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 0.3rem;
+}
+
 
 /* Admin Authentication Styles */
 .admin-auth-container {
