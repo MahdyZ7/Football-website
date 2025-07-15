@@ -327,6 +327,36 @@ const Home: React.FC = () => {
             )}
           </ul>
         </div>
+
+        <div className="card" style={{ marginTop: '2rem' }}>
+          <div className="card-header">
+            <h3>Banned Players</h3>
+          </div>
+          <div className="card-body">
+            <p style={{ textAlign: 'center', marginBottom: '1rem', color: 'var(--text-secondary)' }}>
+              Players currently banned from registering
+            </p>
+            <div style={{ textAlign: 'center' }}>
+              <a 
+                href="/banned-players" 
+                style={{ 
+                  display: 'inline-block',
+                  padding: '0.8rem 1.5rem',
+                  background: 'var(--ft-primary)',
+                  color: 'white',
+                  textDecoration: 'none',
+                  borderRadius: '4px',
+                  fontWeight: 'bold',
+                  transition: 'background 0.2s'
+                }}
+                onMouseEnter={(e) => e.target.style.background = '#005580'}
+                onMouseLeave={(e) => e.target.style.background = 'var(--ft-primary)'}
+              >
+                View Banned Players List
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
       <Footer />
       {showPopup && (
