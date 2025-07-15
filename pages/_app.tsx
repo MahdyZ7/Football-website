@@ -1,4 +1,5 @@
 import "../styles/football.css";
+import "../styles/teams.css";
 import type { AppProps } from "next/app";
 import ErrorBoundary from "../components/ErrorBoundary";
 import { ThemeProvider } from "../contexts/ThemeContext";
