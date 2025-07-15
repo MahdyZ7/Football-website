@@ -163,6 +163,25 @@ const Teams: React.FC = () => {
     setAvailablePlayers(remainingPlayers);
   };
 
+  const removeFromEligible = (playerId: string) => {
+    // Remove player from available players
+    const removedPlayer = availablePlayers.find(p => p.id === playerId);
+    if (!removedPlayer) return;
+
+    const updatedAvailable = availablePlayers.filter(p => p.id !== playerId);
+    
+    // Promote next player from waiting list if any
+    if (waitingListPlayers.length > 0) {
+      const nextPlayer = waitingListPlayers[0];
+      const promotedPlayer = { ...nextPlayer, rating: 1 };
+      
+      setAvailablePlayers([...updatedAvailable, promotedPlayer]);
+      setWaitingListPlayers(prev => prev.slice(1));
+    } else {
+      setAvailablePlayers(updatedAvailable);
+    }
+  };
+
   const clearTeams = () => {
     const verifiedPlayers = registeredUsers.filter(user => user);
     const eligiblePlayers = verifiedPlayers.slice(0, MAXPLAYERS).map(user => ({ ...user, rating: user.rating || 1 }));
@@ -244,10 +263,24 @@ const Teams: React.FC = () => {
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                       <span>#{index + 1} {player.name} ({player.id})</span>
-                      <StarRating 
-                        rating={player.rating || 1} 
-                        onRatingChange={(rating) => updatePlayerRating(player.id, rating)}
-                      />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <StarRating 
+                          rating={player.rating || 1} 
+                          onRatingChange={(rating) => updatePlayerRating(player.id, rating)}
+                        />
+                        <button
+                          onClick={() => removeFromEligible(player.id)}
+                          style={{
+                            padding: '0.3rem 0.6rem',
+                            fontSize: '0.7rem',
+                            background: 'var(--ft-accent)',
+                            color: 'white',
+                            borderRadius: '3px'
+                          }}
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </div>
                     <div style={{ display: 'flex', gap: '0.3rem' }}>
                       <button
