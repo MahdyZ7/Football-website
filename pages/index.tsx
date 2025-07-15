@@ -21,7 +21,7 @@ type Toast = {
 
 const Home: React.FC = () => {
   // State management
-  const [showPopup, setShowPopup] = useState(true);
+  const [showPopup, setShowPopup] = useState(false);
   const [name, setName] = useState("");
   const [id, setId] = useState("");
   const [registeredUsers, setRegisteredUsers] = useState<User[]>([]);
