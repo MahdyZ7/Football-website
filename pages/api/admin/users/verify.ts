@@ -21,7 +21,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       client.release();
 
       // Get authenticated admin user
-      const userInfoResponse = await fetch(`${req.headers.origin}/__replauthuser`, {
+      const protocol = req.headers['x-forwarded-proto'] || 'https';
+      const host = req.headers.host;
+      const userInfoResponse = await fetch(`${protocol}://${host}/__replauthuser`, {
         headers: {
           'Cookie': req.headers.cookie || ''
         }
