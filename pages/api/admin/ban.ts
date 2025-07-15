@@ -1,11 +1,54 @@
+
 import { NextApiRequest, NextApiResponse } from 'next';
 import pool from '../../../utils/db';
 import { logAdminAction } from '../../../utils/adminLogger';
 
+const ADMIN_USERS = ['MahdyZ7']; // Add Replit usernames of admins here
+
+async function getAuthenticatedUser(req: NextApiRequest): Promise<string | null> {
+  // Check for Replit authentication headers first (more reliable)
+  let adminUser = req.headers['x-replit-user-name'] as string;
+
+  // If no server headers, try client-side approach
+  if (!adminUser) {
+    try {
+      const protocol = req.headers['x-forwarded-proto'] || 'https';
+      const host = req.headers.host;
+      const authUrl = `${protocol}://${host}/__replauthuser`;
+
+      const userInfoResponse = await fetch(authUrl, {
+        headers: {
+          'Cookie': req.headers.cookie || '',
+          'User-Agent': req.headers['user-agent'] || 'NextJS-Admin',
+          'Referer': req.headers.referer || `${protocol}://${host}/admin`
+        }
+      });
+
+      if (!userInfoResponse.ok) {
+        console.error('Auth request failed:', userInfoResponse.status);
+        return null;
+      }
+
+      const userData = await userInfoResponse.json();
+      adminUser = userData.name;
+    } catch (fetchError) {
+      console.error('Error fetching user info:', fetchError);
+      return null;
+    }
+  }
+
+  return adminUser;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = req.cookies['admin_session'];
-  if (!session) {
-    return res.status(401).json({ error: 'Unauthorized' });
+  const adminUser = await getAuthenticatedUser(req);
+
+  if (!adminUser) {
+    return res.status(401).json({ error: 'Unauthorized - Not logged in' });
+  }
+
+  if (!ADMIN_USERS.includes(adminUser)) {
+    return res.status(403).json({ error: 'Forbidden - Admin access required' });
   }
 
   const client = await pool.connect();
@@ -26,7 +69,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       const userName = userCheck.rows[0].name;
       const bannedUntil = new Date();
-      bannedUntil.setDate(bannedUntil.getDate() + parseInt(duration));
+      bannedUntil.setDate(bannedUntil.getDate() + parseFloat(duration));
 
       // Insert or update ban record
       await client.query(`
@@ -35,16 +78,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         ON CONFLICT (id) 
         DO UPDATE SET reason = $2, banned_at = NOW(), banned_until = $4
       `, [userId, userName, reason, bannedUntil]);
-
-      // Get authenticated admin user
-      const userInfoResponse = await fetch(`${req.headers.origin}/__replauthuser`, {
-        headers: {
-          'Cookie': req.headers.cookie || ''
-        }
-      });
-      
-      const userData = await userInfoResponse.json();
-      const adminUser = userData.name || 'Unknown Admin';
 
       // Log the action
       await logAdminAction({
@@ -63,7 +96,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     } else if (req.method === 'DELETE') {
       const { id } = req.body;
 
+      // Get user name for logging
+      const userResult = await client.query('SELECT name FROM banned_users WHERE id = $1', [id]);
+      const userName = userResult.rows[0]?.name || 'Unknown';
+
       await client.query('DELETE FROM banned_users WHERE id = $1', [id]);
+
+      // Log the action
+      await logAdminAction({
+        adminUser: adminUser,
+        action: 'user_unbanned',
+        targetUser: id,
+        targetName: userName,
+        details: 'User unbanned'
+      });
+
       res.status(200).json({ message: 'User unbanned successfully' });
 
     } else {
