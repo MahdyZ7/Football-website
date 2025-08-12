@@ -99,16 +99,16 @@ async function registerUser(user: User) {
       };
     }
 
-    const verifiedInfo: UserInfo = await verifyLogin(user.id);
+    // const verifiedInfo: UserInfo = await verifyLogin(user.id);
     
-    if (verifiedInfo.valid && !verifiedInfo.error) {
-      user.id = verifiedInfo.intra;
-      user.name = verifiedInfo.name;
-    }
+    // if (verifiedInfo.valid && !verifiedInfo.error) {
+    //   user.id = verifiedInfo.intra;
+    //   user.name = verifiedInfo.name;
+    // }
     
-    if (!verifiedInfo.valid && !user.name) {
-      return { error: "Intra not found", status: 404 };
-    }
+    // if (!verifiedInfo.valid && !user.name) {
+    //   return { error: "Intra not found", status: 404 };
+    // }
 
     const { rows } = await client.query("SELECT name, intra FROM players");
     
@@ -122,13 +122,13 @@ async function registerUser(user: User) {
     }
 
     const date = new Date();
-    if (!verifiedInfo.valid) {
-      date.setSeconds(date.getSeconds() + 10);
-    }
+    // if (!verifiedInfo.valid) {
+    //   date.setSeconds(date.getSeconds() + 10);
+    // }
 
     await client.query(
       "INSERT INTO players (name, intra, verified, created_at) VALUES ($1, $2, $3, $4)",
-      [user.name, user.id, verifiedInfo.valid, date]
+      [user.name, user.id, false, date]
     );
 
     return { success: true };

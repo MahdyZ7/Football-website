@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import Footer from "./footer";
-
 const MAXPLAYERS = 21;
 
 type User = {
