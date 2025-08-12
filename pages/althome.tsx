@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { 
   Home, 
   DollarSign, 
@@ -58,7 +58,7 @@ const Button = ({ children, variant = "default", size = "default", className = "
   );
 };
 
-const Input = ({ className = "", value, onChange, placeholder, id, autoComplete }) => (
+const Input = memo(({ className = "", value, onChange, placeholder, id, autoComplete }) => (
   <input 
     className={`flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
     value={value}
@@ -67,7 +67,7 @@ const Input = ({ className = "", value, onChange, placeholder, id, autoComplete 
     id={id}
     autoComplete={autoComplete}
   />
-);
+));
 
 const Label = ({ children, htmlFor, className = "" }) => (
   <label htmlFor={htmlFor} className={`text-sm font-medium text-gray-700 mb-2 block ${className}`}>
@@ -137,6 +137,166 @@ type User = {
   created_at: string;
 };
 
+const HomePage = ({ 
+  isSubmissionAllowed, 
+  timeUntilNext, 
+  name, 
+  id, 
+  handleNameChange, 
+  handleIdChange, 
+  handleSubmit, 
+  loading, 
+  registeredUsers 
+}) => (
+  <div className="space-y-8">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-center sm:text-left">
+      <div className="mx-auto sm:mx-0">
+        <h1 className="text-3xl font-bold text-slate-900">Football Registration</h1>
+        <p className="mt-1 text-slate-600">Register for upcoming matches</p>
+      </div>
+      {!isSubmissionAllowed && (
+        <div className="mt-4 sm:mt-0">
+          <div className="modern-badge-warning">
+            <Clock className="h-3 w-3 mr-1" />
+            Next registration: {timeUntilNext}
+          </div>
+        </div>
+      )}
+    </div>
+
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <Card>
+        <CardHeader>
+          <h2 className="text-xl font-semibold">Register Now</h2>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name</Label>
+              <Input 
+                id="name"
+                value={name}
+                onChange={handleNameChange}
+                placeholder="Enter your full name"
+                autoComplete="name"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="id">Intra Login</Label>
+              <Input
+                id="id"
+                value={id}
+                onChange={handleIdChange}
+                placeholder="Enter your intra login"
+                autoComplete="username"
+              />
+            </div>
+            
+            <Button 
+              onClick={handleSubmit}
+              className="w-full mt-6" 
+              disabled={loading || !isSubmissionAllowed}
+            >
+              {loading ? 'Registering...' : 'Register'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <h2 className="text-xl font-semibold">Late Fees</h2>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Action</TableHead>
+                <TableHead className="text-right">Amount</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell>Not ready when booking starts</TableCell>
+                <TableCell className="text-right font-medium">5 AED</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Cancel reservation</TableCell>
+                <TableCell className="text-right font-medium">5 AED</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Late &gt; 15 minutes</TableCell>
+                <TableCell className="text-right font-medium">15 AED</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Cancel on game day after 5 PM</TableCell>
+                <TableCell className="text-right font-medium">15 AED</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>No Show without notice</TableCell>
+                <TableCell className="text-right font-medium">30 AED</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">Player List</h2>
+          <Badge variant="secondary" className="modern-badge">{registeredUsers.length} registered</Badge>
+        </div>
+        <p className="text-sm text-slate-600">Orange indicates waitlist position</p>
+      </CardHeader>
+      <CardContent>
+        {loading ? (
+          <div className="text-center py-8">Loading players...</div>
+        ) : registeredUsers.length === 0 ? (
+          <div className="text-center py-8 text-slate-500">
+            <Users className="h-12 w-12 mx-auto mb-4" />
+            <p className="text-lg font-medium">Dare to be First</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {registeredUsers.map((user, index) => (
+              <div 
+                key={user.id}
+                className={`player-item ${index < 16 ? 'confirmed' : 'waitlist'}`}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className={`player-number ${index < 16 ? 'confirmed' : 'waitlist'}`}>
+                    {index + 1}
+                  </div>
+                  <div>
+                    <p className="font-medium text-slate-900">{user.name}</p>
+                    <p className="text-sm text-slate-600">{user.intra}</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  {user.verified ? (
+                    <div className="badge badge-success">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Verified
+                    </div>
+                  ) : (
+                    <div className="badge badge-destructive">
+                      <AlertCircle className="h-3 w-3 mr-1" />
+                      Invalid Intra
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  </div>
+);
+
 const FootballApp = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -149,6 +309,7 @@ const FootballApp = () => {
   const [loading, setLoading] = useState(false);
   const [timeUntilNext, setTimeUntilNext] = useState("2h 30m 15s");
   const [isSubmissionAllowed, setIsSubmissionAllowed] = useState(true);
+  
   
   useEffect (() => {
 	  fetch("/api/users")
@@ -284,156 +445,6 @@ const FootballApp = () => {
     </div>
   );
 
-  const HomePage = () => (
-    <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-center sm:text-left">
-        <div className="mx-auto sm:mx-0">
-          <h1 className="text-3xl font-bold text-slate-900">Football Registration</h1>
-          <p className="mt-1 text-slate-600">Register for upcoming matches</p>
-        </div>
-        {!isSubmissionAllowed && (
-          <div className="mt-4 sm:mt-0">
-            <div className="modern-badge-warning">
-              <Clock className="h-3 w-3 mr-1" />
-              Next registration: {timeUntilNext}
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card>
-          <CardHeader>
-            <h2 className="text-xl font-semibold">Register Now</h2>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <input 
-				  type="text"
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Enter your full name"
-                  autoComplete="name"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="id">Intra Login</Label>
-                <input
-                  id="id"
-                  value={id}
-                  onChange={(e) => setId(e.target.value)}
-                  placeholder="Enter your intra login"
-                  autoComplete="username"
-                />
-              </div>
-              
-              <Button 
-                onClick={handleSubmit}
-                className="w-full mt-6" 
-                disabled={loading || !isSubmissionAllowed}
-              >
-                {loading ? 'Registering...' : 'Register'}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <h2 className="text-xl font-semibold">Late Fees</h2>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Action</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell>Not ready when booking starts</TableCell>
-                  <TableCell className="text-right font-medium">5 AED</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Cancel reservation</TableCell>
-                  <TableCell className="text-right font-medium">5 AED</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Late &gt; 15 minutes</TableCell>
-                  <TableCell className="text-right font-medium">15 AED</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Cancel on game day after 5 PM</TableCell>
-                  <TableCell className="text-right font-medium">15 AED</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>No Show without notice</TableCell>
-                  <TableCell className="text-right font-medium">30 AED</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Player List</h2>
-            <Badge variant="secondary" className="modern-badge">{registeredUsers.length} registered</Badge>
-          </div>
-          <p className="text-sm text-slate-600">Orange indicates waitlist position</p>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="text-center py-8">Loading players...</div>
-          ) : registeredUsers.length === 0 ? (
-            <div className="text-center py-8 text-slate-500">
-              <Users className="h-12 w-12 mx-auto mb-4" />
-              <p className="text-lg font-medium">Dare to be First</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {registeredUsers.map((user, index) => (
-                <div 
-                  key={user.id}
-                  className={`player-item ${index < 16 ? 'confirmed' : 'waitlist'}`}
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className={`player-number ${index < 16 ? 'confirmed' : 'waitlist'}`}>
-                      {index + 1}
-                    </div>
-                    <div>
-                      <p className="font-medium text-slate-900">{user.name}</p>
-                      <p className="text-sm text-slate-600">{user.intra}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {user.verified ? (
-                      <div className="badge badge-success">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Verified
-                      </div>
-                    ) : (
-                      <div className="badge badge-destructive">
-                        <AlertCircle className="h-3 w-3 mr-1" />
-                        Invalid Intra
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  );
 
   const MoneyPage = () => (
     <div className="space-y-6">
@@ -658,7 +669,19 @@ const FootballApp = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'home':
-        return <HomePage />;
+        return (
+          <HomePage 
+            isSubmissionAllowed={isSubmissionAllowed}
+            timeUntilNext={timeUntilNext}
+            name={name}
+            id={id}
+            handleNameChange={(e) => setName(e.target.value)}
+            handleIdChange={(e) => setId(e.target.value)}
+            handleSubmit={handleSubmit}
+            loading={loading}
+            registeredUsers={registeredUsers}
+          />
+        );
       case 'money':
         return <MoneyPage />;
       case 'players':
@@ -666,7 +689,19 @@ const FootballApp = () => {
 	  case 'banned':
 		return <BannedPlayersPage />;
       default:
-        return <HomePage />;
+        return (
+          <HomePage 
+            isSubmissionAllowed={isSubmissionAllowed}
+            timeUntilNext={timeUntilNext}
+            name={name}
+            id={id}
+            handleNameChange={(e) => setName(e.target.value)}
+            handleIdChange={(e) => setId(e.target.value)}
+            handleSubmit={handleSubmit}
+            loading={loading}
+            registeredUsers={registeredUsers}
+          />
+        );
     }
   };
 
