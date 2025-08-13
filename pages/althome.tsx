@@ -305,7 +305,7 @@ const FootballApp = () => {
   const [id, setId] = useState("");
   const [registeredUsers, setRegisteredUsers] =  useState<User[]>([]);
   const [moneyData, setMoneyData] = useState([] as { date: string; name: string; intra: string; amount: number; paid?: boolean }[]);
- const [bannedUsers, setBannedUsers] = useState([] as { id: string; reason: string; banned_until: string }[]);
+  const [bannedUsers, setBannedUsers] = useState([] as { id: string; name: string; reason: string; banned_at: string; banned_until: string }[]);
   const [loading, setLoading] = useState(false);
   const [timeUntilNext, setTimeUntilNext] = useState("2h 30m 15s");
   const [isSubmissionAllowed, setIsSubmissionAllowed] = useState(true);
@@ -627,6 +627,22 @@ const FootballApp = () => {
     </div>
   );
 
+
+    const isExpired = (bannedUntil: string) => {
+    return new Date(bannedUntil) < new Date();
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  const activeBans = bannedUsers.filter(user => !isExpired(user.banned_until));
+  const expiredBans = bannedUsers.filter(user => isExpired(user.banned_until));
+
   const BannedPlayersPage = () => (
 	<div className="space-y-6">
       <div className="text-center sm:text-left">
@@ -638,28 +654,92 @@ const FootballApp = () => {
 	  <Card>
 		<CardHeader>
 			<div className="flex items-center justify-between">
-				<h2 className="text-xl font-semibold">Banned Players</h2>
-				<Badge variant="secondary" className="modern-badge">{bannedUsers.length} total</Badge>
+				<h2 className="text-xl font-semibold">Currently Banned Players</h2>
+				<Badge variant="secondary" className="modern-badge">{activeBans.length} total</Badge>
 			</div>
 		</CardHeader>
 		<CardContent>
 			<div className="space-y-3">
-				{bannedUsers.map((bannedUser) => (
-					<div key={bannedUser.id} className="flex items-center justify-between p-4 border rounded-lg bg-white hover:bg-gray-50 transition-colors">
-						<div className="flex items-center space-x-4">
-							<div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center">
-								<Users className="h-5 w-5 text-slate-600" />
-							</div>
-							<div>
-								<h3 className="font-medium text-slate-900">{bannedUser.id}</h3>
-								<p className="text-sm text-slate-800">{bannedUser.reason}</p>
-								<p className="text-xs text-slate-800">
-									Banned untill: {new Date(bannedUser.banned_until).toLocaleDateString()}
-								</p>
-							</div>
-						</div>
-					</div>
-				))}
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th>Player</th>
+                          <th>ID</th>
+                          <th>Reason</th>
+                          <th>Banned Date</th>
+                          <th>Ban Expires</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {activeBans.map((user) => (
+                          <tr key={user.id}>
+                            <td>
+                              {user.name}
+                            </td>
+                            <td>
+                              {user.id}
+                            </td>
+                            <td>
+                              {user.reason}
+                            </td>
+                            <td>
+                              {formatDate(user.banned_at)}
+                            </td>
+                            <td>
+                              <span style={{ color: '#ff6b6b', fontWeight: 'bold' }}>
+                                {formatDate(user.banned_until)}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+			</div>
+		</CardContent>
+	</Card>
+	<Card>
+		<CardHeader>
+			<div className="flex items-center justify-between">
+				<h2 className="text-xl font-semibold">Expired Bannes</h2>
+				<Badge variant="secondary" className="modern-badge">{expiredBans.length} total</Badge>
+			</div>
+		</CardHeader>
+		<CardContent>
+			<div className="space-y-3">
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th>Player</th>
+                          <th>ID</th>
+                          <th>Reason</th>
+                          <th>Banned Date</th>
+                          <th>Ban Expires</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {expiredBans.map((user) => (
+                          <tr key={user.id}>
+                            <td>
+                              {user.name}
+                            </td>
+                            <td>
+                              {user.id}
+                            </td>
+                            <td>
+                              {user.reason}
+                            </td>
+                            <td>
+                              {formatDate(user.banned_at)}
+                            </td>
+                            <td>
+                              <span style={{ color: '#4CAF50', fontWeight: 'bold' }}>
+                                {formatDate(user.banned_until)}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
 			</div>
 		</CardContent>
 	</Card>
