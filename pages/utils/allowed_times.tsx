@@ -10,6 +10,7 @@ export default function allowed_times() {
 		(currentDay === 1 && currentHour <= 21) ||
 		(currentDay === 3 && currentHour >= 12) ||
 		(currentDay === 4 && currentHour <= 21);
+	console.log(`Current time: ${currentTime.toISOString()}, Allowed: ${isAllowed}`);
 	return isAllowed;
 }
 
