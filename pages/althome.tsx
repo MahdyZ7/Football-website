@@ -15,33 +15,50 @@ import {
 } from 'lucide-react';
 
 // Shadcn/ui components (simulated)
-const Card = ({ children, className = "" }) => (
+const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <div className={`bg-white rounded-lg border shadow-sm ${className}`}>
     {children}
   </div>
 );
 
-const CardHeader = ({ children, className = "" }) => (
+const CardHeader = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <div className={`px-6 py-4 border-b ${className}`}>
     {children}
   </div>
 );
 
-const CardContent = ({ children, className = "" }) => (
+const CardContent = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <div className={`px-6 py-4 ${className}`}>
     {children}
   </div>
 );
 
-const Button = ({ children, variant = "default", size = "default", className = "", onClick, disabled = false }) => {
+type ButtonVariant = "default" | "outline" | "ghost" | "link";
+type ButtonSize = "default" | "sm" | "lg";
+
+const Button = ({
+  children,
+  variant = "default",
+  size = "default",
+  className = "",
+  onClick,
+  disabled = false
+}: {
+  children: React.ReactNode;
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  className?: string;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  disabled?: boolean;
+}) => {
   const baseClasses = "inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
-  const variants = {
+  const variants: Record<ButtonVariant, string> = {
     default: "bg-slate-900 text-white hover:bg-slate-800",
     outline: "border border-input hover:bg-accent hover:text-accent-foreground",
     ghost: "hover:bg-accent hover:text-accent-foreground",
     link: "underline-offset-4 hover:underline text-primary"
   };
-  const sizes = {
+  const sizes: Record<ButtonSize, string> = {
     default: "h-10 py-2 px-4",
     sm: "h-9 px-3 rounded-md",
     lg: "h-11 px-8 rounded-md"
@@ -58,7 +75,19 @@ const Button = ({ children, variant = "default", size = "default", className = "
   );
 };
 
-const Input = memo(({ className = "", value, onChange, placeholder, id, autoComplete }) => (
+const Input = memo(({
+		className = "", 
+		value, onChange, 
+		placeholder, id, 
+		autoComplete 
+	}: {
+		className?: string;
+		value: string;
+		onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+		placeholder?: string;
+		id?: string;
+		autoComplete?: string;
+	}) => (
   <input 
     className={`flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
     value={value}
@@ -69,14 +98,15 @@ const Input = memo(({ className = "", value, onChange, placeholder, id, autoComp
   />
 ));
 
-const Label = ({ children, htmlFor, className = "" }) => (
+const Label = ({ children, htmlFor, className = "" } : { children: React.ReactNode; htmlFor: string; className?: string }) => (
   <label htmlFor={htmlFor} className={`text-sm font-medium text-gray-700 mb-2 block ${className}`}>
     {children}
   </label>
 );
 
-const Badge = ({ children, variant = "default", className = "" }) => {
-  const variants = {
+type BadgeVariant = "default" | "secondary" | "success" | "warning" | "destructive";
+const Badge = ({ children, variant = "default", className = "" }: { children: React.ReactNode; variant?: BadgeVariant; className?: string }) => {
+  const variants: Record<BadgeVariant, string> = {
     default: "bg-slate-900 text-white",
     secondary: "bg-slate-100 text-slate-900",
     success: "bg-green-500 text-white",
@@ -91,7 +121,7 @@ const Badge = ({ children, variant = "default", className = "" }) => {
   );
 };
 
-const Table = ({ children, className = "" }) => (
+const Table = ({ children, className = "" } : { children: React.ReactNode; className?: string }) => (
   <div className="w-full overflow-auto">
     <table className={`w-full caption-bottom text-sm ${className}`}>
       {children}
@@ -99,32 +129,32 @@ const Table = ({ children, className = "" }) => (
   </div>
 );
 
-const TableHeader = ({ children }) => (
+const TableHeader = ({ children } : { children: React.ReactNode }) => (
   <thead className="border-b bg-slate-50">
     {children}
   </thead>
 );
 
-const TableBody = ({ children }) => (
+const TableBody = ({ children } : { children: React.ReactNode }) => (
   <tbody className="[&_tr:last-child]:border-0">
     {children}
   </tbody>
 );
 
-const TableRow = ({ children, className = "" }) => (
+const TableRow = ({ children, className = "" } : { children: React.ReactNode; className?: string }) => (
   <tr className={`border-b transition-colors hover:bg-muted/50 ${className}`}>
     {children}
   </tr>
 );
 
-const TableHead = ({ children, className = "" }) => (
+const TableHead = ({ children, className = "" } : { children: React.ReactNode; className?: string }) => (
   <th className={`h-12 px-4 text-left align-middle font-medium text-muted-foreground ${className}`}>
     {children}
   </th>
 );
 
-const TableCell = ({ children, className = "" }) => (
-  <td className={`p-4 align-middle ${className}`}>
+const TableCell = ({ children, className = "", colSpan } : { children: React.ReactNode; className?: string; colSpan?: number }) => (
+  <td className={`p-4 align-middle ${className}`} colSpan={colSpan}>
     {children}
   </td>
 );
@@ -147,6 +177,16 @@ const HomePage = ({
   handleSubmit, 
   loading, 
   registeredUsers 
+}: { 
+  isSubmissionAllowed: boolean; 
+  timeUntilNext: string; 
+  name: string; 
+  id: string; 
+  handleNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void; 
+  handleIdChange: (e: React.ChangeEvent<HTMLInputElement>) => void; 
+  handleSubmit: () => void; 
+  loading: boolean; 
+  registeredUsers: User[]; 
 }) => (
   <div className="space-y-8">
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-center sm:text-left">
@@ -272,7 +312,7 @@ const HomePage = ({
                   </div>
                   <div>
                     <p className="font-medium text-slate-900">{user.name}</p>
-                    <p className="text-sm text-slate-600">{user.intra}</p>
+                    <p className="text-sm text-slate-600">{user.id}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
