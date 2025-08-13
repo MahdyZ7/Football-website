@@ -3,7 +3,6 @@ import {
   Home, 
   DollarSign, 
   Users, 
-  Calendar, 
   MapPin, 
   Navigation,
   Menu,
@@ -79,7 +78,7 @@ const Input = memo(({
 		className = "", 
 		value, onChange, 
 		placeholder, id, 
-		autoComplete 
+		autoComplete
 	}: {
 		className?: string;
 		value: string;
@@ -97,6 +96,8 @@ const Input = memo(({
     autoComplete={autoComplete}
   />
 ));
+
+Input.displayName = 'Input';
 
 const Label = ({ children, htmlFor, className = "" } : { children: React.ReactNode; htmlFor: string; className?: string }) => (
   <label htmlFor={htmlFor} className={`text-sm font-medium text-gray-700 mb-2 block ${className}`}>
