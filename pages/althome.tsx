@@ -56,7 +56,8 @@ const Button = ({
   size = "default",
   className = "",
   onClick,
-  disabled = false
+  disabled = false,
+  type = "button"
 }: {
   children: React.ReactNode;
   variant?: ButtonVariant;
@@ -64,6 +65,7 @@ const Button = ({
   className?: string;
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
   disabled?: boolean;
+  type?: "button" | "submit" | "reset";
 }) => {
   const baseClasses = "inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
   const variants: Record<ButtonVariant, string> = {
@@ -80,6 +82,7 @@ const Button = ({
   
   return (
     <button 
+      type={type}
       className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${className}`}
       onClick={onClick}
       disabled={disabled}
@@ -192,7 +195,7 @@ const HomePage = ({
   id: string; 
   handleNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void; 
   handleIdChange: (e: React.ChangeEvent<HTMLInputElement>) => void; 
-  handleSubmit: () => void; 
+  handleSubmit: (event: FormEvent) => Promise<void>; 
   loading: boolean; 
   registeredUsers: User[]; 
 }) => (
@@ -218,7 +221,7 @@ const HomePage = ({
           <h2 className="text-xl font-semibold">Register Now</h2>
         </CardHeader>
         <CardContent>
-          <div className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
               <Input 
@@ -242,13 +245,13 @@ const HomePage = ({
             </div>
             
             <Button 
-              onClick={handleSubmit}
+              type="submit"
               className="w-full mt-6" 
               disabled={loading || !isSubmissionAllowed}
             >
               {loading ? 'Registering...' : 'Register'}
             </Button>
-          </div>
+          </form>
         </CardContent>
       </Card>
 
