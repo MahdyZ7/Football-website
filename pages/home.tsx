@@ -12,7 +12,7 @@ const Home: React.FC = () => {
   // State management
   const [showPopup, setShowPopup] = useState(false);
   const [name, setName] = useState("");
-  const [id, setId] = useState("");
+  const [intra, setIntra] = useState("");
   const [registeredUsers, setRegisteredUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeUntilNext, setTimeUntilNext] = useState("");
@@ -21,7 +21,7 @@ const Home: React.FC = () => {
 
   // Refs for form navigation
   const nameInputRef = useRef<HTMLInputElement>(null);
-  const idInputRef = useRef<HTMLInputElement>(null);
+  const intraInputRef = useRef<HTMLInputElement>(null);
   const submitButtonRef = useRef<HTMLButtonElement>(null);
 
   const checkSubmissionAllowed = useCallback(async () => {
@@ -107,13 +107,13 @@ const Home: React.FC = () => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
   };
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>, currentField: 'name' | 'id') => {
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>, currentField: 'name' | 'intra') => {
     if (event.key === 'Enter') {
       event.preventDefault();
       
-      if (currentField === 'name' && idInputRef.current) {
-        idInputRef.current.focus();
-      } else if (currentField === 'id' && submitButtonRef.current) {
+      if (currentField === 'name' && intraInputRef.current) {
+        intraInputRef.current.focus();
+      } else if (currentField === 'intra' && submitButtonRef.current) {
         submitButtonRef.current.click();
       }
     }
@@ -128,7 +128,7 @@ const Home: React.FC = () => {
       showToast("Resetting user list...", 'info');
       try {
         await axios.delete("/api/register", {
-          data: { name, id },
+          data: { name, intra },
           headers: { "X-Secret-Header": name },
         });
         removeToast(loadingToastId);
@@ -148,8 +148,8 @@ const Home: React.FC = () => {
       return;
     }
 
-    if (!id) {
-      showToast("Please fill in both name and ID fields", 'error');
+    if (!intra) {
+      showToast("Please fill in both name and Intra login fields", 'error');
       return;
     }
 
@@ -164,7 +164,7 @@ const Home: React.FC = () => {
 
     // Submit registration
     try {
-      await axios.post("/api/register", { name, id });
+      await axios.post("/api/register", { name, intra });
       const updatedUsers = await fetch('/api/users').then(response => response.json());
       setRegisteredUsers(updatedUsers);
       
@@ -172,7 +172,7 @@ const Home: React.FC = () => {
       removeToast(loadingToastId);
       showToast('Registration successful!', 'success');
       setName("");
-      setId("");
+      setIntra("");
       // Focus back to name field for next registration
       nameInputRef.current?.focus();
     } catch (error) {
@@ -184,9 +184,9 @@ const Home: React.FC = () => {
         if (status === 403) {
           showToast("Players limit reached. Better luck next time!", 'error');
         } else if (status === 409) {
-          showToast(`A user with the Intra-login ${id} already exists.`, 'error');
+          showToast(`A user with the Intra-login ${intra} already exists.`, 'error');
         } else if (status === 404) {
-          showToast(`User with Intra-login ${id} not found. Please enter name also`, 'error');
+          showToast(`User with Intra-login ${intra} not found. Please enter name also`, 'error');
         } else {
           showToast("Registration failed. Please try again.", 'error');
         }
@@ -213,15 +213,15 @@ const Home: React.FC = () => {
             onKeyDown={(e) => handleKeyDown(e, 'name')}
           />
 
-          <label htmlFor="id">Intra login:</label>
+          <label htmlFor="intra">Intra login:</label>
           <input
-            ref={idInputRef}
+            ref={intraInputRef}
             type="text"
-            id="id"
-            value={id}
+            id="intra"
+            value={intra}
             autoComplete="intra"
-            onChange={(e) => setId(e.target.value)}
-            onKeyDown={(e) => handleKeyDown(e, 'id')}
+            onChange={(e) => setIntra(e.target.value)}
+            onKeyDown={(e) => handleKeyDown(e, 'intra')}
           />
 
           {!loading && (

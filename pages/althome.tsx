@@ -182,9 +182,9 @@ const HomePage = ({
   isSubmissionAllowed, 
   timeUntilNext, 
   name, 
-  id, 
+  intra, 
   handleNameChange, 
-  handleIdChange, 
+  handleIntraChange, 
   handleSubmit, 
   loading, 
   registeredUsers 
@@ -192,9 +192,9 @@ const HomePage = ({
   isSubmissionAllowed: boolean; 
   timeUntilNext: string; 
   name: string; 
-  id: string; 
+  intra: string; 
   handleNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void; 
-  handleIdChange: (e: React.ChangeEvent<HTMLInputElement>) => void; 
+  handleIntraChange: (e: React.ChangeEvent<HTMLInputElement>) => void; 
   handleSubmit: (event: FormEvent) => Promise<void>; 
   loading: boolean; 
   registeredUsers: User[]; 
@@ -234,11 +234,11 @@ const HomePage = ({
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="id">Intra Login</Label>
+              <Label htmlFor="intra">Intra Login</Label>
               <Input
-                id="id"
-                value={id}
-                onChange={handleIdChange}
+                id="intra"
+                value={intra}
+                onChange={handleIntraChange}
                 placeholder="Enter your intra login"
                 autoComplete="username"
               />
@@ -353,7 +353,7 @@ const FootballApp = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [name, setName] = useState("");
-  const [id, setId] = useState("");
+  const [intra, setIntra] = useState("");
   const [registeredUsers, setRegisteredUsers] =  useState<User[]>([]);
   const [moneyData, setMoneyData] = useState([] as { date: string; name: string; intra: string; amount: number; paid?: boolean }[]);
   const [bannedUsers, setBannedUsers] = useState<BannedUser[]>([]);
@@ -460,7 +460,7 @@ const handleSubmit = async (event: FormEvent) => {
       showToast("Resetting user list...", 'info');
       try {
         await axios.delete("/api/register", {
-          data: { name, id },
+          data: { name, intra },
           headers: { "X-Secret-Header": name },
         });
         removeToast(loadingToastId);
@@ -479,8 +479,8 @@ const handleSubmit = async (event: FormEvent) => {
       return;
     }
 
-    if (!id) {
-      showToast("Please fill in both name and ID fields", 'error');
+    if (!intra) {
+      showToast("Please fill in both name and Intra fields", 'error');
       return;
     }
 
@@ -495,7 +495,7 @@ const handleSubmit = async (event: FormEvent) => {
 
     // Submit registration
     try {
-      await axios.post("/api/register", { name, id });
+      await axios.post("/api/register", { name, intra });
       const updatedUsers = await fetch('/api/users').then(response => response.json());
       setRegisteredUsers(updatedUsers);
       
@@ -503,7 +503,7 @@ const handleSubmit = async (event: FormEvent) => {
       removeToast(loadingToastId);
       showToast('Registration successful!', 'success');
       setName("");
-      setId("");
+      setIntra("");
       // Focus back to name field for next registration
     } catch (error) {
       // Remove loading toast first
@@ -514,9 +514,9 @@ const handleSubmit = async (event: FormEvent) => {
         if (status === 403) {
           showToast("Players limit reached. Better luck next time!", 'error');
         } else if (status === 409) {
-          showToast(`A user with the Intra-login ${id} already exists.`, 'error');
+          showToast(`A user with the Intra-login ${intra} already exists.`, 'error');
         } else if (status === 404) {
-          showToast(`User with Intra-login ${id} not found. Please enter name also`, 'error');
+          showToast(`User with Intra-login ${intra} not found. Please enter name also`, 'error');
         } else {
           showToast("Registration failed. Please try again.", 'error');
         }
@@ -907,9 +907,9 @@ const handleSubmit = async (event: FormEvent) => {
             isSubmissionAllowed={isSubmissionAllowed}
             timeUntilNext={timeUntilNext}
             name={name}
-            id={id}
+            intra={intra}
             handleNameChange={(e) => setName(e.target.value)}
-            handleIdChange={(e) => setId(e.target.value)}
+            handleIntraChange={(e) => setIntra(e.target.value)}
             handleSubmit={handleSubmit}
             loading={loading}
             registeredUsers={registeredUsers}
@@ -927,9 +927,9 @@ const handleSubmit = async (event: FormEvent) => {
             isSubmissionAllowed={isSubmissionAllowed}
             timeUntilNext={timeUntilNext}
             name={name}
-            id={id}
+            intra={intra}
             handleNameChange={(e) => setName(e.target.value)}
-            handleIdChange={(e) => setId(e.target.value)}
+            handleIntraChange={(e) => setIntra(e.target.value)}
             handleSubmit={handleSubmit}
             loading={loading}
             registeredUsers={registeredUsers}
