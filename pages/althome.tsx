@@ -491,7 +491,6 @@ const handleSubmit = async (event: FormEvent) => {
     setToasts(prev => [...prev, loadingToast]);
 
     // Submit registration
-	console.log("ASASASAS")
     try {
       await axios.post("/api/register", { name, id });
       const updatedUsers = await fetch('/api/users').then(response => response.json());
