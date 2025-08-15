@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import Footer from "./footer";
-const MAXPLAYERS = 21;
+import { GuaranteedSpot } from "../types/user";
 
 type User = {
   name: string;
-  id: string;
+  intra: string;
   verified: boolean;
   created_at: string;
   rating?: number;
@@ -33,8 +33,8 @@ const Teams: React.FC = () => {
       .then((response) => response.json())
       .then((data) => {
         if (Array.isArray(data)) {
-          const eligiblePlayers = data.slice(0, MAXPLAYERS).map(user => ({ ...user, rating: 1 }));
-          const waitingPlayers = data.slice(MAXPLAYERS);
+          const eligiblePlayers = data.slice(0, GuaranteedSpot).map(user => ({ ...user, rating: 1 }));
+          const waitingPlayers = data.slice(GuaranteedSpot);
 
           setRegisteredUsers(data);
           setAvailablePlayers(eligiblePlayers);
@@ -54,28 +54,28 @@ const Teams: React.FC = () => {
   const updatePlayerRating = (playerId: string, rating: number) => {
     setAvailablePlayers(prev => 
       prev.map(player => 
-        player.id === playerId ? { ...player, rating } : player
+        player.intra === playerId ? { ...player, rating } : player
       )
     );
 
     setTeam1(prev => ({
       ...prev,
       players: prev.players.map(player => 
-        player.id === playerId ? { ...player, rating } : player
+        player.intra === playerId ? { ...player, rating } : player
       )
     }));
 
     setTeam2(prev => ({
       ...prev,
       players: prev.players.map(player => 
-        player.id === playerId ? { ...player, rating } : player
+        player.intra === playerId ? { ...player, rating } : player
       )
     }));
 
     setTeam3(prev => ({
       ...prev,
       players: prev.players.map(player => 
-        player.id === playerId ? { ...player, rating } : player
+        player.intra === playerId ? { ...player, rating } : player
       )
     }));
   };
@@ -83,7 +83,7 @@ const Teams: React.FC = () => {
   const StarRating = ({ rating, onRatingChange }: { rating: number, onRatingChange: (rating: number) => void }) => {
     return (
       <div className="star-rating">
-        {[1, 2, 3].map((star) => (
+        {[1, 2, 3, 4, 5].map((star) => (
           <span
             key={star}
             onClick={() => onRatingChange(star)}
@@ -118,13 +118,13 @@ const Teams: React.FC = () => {
 
     // Remove from source
     if (dragSource === 'available') {
-      setAvailablePlayers(prev => prev.filter(p => p.id !== draggedPlayer.id));
+      setAvailablePlayers(prev => prev.filter(p => p.intra !== draggedPlayer.intra));
     } else if (dragSource === 'team1') {
-      setTeam1(prev => ({ ...prev, players: prev.players.filter(p => p.id !== draggedPlayer.id) }));
+      setTeam1(prev => ({ ...prev, players: prev.players.filter(p => p.intra !== draggedPlayer.intra) }));
     } else if (dragSource === 'team2') {
-      setTeam2(prev => ({ ...prev, players: prev.players.filter(p => p.id !== draggedPlayer.id) }));
+      setTeam2(prev => ({ ...prev, players: prev.players.filter(p => p.intra !== draggedPlayer.intra) }));
     } else if (dragSource === 'team3') {
-      setTeam3(prev => ({ ...prev, players: prev.players.filter(p => p.id !== draggedPlayer.id) }));
+      setTeam3(prev => ({ ...prev, players: prev.players.filter(p => p.intra !== draggedPlayer.intra) }));
     }
 
     // Add to target
@@ -156,16 +156,16 @@ const Teams: React.FC = () => {
     } else {
       setTeam3(prev => ({ ...prev, players: [...prev.players, player] }));
     }
-    setAvailablePlayers(prev => prev.filter(p => p.id !== player.id));
+    setAvailablePlayers(prev => prev.filter(p => p.intra !== player.intra));
   };
 
   const removeFromTeam = (player: User, teamNumber: 1 | 2 | 3) => {
     if (teamNumber === 1) {
-      setTeam1(prev => ({ ...prev, players: prev.players.filter(p => p.id !== player.id) }));
+      setTeam1(prev => ({ ...prev, players: prev.players.filter(p => p.intra !== player.intra) }));
     } else if (teamNumber === 2) {
-      setTeam2(prev => ({ ...prev, players: prev.players.filter(p => p.id !== player.id) }));
+      setTeam2(prev => ({ ...prev, players: prev.players.filter(p => p.intra !== player.intra) }));
     } else {
-      setTeam3(prev => ({ ...prev, players: prev.players.filter(p => p.id !== player.id) }));
+      setTeam3(prev => ({ ...prev, players: prev.players.filter(p => p.intra !== player.intra) }));
     }
     setAvailablePlayers(prev => [...prev, player]);
   };
@@ -174,37 +174,38 @@ const Teams: React.FC = () => {
     const allEligiblePlayers = [...availablePlayers, ...team1.players, ...team2.players, ...team3.players];
     const sortedPlayers = allEligiblePlayers.sort((a, b) => (b.rating || 1) - (a.rating || 1));
 
-    const team1Players: User[] = [];
-    const team2Players: User[] = [];
-    const team3Players: User[] = [];
+    const teams: User[][] = [[], [], []];
 
-    sortedPlayers.forEach((player, index) => {
-      if (index % 3 === 0 && team1Players.length < 7) {
-        team1Players.push(player);
-      } else if (index % 3 === 1 && team2Players.length < 7) {
-        team2Players.push(player);
-      } else if (team3Players.length < 7) {
-        team3Players.push(player);
-      } else if (team1Players.length < 7) {
-        team1Players.push(player);
-      } else if (team2Players.length < 7) {
-        team2Players.push(player);
+	const randomfirstpick = Math.floor(Math.random() * 3);
+
+    const pickOrder: number[] = [];
+    for (let round = 0; round < 7; round++) {
+      if (round % 2 === 0) {
+        pickOrder.push(randomfirstpick, (randomfirstpick + 1) % 3, (randomfirstpick + 2) % 3);
+      } else {
+        pickOrder.push((randomfirstpick + 2) % 3, (randomfirstpick + 1) % 3, randomfirstpick);
       }
+    }
+
+    // Assign players using snake draft order
+    sortedPlayers.slice(0, 21).forEach((player, index) => {
+      const teamIndex = pickOrder[index];
+      teams[teamIndex].push(player);
     });
 
     const remainingPlayers = allEligiblePlayers.slice(21);
 
-    setTeam1({ name: "Team 1", players: team1Players });
-    setTeam2({ name: "Team 2", players: team2Players });
-    setTeam3({ name: "Team 3", players: team3Players });
+    setTeam1({ name: team1.name, players: teams[0] });
+    setTeam2({ name: team2.name, players: teams[1] });
+    setTeam3({ name: team3.name, players: teams[2] });
     setAvailablePlayers(remainingPlayers);
   };
 
   const removeFromEligible = (playerId: string) => {
-    const removedPlayer = availablePlayers.find(p => p.id === playerId);
+    const removedPlayer = availablePlayers.find(p => p.intra === playerId);
     if (!removedPlayer) return;
 
-    const updatedAvailable = availablePlayers.filter(p => p.id !== playerId);
+    const updatedAvailable = availablePlayers.filter(p => p.intra !== playerId);
     setRemovedPlayers(prev => [...prev, removedPlayer]);
 
     if (waitingListPlayers.length > 0) {
@@ -219,12 +220,12 @@ const Teams: React.FC = () => {
   };
 
   const restoreRemovedPlayer = (playerId: string) => {
-    const playerToRestore = removedPlayers.find(p => p.id === playerId);
+    const playerToRestore = removedPlayers.find(p => p.intra === playerId);
     if (!playerToRestore) return;
 
-    setRemovedPlayers(prev => prev.filter(p => p.id !== playerId));
+    setRemovedPlayers(prev => prev.filter(p => p.intra !== playerId));
 
-    if (availablePlayers.length >= MAXPLAYERS) {
+    if (availablePlayers.length >= GuaranteedSpot) {
       const playerToWaitingList = availablePlayers[availablePlayers.length - 1];
       setWaitingListPlayers(prev => [playerToWaitingList, ...prev]);
       setAvailablePlayers(prev => [...prev.slice(0, -1), playerToRestore]);
@@ -234,8 +235,17 @@ const Teams: React.FC = () => {
   };
 
   const clearTeams = () => {
+    const allCurrentPlayers = [...availablePlayers, ...team1.players, ...team2.players, ...team3.players];
+    const ratingMap = new Map();
+    allCurrentPlayers.forEach(player => {
+      ratingMap.set(player.intra, player.rating || 1);
+    });
+
     const verifiedPlayers = registeredUsers.filter(user => user);
-    const eligiblePlayers = verifiedPlayers.slice(0, MAXPLAYERS).map(user => ({ ...user, rating: user.rating || 1 }));
+    const eligiblePlayers = verifiedPlayers.slice(0, GuaranteedSpot).map(user => ({ 
+      ...user, 
+      rating: ratingMap.get(user.intra) || 1 
+    }));
 
     setAvailablePlayers(eligiblePlayers);
     setTeam1({ name: "Team 1", players: [] });
@@ -267,17 +277,17 @@ const Teams: React.FC = () => {
     >
       <div className="player-info">
         <span className="player-name">
-          {index >= 0 && `${index + 1}. `}{player.name} ({player.id})
+          {index >= 0 && `${index + 1}. `}{player.name} ({player.intra})
         </span>
         <div className="player-actions">
           <StarRating 
             rating={player.rating || 1} 
-            onRatingChange={(rating) => updatePlayerRating(player.id, rating)}
+            onRatingChange={(rating) => updatePlayerRating(player.intra, rating)}
           />
           {source === 'available' && (
             <button
               className="icon-button"
-              onClick={() => removeFromEligible(player.id)}
+              onClick={() => removeFromEligible(player.intra)}
               title="Remove from eligible players"
             >
               🗑️
@@ -374,7 +384,7 @@ const Teams: React.FC = () => {
               ) : (
                 availablePlayers.map((player, index) => (
                   <PlayerCard 
-                    key={player.id} 
+                    key={player.intra} 
                     player={player} 
                     index={index} 
                     source="available"
@@ -409,7 +419,7 @@ const Teams: React.FC = () => {
               ) : (
                 team1.players.map((player, index) => (
                   <PlayerCard 
-                    key={player.id} 
+                    key={player.intra} 
                     player={player} 
                     index={index} 
                     source="team1"
@@ -443,7 +453,7 @@ const Teams: React.FC = () => {
               ) : (
                 team2.players.map((player, index) => (
                   <PlayerCard 
-                    key={player.id} 
+                    key={player.intra} 
                     player={player} 
                     index={index} 
                     source="team2"
@@ -477,7 +487,7 @@ const Teams: React.FC = () => {
               ) : (
                 team3.players.map((player, index) => (
                   <PlayerCard 
-                    key={player.id} 
+                    key={player.intra} 
                     player={player} 
                     index={index} 
                     source="team3"
@@ -497,12 +507,12 @@ const Teams: React.FC = () => {
             </p>
             <div className="player-list" style={{ maxHeight: '200px' }}>
               {removedPlayers.map((player) => (
-                <div key={player.id} className="player-card">
+                <div key={player.intra} className="player-card">
                   <div className="player-info">
-                    <span className="player-name">{player.name} ({player.id})</span>
+                    <span className="player-name">{player.name} ({player.intra})</span>
                     <button
                       className="icon-button"
-                      onClick={() => restoreRemovedPlayer(player.id)}
+                      onClick={() => restoreRemovedPlayer(player.intra)}
                       title="Restore player"
                     >
                       ↩️
@@ -523,9 +533,9 @@ const Teams: React.FC = () => {
             </p>
             <div className="player-list" style={{ maxHeight: '200px' }}>
               {waitingListPlayers.map((player, index) => (
-                <div key={player.id} className="player-card">
+                <div key={player.intra} className="player-card">
                   <span className="player-name">
-                    #{MAXPLAYERS + index + 1} {player.name} ({player.id})
+                    #{GuaranteedSpot + index + 1} {player.name} ({player.intra})
                   </span>
                 </div>
               ))}

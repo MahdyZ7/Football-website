@@ -57,16 +57,13 @@ const Admin: React.FC = () => {
       const userResponse = await fetch('/__replauthuser');
       if (userResponse.status !== 200) {
         setIsAuthenticated(false);
-        console.log("User not authenticated - A")
         return;
       }
 
       const response = await axios.get('/api/admin/auth');
       setIsAuthenticated(response.data.authenticated);
-      console.log("User authenticated - B")
     } catch {
       setIsAuthenticated(false);
-      console.log("User not authenticated - C")
     }
   };
 

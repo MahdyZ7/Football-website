@@ -3,14 +3,8 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Navbar from './Navbar';
 import Footer from './footer';
+import { BannedUser } from '../types/user';
 
-type BannedUser = {
-  id: string;
-  name: string;
-  reason: string;
-  banned_at: string;
-  banned_until: string;
-};
 
 const BannedPlayersPage: React.FC = () => {
   const [bannedUsers, setBannedUsers] = useState<BannedUser[]>([]);
@@ -112,12 +106,12 @@ const BannedPlayersPage: React.FC = () => {
                       </thead>
                       <tbody>
                         {activeBans.map((user) => (
-                          <tr key={user.id}>
+                          <tr key={user.intra}>
                             <td style={{ padding: '0.8rem', borderBottom: '1px solid var(--bg-secondary)' }}>
                               {user.name}
                             </td>
                             <td style={{ padding: '0.8rem', borderBottom: '1px solid var(--bg-secondary)' }}>
-                              {user.id}
+                              {user.intra}
                             </td>
                             <td style={{ padding: '0.8rem', borderBottom: '1px solid var(--bg-secondary)' }}>
                               {user.reason}
@@ -159,12 +153,12 @@ const BannedPlayersPage: React.FC = () => {
                       </thead>
                       <tbody>
                         {expiredBans.map((user) => (
-                          <tr key={user.id}>
+                          <tr key={user.intra}>
                             <td style={{ padding: '0.8rem', borderBottom: '1px solid var(--bg-secondary)' }}>
                               {user.name}
                             </td>
                             <td style={{ padding: '0.8rem', borderBottom: '1px solid var(--bg-secondary)' }}>
-                              {user.id}
+                              {user.intra}
                             </td>
                             <td style={{ padding: '0.8rem', borderBottom: '1px solid var(--bg-secondary)' }}>
                               {user.reason}

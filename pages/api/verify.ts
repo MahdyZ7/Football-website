@@ -15,10 +15,8 @@ export default async function handler(
 		return;
 	}
 	
-	const {valid, error } = await verifyLogin("Ahsalem");
-	if (error)
-		res.status(500);
-	else if (!valid)
+	const {verified } = await verifyLogin("Ahsalem");
+	if (!verified)
 		res.status(403);
 	else
 		res.status(200).json({ isAllowed: true });

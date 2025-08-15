@@ -13,14 +13,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const protocol = req.headers['x-forwarded-proto'] || 'https';
         const host = req.headers.host;
 
-        console.log('Debug - Admin auth attempt:');
-        console.log('- Protocol:', protocol);
-        console.log('- Host:', host);
 
         const authUrl = `${protocol}://${host}/__replauthuser`;
 
         try {
-          console.log('- Trying auth URL:', authUrl);
           const userInfoResponse = await fetch(authUrl, {
             headers: {
               'Cookie': req.headers.cookie || '',
@@ -29,11 +25,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
           });
 
-          console.log('- Response status:', userInfoResponse.status);
 
           if (!userInfoResponse.ok) {
             const errorText = await userInfoResponse.text();
-            console.log('- Auth failed:', errorText.substring(0, 200));
             return res.status(401).json({ 
               authenticated: false, 
               message: 'Not logged in with Replit',
@@ -47,7 +41,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
           const userData = await userInfoResponse.json();
           userName = userData.name;
-          console.log('- Successfully authenticated user:', userName);
 
         } catch (fetchError) {
           const errorMessage = fetchError instanceof Error ? fetchError.message : 'Unknown error';
@@ -61,7 +54,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           });
         }
       } else {
-        console.log('Authenticated user (server headers):', userName);
       }
 
       if (!userName) {
