@@ -27,6 +27,7 @@ const Home: React.FC = () => {
   const checkSubmissionAllowed = useCallback(async () => {
     try {
       const response = await axios.get("/api/allowed");
+	  setIsSubmissionAllowed(response.data.isAllowed);
       return response.status === 200 ? response.data.isAllowed : false;
     } catch (error) {
       console.error("Error checking submission allowed:", error);
@@ -67,7 +68,7 @@ const Home: React.FC = () => {
     return () => {
       clearInterval(countdownTimer);
     };
-  }, [checkSubmissionAllowed]);
+  }, [checkSubmissionAllowed, next]);
 
   // Initial data fetch and popup timer
   useEffect(() => {
