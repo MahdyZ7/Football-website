@@ -46,6 +46,11 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse) {
   if (user.name) {
     user.name = user.name.trim();
   }
+// Basic validation against SQL injection and XSS patterns
+const dangerousPattern = /('|--|;|\/\*|\*\/|<|>|script|select|insert|update|delete|drop|union|exec|xp_)/i;
+if (dangerousPattern.test(user.intra) || (user.name && dangerousPattern.test(user.name))) {
+	return res.status(400).json({ error: "Invalid characters detected in input" });
+}
   
   const result = await registerUser(user);
   
@@ -58,18 +63,19 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse) {
 async function handleDelete(req: NextApiRequest, res: NextApiResponse) {
   const secretHeader = req.headers["x-secret-header"];
   const mySecret = process.env["resetuser"];
+   const user = req.body as User;
   
   if (!secretHeader || !mySecret || secretHeader !== mySecret) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  if (req.body.id) {
+  if (user.intra) {
     // Input validation for delete
-    if (typeof req.body.id !== 'string' || req.body.id.trim().length === 0) {
+    if (typeof user.intra !== 'string' || user.intra.trim().length === 0) {
       return res.status(400).json({ error: "Valid user ID is required" });
     }
-    
-    const result = await deleteUser({ ...req.body, id: req.body.id.trim() });
+
+    const result = await deleteUser({ ...req.body, intra: user.intra.trim() });
     return res.status(result.status || 200).json(result);
   }
   

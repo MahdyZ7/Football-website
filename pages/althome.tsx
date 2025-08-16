@@ -845,7 +845,7 @@ const handleSubmit = async (event: FormEvent) => {
 	<Card>
 		<CardHeader>
 			<div className="flex items-center justify-between">
-				<h2 className="text-xl font-semibold">Expired Bannes</h2>
+				<h2 className="text-xl font-semibold">Expired Bans</h2>
 				<Badge variant="secondary" className="modern-badge">{expiredBans.length} total</Badge>
 			</div>
 		</CardHeader>
