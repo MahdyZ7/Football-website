@@ -35,9 +35,9 @@ const Home: React.FC = () => {
     }
   }, []);
 
-  const next = getNextRegistration();
   // Timer and submission check effects
   useEffect(() => {
+	const next = getNextRegistration();
     const updateCountdown = () => {
       const now = new Date();
       const diff = next.getTime() - now.getTime();

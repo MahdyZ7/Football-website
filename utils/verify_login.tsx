@@ -12,6 +12,14 @@ function cleanName(name: string) {
 	return name.trim().toLowerCase();
 }
 
+const createEmptyUser = (): User => ({
+	name: "",
+	intra: "",
+	verified: false,
+	created_at: "",
+	email: ""
+});
+
 
 export default async function verifyLogin(intra: string): Promise<User> {
 	
@@ -27,7 +35,7 @@ export default async function verifyLogin(intra: string): Promise<User> {
 	};
 
 	if (!UID || !APP_SEC)
-		return ({name: "", intra: "", verified: false, created_at: "", email: ""})
+		return createEmptyUser();
 
 
 	try {
@@ -48,15 +56,15 @@ export default async function verifyLogin(intra: string): Promise<User> {
 		});
 
 		if (response.status != 200)
-			return {name: "", intra: "", verified: false, created_at: "", email: ""};
+			return createEmptyUser();
 		const data = response.data;
 		if (data.length === 0)
-			return {name: "", intra: "", verified: false, created_at: "", email: ""};
+			return createEmptyUser();
 		if (response.status === 200 && data.length > 0)
 		  return {name: data[0].usual_full_name, intra: intra, verified: true, created_at: data[0].created_at, email: data[0].email};
-      return {name: "", intra: "", verified: false, created_at: "", email: ""};
+      return createEmptyUser();
 	} catch (error) {
 		console.error('Error retrieving access token', error);
-		return {name: "", intra: "", verified: false, created_at: "", email: ""};
+		return createEmptyUser();
 	}
 }

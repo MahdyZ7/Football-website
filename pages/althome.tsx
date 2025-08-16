@@ -282,7 +282,7 @@ const HomePage = ({
               </TableRow>
               <TableRow>
                 <TableCell>Cancel on game day after 5 PM</TableCell>
-                <TableCell className="text-right font-medium">Two week</TableCell>
+                <TableCell className="text-right font-medium">Two weeks</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>No Show without notice</TableCell>
