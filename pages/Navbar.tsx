@@ -38,9 +38,6 @@ export default function Navbar() {
 				<NavLink href="/banned-players" isActive={currentRoute === "/banned-players"}>
 					Banned Players
 				</NavLink>
-				<NavLink href="/Money" isActive={currentRoute === "/Money"}>
-					Money
-				</NavLink>
 				<NavLink href="/teams" isActive={currentRoute === "/teams"}>
 					Teams
 				</NavLink>

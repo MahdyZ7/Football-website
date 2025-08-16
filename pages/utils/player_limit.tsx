@@ -1,5 +1,4 @@
-const playerLimit = 40;
-
+import { MaxPlayers } from "../../types/user";
 export default function player_limit_reached(num: number) {
-	return num >= playerLimit;
+	return num >= MaxPlayers;
 }

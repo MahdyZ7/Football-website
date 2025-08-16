@@ -1,6 +1,6 @@
 import { ClientCredentials } from 'simple-oauth2';
 import axios from 'axios';
-import { UserInfo } from '../types/user'
+import { User } from '../types/user'
 
 const UID = process.env.UID;
 const APP_SEC = process.env.APP_SEC;
@@ -12,8 +12,16 @@ function cleanName(name: string) {
 	return name.trim().toLowerCase();
 }
 
+const createEmptyUser = (): User => ({
+	name: "",
+	intra: "",
+	verified: false,
+	created_at: "",
+	email: ""
+});
 
-export default async function verifyLogin(intra: string): Promise<UserInfo> {
+
+export default async function verifyLogin(intra: string): Promise<User> {
 	
 	intra = cleanName(intra);
 	const credentials = {
@@ -27,7 +35,7 @@ export default async function verifyLogin(intra: string): Promise<UserInfo> {
 	};
 
 	if (!UID || !APP_SEC)
-		return ({name: "", intra: "", valid: false, error: true})
+		return createEmptyUser();
 
 
 	try {
@@ -48,17 +56,15 @@ export default async function verifyLogin(intra: string): Promise<UserInfo> {
 		});
 
 		if (response.status != 200)
-			return {name: "", intra: "", valid: false, error: true};
+			return createEmptyUser();
 		const data = response.data;
-		console.log(response.status);
-		// console.log(data);
 		if (data.length === 0)
-			return {name: "", intra: "", valid: false, error: false};
+			return createEmptyUser();
 		if (response.status === 200 && data.length > 0)
-		  return {name: data[0].usual_full_name, intra: intra, valid: true, error: false};
-      return {name: "", intra: "", valid: false, error: false};
+		  return {name: data[0].usual_full_name, intra: intra, verified: true, created_at: data[0].created_at, email: data[0].email};
+      return createEmptyUser();
 	} catch (error) {
 		console.error('Error retrieving access token', error);
-		return {name: "", intra: "", valid: false, error: true};
+		return createEmptyUser();
 	}
 }

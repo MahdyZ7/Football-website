@@ -1,15 +1,10 @@
 
 import { NextApiRequest, NextApiResponse } from "next";
 import pool from "../../utils/db";
-import { UserInfo } from "../../types/user";
 import allowed_times from "../utils/allowed_times";
 import player_limit_reached from "../utils/player_limit";
 import verifyLogin from "../../utils/verify_login";
-
-type User = {
-  name: string;
-  id: string;
-};
+import { User } from "../../types/user";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -38,7 +33,7 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse) {
     return res.status(400).json({ error: "Invalid request body" });
   }
   
-  if (!user.id || typeof user.id !== 'string' || user.id.trim().length === 0) {
+  if (!user.intra || typeof user.intra !== 'string' || user.intra.trim().length === 0) {
     return res.status(400).json({ error: "User ID is required" });
   }
   
@@ -47,15 +42,20 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse) {
   }
   
   // Sanitize inputs
-  user.id = user.id.trim();
+  user.intra = user.intra.trim();
   if (user.name) {
     user.name = user.name.trim();
   }
+// Basic validation against SQL injection and XSS patterns
+const dangerousPattern = /('|--|;|\/\*|\*\/|<|>|script|select|insert|update|delete|drop|union|exec|xp_)/i;
+if (dangerousPattern.test(user.intra) || (user.name && dangerousPattern.test(user.name))) {
+	return res.status(400).json({ error: "Invalid characters detected in input" });
+}
   
   const result = await registerUser(user);
   
   if (result.success) {
-    return res.status(200).json({ name: user.name, id: user.id });
+    return res.status(200).json({ name: user.name, id: user.intra });
   }
   return res.status(result.status || 400).json(result);
 }
@@ -63,18 +63,19 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse) {
 async function handleDelete(req: NextApiRequest, res: NextApiResponse) {
   const secretHeader = req.headers["x-secret-header"];
   const mySecret = process.env["resetuser"];
+   const user = req.body as User;
   
   if (!secretHeader || !mySecret || secretHeader !== mySecret) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  if (req.body.id) {
+  if (user.intra) {
     // Input validation for delete
-    if (typeof req.body.id !== 'string' || req.body.id.trim().length === 0) {
+    if (typeof user.intra !== 'string' || user.intra.trim().length === 0) {
       return res.status(400).json({ error: "Valid user ID is required" });
     }
-    
-    const result = await deleteUser({ ...req.body, id: req.body.id.trim() });
+
+    const result = await deleteUser({ ...req.body, intra: user.intra.trim() });
     return res.status(result.status || 200).json(result);
   }
   
@@ -89,7 +90,7 @@ async function registerUser(user: User) {
     // Check if user is banned
     const banCheck = await client.query(
       "SELECT banned_until FROM banned_users WHERE id = $1 AND banned_until > NOW()",
-      [user.id]
+      [user.intra]
     );
     
     if (banCheck.rows.length > 0) {
@@ -99,16 +100,16 @@ async function registerUser(user: User) {
       };
     }
 
-    // const verifiedInfo: UserInfo = await verifyLogin(user.id);
+    const verifiedInfo: User = await verifyLogin(user.intra);
     
-    // if (verifiedInfo.valid && !verifiedInfo.error) {
-    //   user.id = verifiedInfo.intra;
-    //   user.name = verifiedInfo.name;
-    // }
+    if (verifiedInfo.verified) {
+      user.intra = verifiedInfo.intra;
+      user.name = verifiedInfo.name;
+    }
     
-    // if (!verifiedInfo.valid && !user.name) {
-    //   return { error: "Intra not found", status: 404 };
-    // }
+    if (!verifiedInfo.verified && !user.name) {
+      return { error: "Intra not found", status: 404 };
+    }
 
     const { rows } = await client.query("SELECT name, intra FROM players");
     
@@ -116,19 +117,19 @@ async function registerUser(user: User) {
       return { error: "Player limit reached", status: 403 };
     }
     
-    const player = rows.find(row => row.intra === user.id);
+    const player = rows.find(row => row.intra === user.intra);
     if (player) {
       return { error: "Player already exists", status: 409 };
     }
 
     const date = new Date();
-    // if (!verifiedInfo.valid) {
-    //   date.setSeconds(date.getSeconds() + 10);
-    // }
+    if (!verifiedInfo.verified) {
+      date.setSeconds(date.getSeconds() + 10);
+    }
 
     await client.query(
       "INSERT INTO players (name, intra, verified, created_at) VALUES ($1, $2, $3, $4)",
-      [user.name, user.id, false, date]
+      [user.name, user.intra, false, date]
     );
 
     return { success: true };
@@ -156,13 +157,13 @@ async function deleteUser(user: User) {
   const client = await pool.connect();
   try {
     const { rows } = await client.query("SELECT name, intra FROM players");
-    const player = rows.find(row => row.intra === user.id);
+    const player = rows.find(row => row.intra === user.intra);
     
     if (!player) {
       return { error: "User does not exist", status: 418 };
     }
     
-    await client.query("DELETE FROM players WHERE intra = $1", [user.id]);
+    await client.query("DELETE FROM players WHERE intra = $1", [user.intra]);
     return { success: true };
   } catch (error) {
     console.error("Error deleting user:", error);

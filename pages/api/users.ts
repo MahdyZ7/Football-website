@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import pool from "../../utils/db";
+import { User } from "../../types/user";
 
 export default async function handler(
 	req: NextApiRequest,
@@ -12,10 +13,11 @@ export default async function handler(
 
 			const players = rows.map(row => ({
 				name: row.name,
-				id: row.intra,
+				intra: row.intra,
 				verified: row.verified,
 				created_at: row.created_at,
-			}));
+
+			} as User));
 
 			res.status(200).json(players);
 

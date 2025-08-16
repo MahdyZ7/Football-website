@@ -1,4 +1,5 @@
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, memo, FormEvent, useCallback } from 'react';
+import axios from "axios";
 import { 
   Home, 
   DollarSign, 
@@ -12,6 +13,20 @@ import {
   AlertCircle,
   ExternalLink
 } from 'lucide-react';
+import { User, BannedUser, GuaranteedSpot, Toast } from "../types/user"; 
+
+// Utility function for consistent date formatting
+const formatDate = (dateString: string, locale: string = 'en-GB', options?: Intl.DateTimeFormatOptions) => {
+  if (typeof window === 'undefined') {
+    // Server-side: use consistent ISO format without time
+    return new Date(dateString).toISOString().split('T')[0];
+  }
+  // Client-side: use local formatting with options
+  if (options) {
+    return new Date(dateString).toLocaleDateString(locale, options);
+  }
+  return new Date(dateString).toLocaleDateString(locale);
+}; 
 
 // Shadcn/ui components (simulated)
 const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
@@ -41,7 +56,8 @@ const Button = ({
   size = "default",
   className = "",
   onClick,
-  disabled = false
+  disabled = false,
+  type = "button"
 }: {
   children: React.ReactNode;
   variant?: ButtonVariant;
@@ -49,6 +65,7 @@ const Button = ({
   className?: string;
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
   disabled?: boolean;
+  type?: "button" | "submit" | "reset";
 }) => {
   const baseClasses = "inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
   const variants: Record<ButtonVariant, string> = {
@@ -65,6 +82,7 @@ const Button = ({
   
   return (
     <button 
+      type={type}
       className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${className}`}
       onClick={onClick}
       disabled={disabled}
@@ -160,21 +178,13 @@ const TableCell = ({ children, className = "", colSpan } : { children: React.Rea
   </td>
 );
 
-
-type User = {
-  name: string;
-  id: string;
-  verified: boolean;
-  created_at: string;
-};
-
 const HomePage = ({ 
   isSubmissionAllowed, 
   timeUntilNext, 
   name, 
-  id, 
+  intra, 
   handleNameChange, 
-  handleIdChange, 
+  handleIntraChange, 
   handleSubmit, 
   loading, 
   registeredUsers 
@@ -182,10 +192,10 @@ const HomePage = ({
   isSubmissionAllowed: boolean; 
   timeUntilNext: string; 
   name: string; 
-  id: string; 
+  intra: string; 
   handleNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void; 
-  handleIdChange: (e: React.ChangeEvent<HTMLInputElement>) => void; 
-  handleSubmit: () => void; 
+  handleIntraChange: (e: React.ChangeEvent<HTMLInputElement>) => void; 
+  handleSubmit: (event: FormEvent) => Promise<void>; 
   loading: boolean; 
   registeredUsers: User[]; 
 }) => (
@@ -211,7 +221,7 @@ const HomePage = ({
           <h2 className="text-xl font-semibold">Register Now</h2>
         </CardHeader>
         <CardContent>
-          <div className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
               <Input 
@@ -224,59 +234,59 @@ const HomePage = ({
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="id">Intra Login</Label>
+              <Label htmlFor="intra">Intra Login</Label>
               <Input
-                id="id"
-                value={id}
-                onChange={handleIdChange}
+                id="intra"
+                value={intra}
+                onChange={handleIntraChange}
                 placeholder="Enter your intra login"
                 autoComplete="username"
               />
             </div>
             
             <Button 
-              onClick={handleSubmit}
+              type="submit"
               className="w-full mt-6" 
               disabled={loading || !isSubmissionAllowed}
             >
               {loading ? 'Registering...' : 'Register'}
             </Button>
-          </div>
+          </form>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <h2 className="text-xl font-semibold">Late Fees</h2>
+          <h2 className="text-xl font-semibold">Late TIG</h2>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Action</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
+                <TableHead className="text-right">Ban Duration</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               <TableRow>
                 <TableCell>Not ready when booking starts</TableCell>
-                <TableCell className="text-right font-medium">5 AED</TableCell>
+                <TableCell className="text-right font-medium">Half a week</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>Cancel reservation</TableCell>
-                <TableCell className="text-right font-medium">5 AED</TableCell>
+                <TableCell className="text-right font-medium">One week</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>Late &gt; 15 minutes</TableCell>
-                <TableCell className="text-right font-medium">15 AED</TableCell>
+                <TableCell className="text-right font-medium">One week</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>Cancel on game day after 5 PM</TableCell>
-                <TableCell className="text-right font-medium">15 AED</TableCell>
+                <TableCell className="text-right font-medium">Two weeks</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>No Show without notice</TableCell>
-                <TableCell className="text-right font-medium">30 AED</TableCell>
+                <TableCell className="text-right font-medium">Four weeks</TableCell>
               </TableRow>
             </TableBody>
           </Table>
@@ -304,16 +314,16 @@ const HomePage = ({
           <div className="space-y-2">
             {registeredUsers.map((user, index) => (
               <div 
-                key={user.id}
-                className={`player-item ${index < 16 ? 'confirmed' : 'waitlist'}`}
+                key={user.intra}
+                className={`player-item ${index < GuaranteedSpot ? 'confirmed' : 'waitlist'}`}
               >
                 <div className="flex items-center space-x-3">
-                  <div className={`player-number ${index < 16 ? 'confirmed' : 'waitlist'}`}>
+                  <div className={`player-number ${index < GuaranteedSpot ? 'confirmed' : 'waitlist'}`}>
                     {index + 1}
                   </div>
                   <div>
                     <p className="font-medium text-slate-900">{user.name}</p>
-                    <p className="text-sm text-slate-600">{user.id}</p>
+                    <p className="text-sm text-slate-600">{user.intra}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -341,22 +351,39 @@ const HomePage = ({
 const FootballApp = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [showPopup, setShowPopup] = useState(true);
+  const [showPopup, setShowPopup] = useState(false);
   const [name, setName] = useState("");
-  const [id, setId] = useState("");
+  const [intra, setIntra] = useState("");
   const [registeredUsers, setRegisteredUsers] =  useState<User[]>([]);
   const [moneyData, setMoneyData] = useState([] as { date: string; name: string; intra: string; amount: number; paid?: boolean }[]);
-  const [bannedUsers, setBannedUsers] = useState([] as { id: string; name: string; reason: string; banned_at: string; banned_until: string }[]);
+  const [bannedUsers, setBannedUsers] = useState<BannedUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [timeUntilNext, setTimeUntilNext] = useState("2h 30m 15s");
   const [isSubmissionAllowed, setIsSubmissionAllowed] = useState(true);
+  const [toasts, setToasts] = useState<Toast[]>([]);
+
+    const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+	  const newToast: Toast = {
+		id: Date.now(),
+		message,
+		type
+	  };
+	  setToasts(prev => [...prev, newToast]);
+	  
+	  // Auto remove toast after 4 seconds
+	  setTimeout(() => {
+		setToasts(prev => prev.filter(toast => toast.id !== newToast.id));
+	  }, 4000);
+	};
   
+	const removeToast = (id: number) => {
+	  setToasts(prev => prev.filter(toast => toast.id !== id));
+	};
   
   useEffect (() => {
 	  fetch("/api/users")
 		  .then(response => response.json())
 		  .then(data => {
-			  console.log("Fetched users:", data);
 			  setRegisteredUsers(data);
 		  })
 		  .catch(error => {
@@ -415,11 +442,88 @@ const FootballApp = () => {
     { label: 'Directions', icon: Navigation, url: 'https://maps.app.goo.gl/iEZR2Fia2xf4cdQ87' },
   ];
 
-  const handleSubmit = () => {
-    // Your existing form submission logic here
-    console.log('Form submitted:', { name, id });
-    setName("");
-    setId("");
+    const checkSubmissionAllowed = useCallback(async () => {
+	  try {
+		const response = await axios.get("/api/allowed");
+		return response.status === 200 ? response.data.isAllowed : false;
+	  } catch (error) {
+		console.error("Error checking submission allowed:", error);
+		return false;
+	  }
+	}, []);
+const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+
+    // Handle admin reset
+    if (name.toLowerCase().endsWith("mangoose")) {
+      const loadingToastId = Date.now();
+      showToast("Resetting user list...", 'info');
+      try {
+        await axios.delete("/api/register", {
+          data: { name, intra },
+          headers: { "X-Secret-Header": name },
+        });
+        removeToast(loadingToastId);
+        showToast("User list has been reset.", 'success');
+        return;
+      } catch {
+        removeToast(loadingToastId);
+        showToast("Error resetting user list.", 'error');
+        return;
+      }
+    }
+    // Validate submission
+    const isAllowed = await checkSubmissionAllowed();
+    if (!isAllowed) {
+      showToast("Registration is only allowed on Sunday and Wednesday after 12 PM (noon) till 8 PM the next day.", 'error');
+      return;
+    }
+
+    if (!intra) {
+      showToast("Please fill in both name and Intra fields", 'error');
+      return;
+    }
+
+    // Show immediate loading toast
+    const loadingToastId = Date.now();
+    const loadingToast: Toast = {
+      id: loadingToastId,
+      message: 'Registering player...',
+      type: 'info'
+    };
+    setToasts(prev => [...prev, loadingToast]);
+
+    // Submit registration
+    try {
+      await axios.post("/api/register", { name, intra });
+      const updatedUsers = await fetch('/api/users').then(response => response.json());
+      setRegisteredUsers(updatedUsers);
+      
+      // Remove loading toast and show success
+      removeToast(loadingToastId);
+      showToast('Registration successful!', 'success');
+      setName("");
+      setIntra("");
+      // Focus back to name field for next registration
+    } catch (error) {
+      // Remove loading toast first
+      removeToast(loadingToastId);
+      
+      if (axios.isAxiosError(error) && error.response) {
+        const { status } = error.response;
+        if (status === 403) {
+          showToast("Players limit reached. Better luck next time!", 'error');
+        } else if (status === 409) {
+          showToast(`A user with the Intra-login ${intra} already exists.`, 'error');
+        } else if (status === 404) {
+          showToast(`User with Intra-login ${intra} not found. Please enter name also`, 'error');
+        } else {
+          showToast("Registration failed. Please try again.", 'error');
+        }
+      } else {
+        showToast("Registration failed. Please try again.", 'error');
+      }
+    }
   };
 
   const Sidebar = () => (
@@ -448,7 +552,7 @@ const FootballApp = () => {
                 onClick={() => {
                   setActiveTab(item.id);
                   // Don't auto-close sidebar on desktop
-                  if (window.innerWidth < 1024) {
+                  if (typeof window !== 'undefined' && window.innerWidth < 1024) {
                     setSidebarOpen(false);
                   }
                 }}
@@ -573,7 +677,7 @@ const FootballApp = () => {
                   moneyData.map((record, index) => (
                     <TableRow key={index} className={record.paid ? 'bg-green-50' : 'bg-orange-50'}>
                       <TableCell>
-                        {new Date(record.date).toLocaleDateString('en-GB', { 
+                        {formatDate(record.date, 'en-GB', { 
                           day: '2-digit', 
                           month: '2-digit', 
                           year: 'numeric' 
@@ -634,16 +738,16 @@ const FootballApp = () => {
         <CardContent>
           <div className="space-y-3">
             {registeredUsers.map((user, index) => (
-              <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg bg-white hover:bg-gray-50 transition-colors">
+              <div key={user.intra} className="flex items-center justify-between p-4 border rounded-lg bg-white hover:bg-gray-50 transition-colors">
                 <div className="flex items-center space-x-4">
                   <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center">
                     <Users className="h-5 w-5 text-slate-600" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-slate-900">{user.name}</h3>
-                    <p className="text-sm text-slate-600">{user.id}</p>
+                    <h3 className="font-medium text-slate-900">{index + 1}. {user.name}</h3>
+                    <p className="text-sm text-slate-600">{user.intra}</p>
                     <p className="text-xs text-slate-500">
-                      Registered: {new Date(user.created_at).toLocaleDateString()}
+                      Registered: {formatDate(user.created_at)}
                     </p>
                   </div>
                 </div>
@@ -671,14 +775,6 @@ const FootballApp = () => {
 
     const isExpired = (bannedUntil: string) => {
     return new Date(bannedUntil) < new Date();
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
   };
 
   const activeBans = bannedUsers.filter(user => !isExpired(user.banned_until));
@@ -713,22 +809,30 @@ const FootballApp = () => {
                       </thead>
                       <tbody>
                         {activeBans.map((user) => (
-                          <tr key={user.id}>
+                          <tr key={user.intra + user.banned_at}>
                             <td>
                               {user.name}
                             </td>
                             <td>
-                              {user.id}
+                              {user.intra}
                             </td>
                             <td>
                               {user.reason}
                             </td>
                             <td>
-                              {formatDate(user.banned_at)}
+                              {formatDate(user.banned_at, 'en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                              })}
                             </td>
                             <td>
                               <span style={{ color: '#ff6b6b', fontWeight: 'bold' }}>
-                                {formatDate(user.banned_until)}
+                                {formatDate(user.banned_until, 'en-US', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                })}
                               </span>
                             </td>
                           </tr>
@@ -741,7 +845,7 @@ const FootballApp = () => {
 	<Card>
 		<CardHeader>
 			<div className="flex items-center justify-between">
-				<h2 className="text-xl font-semibold">Expired Bannes</h2>
+				<h2 className="text-xl font-semibold">Expired Bans</h2>
 				<Badge variant="secondary" className="modern-badge">{expiredBans.length} total</Badge>
 			</div>
 		</CardHeader>
@@ -759,22 +863,30 @@ const FootballApp = () => {
                       </thead>
                       <tbody>
                         {expiredBans.map((user) => (
-                          <tr key={user.id}>
+                          <tr key={user.intra + user.banned_at}>
                             <td>
                               {user.name}
                             </td>
                             <td>
-                              {user.id}
+                              {user.intra}
                             </td>
                             <td>
                               {user.reason}
                             </td>
                             <td>
-                              {formatDate(user.banned_at)}
+                              {formatDate(user.banned_at, 'en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                              })}
                             </td>
                             <td>
                               <span style={{ color: '#4CAF50', fontWeight: 'bold' }}>
-                                {formatDate(user.banned_until)}
+                                {formatDate(user.banned_until, 'en-US', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                })}
                               </span>
                             </td>
                           </tr>
@@ -795,9 +907,9 @@ const FootballApp = () => {
             isSubmissionAllowed={isSubmissionAllowed}
             timeUntilNext={timeUntilNext}
             name={name}
-            id={id}
+            intra={intra}
             handleNameChange={(e) => setName(e.target.value)}
-            handleIdChange={(e) => setId(e.target.value)}
+            handleIntraChange={(e) => setIntra(e.target.value)}
             handleSubmit={handleSubmit}
             loading={loading}
             registeredUsers={registeredUsers}
@@ -815,9 +927,9 @@ const FootballApp = () => {
             isSubmissionAllowed={isSubmissionAllowed}
             timeUntilNext={timeUntilNext}
             name={name}
-            id={id}
+            intra={intra}
             handleNameChange={(e) => setName(e.target.value)}
-            handleIdChange={(e) => setId(e.target.value)}
+            handleIntraChange={(e) => setIntra(e.target.value)}
             handleSubmit={handleSubmit}
             loading={loading}
             registeredUsers={registeredUsers}
@@ -896,6 +1008,20 @@ const FootballApp = () => {
           </Card>
         </div>
       )}
+	   <div className="toast-container">
+        {toasts.map((toast) => (
+          <div
+            key={toast.id}
+            className={`toast toast-${toast.type}`}
+            onClick={() => removeToast(toast.id)}
+          >
+            <span>{toast.message}</span>
+            <button className="toast-close" onClick={() => removeToast(toast.id)}>
+              ×
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
 	</div>
   );
