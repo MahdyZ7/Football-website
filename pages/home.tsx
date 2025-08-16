@@ -68,7 +68,7 @@ const Home: React.FC = () => {
     return () => {
       clearInterval(countdownTimer);
     };
-  }, [checkSubmissionAllowed, next]);
+  }, [checkSubmissionAllowed]);
 
   // Initial data fetch and popup timer
   useEffect(() => {
