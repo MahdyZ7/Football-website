@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs';
 import Home from './home';
 import FootballApp from './althome'; 
 
@@ -17,6 +18,47 @@ export default function Index() {
 		return <Home />;
 	}
 
-	// After hydration, show the randomly selected component
-	return showHome ? <Home /> : <FootballApp />;
+	return (
+		<>
+			<SignedOut>
+				<div className="container">
+				<div style={{ 
+					display: 'flex', 
+					flexDirection: 'column', 
+					alignItems: 'center', 
+					justifyContent: 'center', 
+					minHeight: '100vh', 
+					padding: '20px',
+					textAlign: 'center'
+				}}>
+					<h1>
+						42 Football Registration
+					</h1>
+					<p style={{ marginBottom: '30px', fontSize: '1.1rem' }}>
+						Please sign in to access the registration system
+					</p>
+					<SignInButton mode="modal">
+						<button style={{
+							padding: '12px 24px',
+							fontSize: '1rem',
+							border: 'none',
+							borderRadius: '12px',
+							cursor: 'pointer',
+							transition: 'background-color 0.3s',
+							width: '200px',
+						}}>
+							Sign In
+						</button>
+					</SignInButton>
+				</div>
+				</div>
+			</SignedOut>
+			<SignedIn>
+				<div style={{ position: 'absolute', top: '10px', right: '10px' }}>
+					<UserButton />
+				</div>
+				{showHome ? <Home /> : <FootballApp />}
+			</SignedIn>
+		</>
+	);
 }

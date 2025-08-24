@@ -1,56 +1,20 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import pool from '../../../../utils/db';
 import { logAdminAction } from '../../../../utils/adminLogger';
-
-const ADMIN_USERS = ['MahdyZ7'];
-
-async function getAuthenticatedUser(req: NextApiRequest): Promise<string | null> {
-  // Check for Replit authentication headers first (more reliable)
-  let adminUser = req.headers['x-replit-user-name'] as string;
-
-  // If no server headers, try client-side approach
-  if (!adminUser) {
-    try {
-      const protocol = req.headers['x-forwarded-proto'] || 'https';
-      const host = req.headers.host;
-      const authUrl = `${protocol}://${host}/__replauthuser`;
-
-      const userInfoResponse = await fetch(authUrl, {
-        headers: {
-          'Cookie': req.headers.cookie || '',
-          'User-Agent': req.headers['user-agent'] || 'NextJS-Admin',
-          'Referer': req.headers.referer || `${protocol}://${host}/admin`
-        }
-      });
-
-      if (!userInfoResponse.ok) {
-        console.error('Auth request failed:', userInfoResponse.status);
-        return null;
-      }
-
-      const userData = await userInfoResponse.json();
-      adminUser = userData.name;
-    } catch (fetchError) {
-      console.error('Error fetching user info:', fetchError);
-      return null;
-    }
-  }
-
-  return adminUser;
-}
+import { requireAdmin } from '../../../../utils/clerkAuth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'PATCH') {
     try {
-      const adminUser = await getAuthenticatedUser(req);
+      const authResult = await requireAdmin(req);
 
-      if (!adminUser) {
-        return res.status(401).json({ error: 'Unauthorized - Not logged in' });
+      if (!authResult.isAuthenticated) {
+        return res.status(401).json({ 
+          error: authResult.error || 'Unauthorized - Admin access required' 
+        });
       }
 
-      if (!ADMIN_USERS.includes(adminUser)) {
-        return res.status(403).json({ error: 'Forbidden - Admin access required' });
-      }
+      const adminUser = authResult.user!.email;
 
       const { id, verified } = req.body;
       const client = await pool.connect();

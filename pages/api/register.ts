@@ -5,6 +5,7 @@ import allowed_times from "../utils/allowed_times";
 import player_limit_reached from "../utils/player_limit";
 import verifyLogin from "../../utils/verify_login";
 import { User } from "../../types/user";
+import { authenticateRequest } from "../../utils/clerkAuth";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -25,6 +26,10 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse) {
   if (!allowed_times()) {
     return res.status(403).json({ error: "Registration is not allowed at this time." });
   }
+
+  // Check if user is authenticated (optional - allows both auth and unauth)
+  const authResult = await authenticateRequest(req);
+  const isAuthenticated = authResult.isAuthenticated;
 
   const user = req.body as User;
   
@@ -52,10 +57,15 @@ if (dangerousPattern.test(user.intra) || (user.name && dangerousPattern.test(use
 	return res.status(400).json({ error: "Invalid characters detected in input" });
 }
   
-  const result = await registerUser(user);
+  const result = await registerUser(user, isAuthenticated);
   
   if (result.success) {
-    return res.status(200).json({ name: user.name, id: user.intra });
+    return res.status(200).json({ 
+      name: user.name, 
+      id: user.intra, 
+      authenticated: isAuthenticated,
+      userEmail: authResult.user?.email || "TEMP EMAIL VALIDATION"
+    });
   }
   return res.status(result.status || 400).json(result);
 }
@@ -83,7 +93,7 @@ async function handleDelete(req: NextApiRequest, res: NextApiResponse) {
   return res.status(result.status || 200).json(result);
 }
 
-async function registerUser(user: User) {
+async function registerUser(user: User, isAuthenticated: boolean = false) {
   const client = await pool.connect();
   
   try {
@@ -123,13 +133,13 @@ async function registerUser(user: User) {
     }
 
     const date = new Date();
-    if (!verifiedInfo.verified) {
-      date.setSeconds(date.getSeconds() + 10);
+    if (!isAuthenticated) {
+      date.setHours(date.getHours() + 46);
     }
 
     await client.query(
-      "INSERT INTO players (name, intra, verified, created_at) VALUES ($1, $2, $3, $4)",
-      [user.name, user.intra, false, date]
+      "INSERT INTO players (name, intra, verified, created_at, email) VALUES ($1, $2, $3, $4, $5)",
+      [user.name, user.intra, verifiedInfo.verified || isAuthenticated, date, user.email || "TEMP EMAIL VALIDATION"]
     );
 
     return { success: true };
