@@ -1,10 +1,10 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
 import pool from '../../../utils/db';
-import { requireAdmin } from '../../../utils/clerkAuth';
+import { requireAdmin } from '../../../utils/nextauth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const authResult = await requireAdmin(req);
+  const authResult = await requireAdmin(req, res);
 
   if (!authResult.isAuthenticated) {
     return res.status(401).json({ 

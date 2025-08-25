@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRoleAuth } from '../hooks/useRoleAuth';
-import { UserRole } from '../utils/roles';
-import { SignInButton } from '@clerk/nextjs';
+import { UserRole } from '../types/auth';
+import { signIn } from 'next-auth/react';
 
 interface RoleGuardProps {
   children: React.ReactNode;
@@ -43,8 +43,9 @@ const RoleGuard: React.FC<RoleGuardProps> = ({
       }}>
         <h3>Authentication Required</h3>
         <p>Please sign in to access this feature.</p>
-        <SignInButton mode="modal">
-          <button style={{
+        <button 
+          onClick={() => signIn()}
+          style={{
             background: 'var(--ft-primary)',
             color: 'white',
             padding: '0.5rem 1rem',
@@ -52,10 +53,10 @@ const RoleGuard: React.FC<RoleGuardProps> = ({
             borderRadius: '4px',
             cursor: 'pointer',
             marginTop: '1rem'
-          }}>
-            Sign In
-          </button>
-        </SignInButton>
+          }}
+        >
+          Sign In
+        </button>
       </div>
     );
   }

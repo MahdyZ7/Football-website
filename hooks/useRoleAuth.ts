@@ -1,6 +1,6 @@
-import { useUser } from '@clerk/nextjs';
+import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
-import { UserRole, getUserRole } from '../utils/roles';
+import { UserRole } from '../types/auth';
 
 export interface UseRoleAuthReturn {
   isLoaded: boolean;
@@ -12,17 +12,34 @@ export interface UseRoleAuthReturn {
 }
 
 export function useRoleAuth(): UseRoleAuthReturn {
-  const { user, isLoaded, isSignedIn } = useUser();
+  const { data: session, status } = useSession();
   const [role, setRole] = useState<UserRole | null>(null);
+  const isLoaded = status !== 'loading';
+  const isSignedIn = status === 'authenticated';
 
   useEffect(() => {
-    if (isSignedIn && user?.emailAddresses[0]?.emailAddress) {
-      const userRole = getUserRole(user.emailAddresses[0].emailAddress);
-      setRole(userRole);
-    } else {
-      setRole(null);
-    }
-  }, [isSignedIn, user]);
+    const fetchRole = async () => {
+      if (isSignedIn && session?.user?.email) {
+        try {
+          // Fetch role from API instead of directly from database
+          const response = await fetch('/api/auth/user-role');
+          if (response.ok) {
+            const data = await response.json();
+            setRole(data.role || UserRole.USER);
+          } else {
+            setRole(UserRole.USER);
+          }
+        } catch (error) {
+          console.error('Error fetching user role:', error);
+          setRole(UserRole.USER);
+        }
+      } else {
+        setRole(null);
+      }
+    };
+
+    fetchRole();
+  }, [isSignedIn, session?.user?.email]);
 
   const hasRole = (requiredRole: UserRole): boolean => {
     if (!role) return false;
@@ -38,7 +55,7 @@ export function useRoleAuth(): UseRoleAuthReturn {
   return {
     isLoaded,
     isSignedIn: isSignedIn || false,
-    user,
+    user: session?.user || null,
     role,
     isAdmin: role === UserRole.ADMIN,
     hasRole

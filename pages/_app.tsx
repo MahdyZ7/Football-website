@@ -6,11 +6,11 @@ import ErrorBoundary from "../components/ErrorBoundary";
 import { ThemeProvider } from "../contexts/ThemeContext";
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
-import { ClerkProvider } from '@clerk/nextjs'
+import { SessionProvider } from 'next-auth/react'
 
-function MyApp({ Component, pageProps }: AppProps) {
+function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   return (
-    <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
+    <SessionProvider session={session}>
       <ErrorBoundary>
         <ThemeProvider>
           <Component {...pageProps} />
@@ -18,7 +18,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           <SpeedInsights />
         </ThemeProvider>
       </ErrorBoundary>
-    </ClerkProvider>
+    </SessionProvider>
   );
 }
 

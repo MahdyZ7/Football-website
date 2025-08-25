@@ -5,7 +5,7 @@ import allowed_times from "../utils/allowed_times";
 import player_limit_reached from "../utils/player_limit";
 import verifyLogin from "../../utils/verify_login";
 import { User } from "../../types/user";
-import { authenticateRequest } from "../../utils/clerkAuth";
+import { authenticateRequest } from "../../utils/nextauth";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -28,7 +28,7 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse) {
   }
 
   // Check if user is authenticated (optional - allows both auth and unauth)
-  const authResult = await authenticateRequest(req);
+  const authResult = await authenticateRequest(req, res);
   const isAuthenticated = authResult.isAuthenticated;
 
   const user = req.body as User;

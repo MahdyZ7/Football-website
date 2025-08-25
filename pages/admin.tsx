@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Navbar from './Navbar';
 import Footer from './footer';
-import { useUser, SignInButton, SignOutButton } from '@clerk/nextjs';
+import { useSession, signIn, signOut } from 'next-auth/react';
+import { useRoleAuth } from '../hooks/useRoleAuth';
 
 type User = {
   name: string;
@@ -26,12 +27,13 @@ type Toast = {
 };
 
 const Admin: React.FC = () => {
-  const { user, isLoaded, isSignedIn } = useUser();
+  const { data: session } = useSession();
+  const { isLoaded, isSignedIn, isAdmin } = useRoleAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [bannedUsers, setBannedUsers] = useState<BannedUser[]>([]);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [activeTab, setActiveTab] = useState<'users' | 'banned'>('users');
-  const [userRole, setUserRole] = useState<string | null>(null);
+  // Remove userRole state as it's now handled by useRoleAuth hook
 
   // Form states
   const [banForm, setBanForm] = useState({
@@ -56,9 +58,11 @@ const Admin: React.FC = () => {
   const checkAuth = useCallback(async () => {
     try {
       const response = await axios.get('/api/admin/auth');
-      setUserRole(response.data.role);
+      // No need to set userRole as it's handled by useRoleAuth hook
+      if (!response.data.authenticated) {
+        showToast('Authentication failed', 'error');
+      }
     } catch {
-      setUserRole(null);
       showToast('Authentication failed', 'error');
     }
   }, []);
@@ -88,11 +92,11 @@ const Admin: React.FC = () => {
   }, [isLoaded, isSignedIn, checkAuth]);
 
   useEffect(() => {
-    if (userRole === 'admin') {
+    if (isAdmin) {
       fetchUsers();
       fetchBannedUsers();
     }
-  }, [userRole, fetchUsers, fetchBannedUsers]);
+  }, [isAdmin, fetchUsers, fetchBannedUsers]);
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
     const newToast: Toast = {
@@ -191,29 +195,28 @@ const Admin: React.FC = () => {
         <div className="container admin-auth-container">
           <h1>Admin Access Required</h1>
           <p>Please sign in to access the admin panel.</p>
-          <SignInButton mode="modal">
-            <button 
-              style={{
-                background: 'var(--ft-primary)',
-                color: 'white',
-                padding: '1rem 2rem',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '1rem',
-                cursor: 'pointer',
-                marginTop: '1rem'
-              }}
-            >
-              Sign In
-            </button>
-          </SignInButton>
+          <button 
+            onClick={() => signIn()}
+            style={{
+              background: 'var(--ft-primary)',
+              color: 'white',
+              padding: '1rem 2rem',
+              border: 'none',
+              borderRadius: '6px',
+              fontSize: '1rem',
+              cursor: 'pointer',
+              marginTop: '1rem'
+            }}
+          >
+            Sign In
+          </button>
         </div>
         <Footer />
       </>
     );
   }
 
-  if (userRole !== 'admin') {
+  if (!isAdmin) {
     return (
       <>
         <Navbar />
@@ -221,24 +224,23 @@ const Admin: React.FC = () => {
           <h1>Access Denied</h1>
           <p>You don&apos;t have admin privileges.</p>
           <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-            Signed in as: {user?.emailAddresses[0]?.emailAddress}
+            Signed in as: {session?.user?.email}
           </p>
-          <SignOutButton>
-            <button 
-              style={{
-                background: 'var(--ft-secondary)',
-                color: 'white',
-                padding: '0.5rem 1rem',
-                border: 'none',
-                borderRadius: '4px',
-                fontSize: '0.9rem',
-                cursor: 'pointer',
-                marginTop: '1rem'
-              }}
-            >
-              Sign Out
-            </button>
-          </SignOutButton>
+          <button 
+            onClick={() => signOut()}
+            style={{
+              background: 'var(--ft-secondary)',
+              color: 'white',
+              padding: '0.5rem 1rem',
+              border: 'none',
+              borderRadius: '4px',
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              marginTop: '1rem'
+            }}
+          >
+            Sign Out
+          </button>
         </div>
         <Footer />
       </>
@@ -253,23 +255,22 @@ const Admin: React.FC = () => {
           <h1>Admin Dashboard</h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-              {user?.emailAddresses[0]?.emailAddress}
+              {session?.user?.email}
             </span>
-            <SignOutButton>
-              <button 
-                style={{
-                  background: 'var(--ft-secondary)',
-                  color: 'white',
-                  padding: '0.5rem 1rem',
-                  border: 'none',
-                  borderRadius: '4px',
-                  fontSize: '0.9rem',
-                  cursor: 'pointer'
-                }}
-              >
-                Sign Out
-              </button>
-            </SignOutButton>
+            <button 
+              onClick={() => signOut()}
+              style={{
+                background: 'var(--ft-secondary)',
+                color: 'white',
+                padding: '0.5rem 1rem',
+                border: 'none',
+                borderRadius: '4px',
+                fontSize: '0.9rem',
+                cursor: 'pointer'
+              }}
+            >
+              Sign Out
+            </button>
           </div>
         </div>
 

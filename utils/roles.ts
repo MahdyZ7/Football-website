@@ -12,27 +12,46 @@ export interface UserWithRole {
   name?: string;
 }
 
-async function fetchAdminEmails() {
+// Cache for admin emails to avoid frequent DB queries
+let adminEmailsCache: string[] | null = null;
+let lastCacheUpdate: number = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+async function fetchAdminEmails(): Promise<string[]> {
+  const now = Date.now();
+  
+  // Return cached data if still valid
+  if (adminEmailsCache && (now - lastCacheUpdate) < CACHE_DURATION) {
+    return adminEmailsCache;
+  }
+
   const client = await pool.connect();
   try {
     const res = await client.query('SELECT admin_email FROM admin_list');
-    const ADMIN_EMAILS = res.rows.map(row => row.admin_email.toLowerCase());
-    return ADMIN_EMAILS;
+    adminEmailsCache = res.rows.map(row => row.admin_email.toLowerCase());
+    lastCacheUpdate = now;
+    return adminEmailsCache;
   } catch (error) {
     console.error('Error fetching admin emails:', error);
+    return adminEmailsCache || [];
   } finally {
     client.release();
   }
 }
-export const ADMIN_EMAILS = await fetchAdminEmails();
 
-export function getUserRole(email: string): UserRole {
-  if (!ADMIN_EMAILS) return UserRole.USER;
-  return ADMIN_EMAILS.includes(email.toLowerCase()) ? UserRole.ADMIN : UserRole.USER;
+export async function getUserRole(email: string): Promise<UserRole> {
+  try {
+    const adminEmails = await fetchAdminEmails();
+    return adminEmails.includes(email.toLowerCase()) ? UserRole.ADMIN : UserRole.USER;
+  } catch (error) {
+    console.error('Error getting user role:', error);
+    return UserRole.USER;
+  }
 }
 
-export function isAdmin(email: string): boolean {
-  return getUserRole(email) === UserRole.ADMIN;
+export async function isAdmin(email: string): Promise<boolean> {
+  const role = await getUserRole(email);
+  return role === UserRole.ADMIN;
 }
 
 export function hasRole(userRole: UserRole, requiredRole: UserRole): boolean {
