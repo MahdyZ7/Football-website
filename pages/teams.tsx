@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import Footer from "./footer";
 import { GuaranteedSpot } from "../types/user";
+import TeamExporter from "../components/TeamExporter";
 
 type User = {
   name: string;
@@ -363,6 +364,7 @@ const Teams: React.FC = () => {
             <button onClick={clearTeams}>
               🗑️ Clear All Teams
             </button>
+            <TeamExporter team1={team1} team2={team2} team3={team3} />
           </div>
         </div>
 
