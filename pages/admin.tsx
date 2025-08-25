@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Navbar from './Navbar';
 import Footer from './footer';
+import { useSession, signIn, signOut } from 'next-auth/react';
+import { useRoleAuth } from '../hooks/useRoleAuth';
 
 type User = {
   name: string;
@@ -25,11 +27,13 @@ type Toast = {
 };
 
 const Admin: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { data: session } = useSession();
+  const { isLoaded, isSignedIn, isAdmin } = useRoleAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [bannedUsers, setBannedUsers] = useState<BannedUser[]>([]);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [activeTab, setActiveTab] = useState<'users' | 'banned'>('users');
+  // Remove userRole state as it's now handled by useRoleAuth hook
 
   // Form states
   const [banForm, setBanForm] = useState({
@@ -51,21 +55,17 @@ const Admin: React.FC = () => {
 
   const [isCustomReason, setIsCustomReason] = useState(false);
 
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
-      // Use relative URL to avoid hostname mismatch
-      const userResponse = await fetch('/__replauthuser');
-      if (userResponse.status !== 200) {
-        setIsAuthenticated(false);
-        return;
-      }
-
       const response = await axios.get('/api/admin/auth');
-      setIsAuthenticated(response.data.authenticated);
+      // No need to set userRole as it's handled by useRoleAuth hook
+      if (!response.data.authenticated) {
+        showToast('Authentication failed', 'error');
+      }
     } catch {
-      setIsAuthenticated(false);
+      showToast('Authentication failed', 'error');
     }
-  };
+  }, []);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -86,12 +86,17 @@ const Admin: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    checkAuth();
-    if (isAuthenticated) {
+    if (isLoaded && isSignedIn) {
+      checkAuth();
+    }
+  }, [isLoaded, isSignedIn, checkAuth]);
+
+  useEffect(() => {
+    if (isAdmin) {
       fetchUsers();
       fetchBannedUsers();
     }
-  }, [isAuthenticated, fetchUsers, fetchBannedUsers]);
+  }, [isAdmin, fetchUsers, fetchBannedUsers]);
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
     const newToast: Toast = {
@@ -171,32 +176,27 @@ const Admin: React.FC = () => {
     }
   };
 
-  if (!isAuthenticated) {
+  if (!isLoaded) {
+    return (
+      <>
+        <Navbar />
+        <div className="container admin-auth-container">
+          <h1>Loading...</h1>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  if (!isSignedIn) {
     return (
       <>
         <Navbar />
         <div className="container admin-auth-container">
           <h1>Admin Access Required</h1>
-          <p>Please log in with your Replit account to access the admin panel.</p>
-          <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-            Only authorized users (MahdyZ7) can access admin features.
-          </p>
+          <p>Please sign in to access the admin panel.</p>
           <button 
-            onClick={() => {
-              window.addEventListener("message", (e) => {
-                if (e.data === "auth_complete") {
-                  window.location.reload();
-                }
-              });
-              const h = 500, w = 350;
-              const left = screen.width / 2 - w / 2;
-              const top = screen.height / 2 - h / 2;
-              window.open(
-                "https://replit.com/auth_with_repl_site?domain=" + location.host,
-                "_blank",
-                `modal=yes, toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=${w}, height=${h}, top=${top}, left=${left}`
-              );
-            }}
+            onClick={() => signIn()}
             style={{
               background: 'var(--ft-primary)',
               color: 'white',
@@ -208,7 +208,38 @@ const Admin: React.FC = () => {
               marginTop: '1rem'
             }}
           >
-            Login with Replit
+            Sign In
+          </button>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <>
+        <Navbar />
+        <div className="container admin-auth-container">
+          <h1>Access Denied</h1>
+          <p>You don&apos;t have admin privileges.</p>
+          <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+            Signed in as: {session?.user?.email}
+          </p>
+          <button 
+            onClick={() => signOut()}
+            style={{
+              background: 'var(--ft-secondary)',
+              color: 'white',
+              padding: '0.5rem 1rem',
+              border: 'none',
+              borderRadius: '4px',
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              marginTop: '1rem'
+            }}
+          >
+            Sign Out
           </button>
         </div>
         <Footer />
@@ -220,7 +251,28 @@ const Admin: React.FC = () => {
     <>
       <Navbar />
       <div className="container">
-        <h1>Admin Dashboard</h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+          <h1>Admin Dashboard</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+              {session?.user?.email}
+            </span>
+            <button 
+              onClick={() => signOut()}
+              style={{
+                background: 'var(--ft-secondary)',
+                color: 'white',
+                padding: '0.5rem 1rem',
+                border: 'none',
+                borderRadius: '4px',
+                fontSize: '0.9rem',
+                cursor: 'pointer'
+              }}
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
 
         {/* Tab Navigation */}
         <div style={{ 
@@ -453,8 +505,8 @@ const Admin: React.FC = () => {
               fontSize: '0.9rem',
               color: 'var(--text-secondary)'
             }}>
-              <strong>Admin Access:</strong> Currently only &apos;MahdyZ7&apos; has admin privileges. 
-              To add more admins, update the ADMIN_USERS array in /pages/api/admin/auth.ts
+              <strong>Admin Access:</strong> Admin privileges are managed through Clerk roles. 
+              To add more admins, update the ADMIN_EMAILS array in /utils/roles.ts
             </div>
             <div className="responsive-table-container">
               <table className="admin-table">

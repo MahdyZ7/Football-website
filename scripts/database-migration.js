@@ -169,6 +169,7 @@ class DatabaseMigration {
       await this.createInventoryTable(client);
       await this.createBannedUsersTable(client);
       await this.createAdminLogsTable(client);
+      await this.createNextAuthTables(client);
       
       console.log('✅ All migrations completed successfully');
       
@@ -272,6 +273,123 @@ class DatabaseMigration {
     `);
     
     console.log('  ✅ Admin logs table ready');
+  }
+
+  async createNextAuthTables(client) {
+    // Create NextAuth users table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255),
+        email VARCHAR(255) UNIQUE,
+        "emailVerified" TIMESTAMPTZ,
+        image TEXT,
+        role VARCHAR(50) DEFAULT 'user',
+        "createdAt" TIMESTAMPTZ DEFAULT NOW(),
+        "updatedAt" TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+
+    // Create accounts table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS accounts (
+        id SERIAL PRIMARY KEY,
+        "userId" INTEGER NOT NULL,
+        type VARCHAR(255) NOT NULL,
+        provider VARCHAR(255) NOT NULL,
+        "providerAccountId" VARCHAR(255) NOT NULL,
+        refresh_token TEXT,
+        access_token TEXT,
+        expires_at BIGINT,
+        id_token TEXT,
+        scope TEXT,
+        session_state TEXT,
+        token_type TEXT,
+        CONSTRAINT "accounts_provider_providerAccountId_key" UNIQUE (provider, "providerAccountId")
+      )
+    `);
+
+    // Create sessions table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS sessions (
+        id SERIAL PRIMARY KEY,
+        "sessionToken" VARCHAR(255) NOT NULL UNIQUE,
+        "userId" INTEGER NOT NULL,
+        expires TIMESTAMPTZ NOT NULL
+      )
+    `);
+
+    // Create verification_tokens table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS verification_tokens (
+        identifier TEXT NOT NULL,
+        expires TIMESTAMPTZ NOT NULL,
+        token TEXT NOT NULL,
+        CONSTRAINT "verification_tokens_identifier_token_key" UNIQUE (identifier, token)
+      )
+    `);
+
+    // Create admin_list table if it doesn't exist
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS admin_list (
+        id SERIAL PRIMARY KEY,
+        admin_email VARCHAR(255) UNIQUE NOT NULL
+      )
+    `);
+
+    // Create indexes for performance
+    await client.query(`CREATE INDEX IF NOT EXISTS "accounts_userId_idx" ON accounts("userId")`);
+    await client.query(`CREATE INDEX IF NOT EXISTS "sessions_userId_idx" ON sessions("userId")`);
+    await client.query(`CREATE INDEX IF NOT EXISTS "sessions_sessionToken_idx" ON sessions("sessionToken")`);
+
+    // Add foreign key constraints
+    await client.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'accounts_userId_fkey') THEN
+          ALTER TABLE accounts ADD CONSTRAINT "accounts_userId_fkey" 
+            FOREIGN KEY ("userId") REFERENCES users(id) ON DELETE CASCADE;
+        END IF;
+      END $$;
+    `);
+
+    await client.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'sessions_userId_fkey') THEN
+          ALTER TABLE sessions ADD CONSTRAINT "sessions_userId_fkey" 
+            FOREIGN KEY ("userId") REFERENCES users(id) ON DELETE CASCADE;
+        END IF;
+      END $$;
+    `);
+
+    // Create function to automatically assign roles based on email
+    await client.query(`
+      CREATE OR REPLACE FUNCTION assign_user_role()
+      RETURNS TRIGGER AS $$
+      BEGIN
+        -- Check if user email is in admin_list
+        IF EXISTS (SELECT 1 FROM admin_list WHERE LOWER(admin_email) = LOWER(NEW.email)) THEN
+          NEW.role := 'admin';
+        ELSE
+          NEW.role := 'user';
+        END IF;
+        
+        RETURN NEW;
+      END;
+      $$ LANGUAGE plpgsql;
+    `);
+
+    // Create trigger to automatically assign roles on user creation/update
+    await client.query(`DROP TRIGGER IF EXISTS assign_role_trigger ON users`);
+    await client.query(`
+      CREATE TRIGGER assign_role_trigger
+        BEFORE INSERT OR UPDATE OF email ON users
+        FOR EACH ROW
+        EXECUTE FUNCTION assign_user_role()
+    `);
+
+    console.log('  ✅ NextAuth tables ready');
   }
 
   async listBackups() {
