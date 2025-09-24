@@ -30,11 +30,11 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
   const copyToClipboard = async () => {
     try {
       setIsExporting(true);
-      let textContent = '📋 FOOTBALL TEAM ROSTERS\n';
+      let textContent = 'FOOTBALL TEAM ROSTERS\n';
       textContent += '='.repeat(40) + '\n\n';
       teams.forEach((team, index) => {
         if (team.players.length > 0) {
-          textContent += `🏆 ${team.name.toUpperCase()}\n`;
+          textContent += `${team.name.toUpperCase()}\n`;
           textContent += '-'.repeat(team.name.length + 4) + '\n';
           
           team.players.forEach((player, playerIndex) => {
@@ -45,8 +45,8 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
           const avgRating = team.players.length > 0 
             ? (team.players.reduce((sum, p) => sum + (p.rating || 1), 0) / team.players.length).toFixed(1)
             : '0';
-          textContent += `📊 Average Rating: ${avgRating}\n`;
-          textContent += `👥 Players: ${team.players.length}/7\n\n`;
+          textContent += `Average Rating: ${avgRating}\n`;
+          textContent += `Players: ${team.players.length}/7\n\n`;
         }
       });
 
@@ -184,8 +184,18 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
       style={{
         width: '1200px',
         height: '800px',
-        padding: '0',
-        background: '#f0f0f0',
+        padding: '20px',
+        background: '#1a5c3a',
+        backgroundImage: `
+          radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+          radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+          radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+          radial-gradient(circle at 60% 60%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+          radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+          radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+          linear-gradient(45deg, transparent 49%, rgba(255, 255, 255, 0.03) 49%, rgba(255, 255, 255, 0.03) 51%, transparent 51%)
+        `,
+        backgroundSize: '100px 100px, 150px 150px, 200px 200px, 80px 80px, 120px 120px, 180px 180px, 60px 60px',
         color: 'white',
         fontFamily: 'Arial, sans-serif',
         position: 'absolute',
@@ -195,136 +205,126 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
         flexDirection: 'column'
       }}
     >
-      {teams.map((team, index) => {
-        const styling = getTeamStyling(index);
-        return (
-          <div
-            key={index}
-            style={{
-              height: '33.33%',
-              background: styling.background,
-              backgroundImage: styling.backgroundPattern,
-              backgroundSize: '80px 80px, 60px 60px, 40px 40px, 30px 30px',
-              padding: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              position: 'relative'
-            }}
-          >
+      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <h1 style={{ 
+          fontSize: '36px', 
+          margin: '0', 
+          textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+          color: '#FFD700'
+        }}>
+          FOOTBALL TEAM ROSTERS
+        </h1>
+        <div style={{ 
+          fontSize: '16px', 
+          marginTop: '8px',
+          color: '#cccccc'
+        }}>
+          {new Date().toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          })}
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '15px', flex: 1 }}>
+        {teams.map((team, index) => {
+          const styling = getTeamStyling(index);
+          return (
             <div
+              key={index}
               style={{
-                width: '90%',
-                maxWidth: '1000px',
+                flex: 1,
                 background: styling.cardBg,
                 border: styling.cardBorder,
                 borderRadius: '15px',
-                padding: '25px',
+                padding: '20px',
                 color: styling.textColor,
-                boxShadow: '0 12px 24px rgba(0,0,0,0.4)',
-                backdropFilter: 'blur(5px)'
+                boxShadow: '0 8px 16px rgba(0,0,0,0.3)',
+                position: 'relative',
+                backgroundImage: styling.backgroundPattern,
+                backgroundSize: '60px 60px, 40px 40px, 30px 30px, 20px 20px',
+                backgroundBlendMode: 'overlay'
               }}
             >
               <h2 style={{ 
                 textAlign: 'center', 
-                margin: '0 0 20px 0', 
-                fontSize: '32px',
+                margin: '0 0 15px 0', 
+                fontSize: '24px',
                 color: styling.headerColor,
-                borderBottom: `3px solid ${styling.accentColor}`,
-                paddingBottom: '12px',
+                borderBottom: `2px solid ${styling.accentColor}`,
+                paddingBottom: '8px',
                 fontWeight: 'bold',
                 textShadow: '1px 1px 2px rgba(0,0,0,0.1)'
               }}>
-                {index === 0 && '🟡'} {index === 1 && '🔵'} {index === 2 && '⚫'} {team.name}
+                {team.name}
               </h2>
               
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                gap: '30px'
-              }}>
-                <div style={{ flex: 1 }}>
-                  {team.players.length > 0 ? (
-                    team.players.map((player, playerIndex) => (
-                      <div
-                        key={playerIndex}
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          padding: '10px 15px',
-                          margin: '8px 0',
-                          background: playerIndex % 2 === 0 ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.6)',
-                          borderRadius: '10px',
-                          fontSize: '16px',
-                          border: styling.accentColor === '#FF8C00' ? '2px solid rgba(255, 140, 0, 0.13)' : styling.accentColor === '#FFD700' ? '2px solid rgba(255, 215, 0, 0.13)' : '2px solid rgba(255, 215, 0, 0.13)',
-                          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                        }}
-                      >
-                        <span style={{ fontWeight: 'bold', fontSize: '18px' }}>
-                          {playerIndex + 1}. {player.name}
-                        </span>
+              <div style={{ marginBottom: '15px' }}>
+                {team.players.length > 0 ? (
+                  team.players.map((player, playerIndex) => (
+                    <div
+                      key={playerIndex}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '8px 12px',
+                        margin: '6px 0',
+                        background: playerIndex % 2 === 0 ? '#f8f9fa' : 'white',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        border: '1px solid #e9ecef'
+                      }}
+                    >
+                      <span style={{ fontWeight: 'bold' }}>
+                        {playerIndex + 1}. {player.name}
+                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <span style={{ 
-                          fontSize: '14px', 
+                          fontSize: '12px', 
                           color: '#666',
-                          fontFamily: 'monospace',
-                          background: 'rgba(255, 140, 0, 0.13)',
-                          padding: '4px 8px',
-                          borderRadius: '6px'
+                          fontFamily: 'monospace'
                         }}>
                           {player.intra}
                         </span>
                       </div>
-                    ))
-                  ) : (
-                    <div style={{ 
-                      textAlign: 'center', 
-                      color: '#666', 
-                      fontStyle: 'italic',
-                      padding: '40px',
-                      fontSize: '18px'
-                    }}>
-                      No players assigned
                     </div>
-                  )}
-                </div>
+                  ))
+                ) : (
+                  <div style={{ 
+                    textAlign: 'center', 
+                    color: '#666', 
+                    fontStyle: 'italic',
+                    padding: '20px'
+                  }}>
+                    No players assigned
+                  </div>
+                )}
+              </div>
 
-                <div style={{ 
-                  minWidth: '200px',
-                  background: styling.accentColor === '#FF8C00' ? 'rgba(255, 140, 0, 0.13)' : styling.accentColor === '#FFD700' ? 'rgba(255, 215, 0, 0.13)' : 'rgba(255, 215, 0, 0.13)',
-                  border: `2px solid ${styling.accentColor}`,
-                  borderRadius: '12px',
-                  padding: '20px',
-                  textAlign: 'center'
-                }}>
-                  <div style={{ fontSize: '18px', marginBottom: '10px', fontWeight: 'bold' }}>
-                    👥 Players: {team.players.length}/7
-                  </div>
-                  <div style={{ fontSize: '18px', fontWeight: 'bold' }}>
-                    📊 Avg Rating: {
-                      team.players.length > 0 
-                        ? (team.players.reduce((sum, p) => sum + (p.rating || 1), 0) / team.players.length).toFixed(1)
-                        : '0'
-                    }
-                  </div>
+              <div style={{ 
+                borderTop: `2px solid ${styling.accentColor}`,
+                paddingTop: '10px',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '12px', marginBottom: '5px' }}>
+                  <strong>Players: {team.players.length}/7</strong>
+                </div>
+                <div style={{ fontSize: '12px' }}>
+                  <strong>Avg Rating: {
+                    team.players.length > 0 
+                      ? (team.players.reduce((sum, p) => sum + (p.rating || 1), 0) / team.players.length).toFixed(1)
+                      : '0'
+                  }</strong>
                 </div>
               </div>
-            </div>
 
-            {/* Club emblem corner decoration */}
-            <div style={{
-              position: 'absolute',
-              top: '10px',
-              right: '20px',
-              fontSize: '24px',
-              opacity: 0.7
-            }}>
-              {index === 0 && '🟨⚡'} {index === 1 && '🔷👑'} {index === 2 && '⚫⚪'}
-            </div>
           </div>
         );
       })}
+      </div>
 
       <div style={{ 
         position: 'absolute',
@@ -339,7 +339,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
         zIndex: 10,
         boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
       }}>
-        ⚽ FOOTBALL TEAM ROSTERS - {new Date().toLocaleDateString('en-US', { 
+        FOOTBALL TEAM ROSTERS - {new Date().toLocaleDateString('en-US', { 
           year: 'numeric', 
           month: 'short', 
           day: 'numeric' 
