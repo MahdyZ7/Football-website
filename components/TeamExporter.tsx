@@ -31,7 +31,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
   const copyToClipboard = async () => {
     try {
       setIsExporting(true);
-      let textContent = 'FOOTBALL TEAM LINEUPS\n';
+      let textContent = 'PREMIER LEAGUE TEAM LINEUPS\n';
       textContent += '='.repeat(50) + '\n\n';
       teams.forEach((team, index) => {
         if (team.players.length > 0) {
@@ -72,13 +72,13 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
         background: '#ffffff',
         useCORS: true,
         allowTaint: false,
-        width: 1400,
+        width: 1600,
         height: 900,
         scale: 2,
       });
       
       const link = document.createElement('a');
-      link.download = `football-lineups.${format}`;
+      link.download = `premier-league-lineups.${format}`;
       link.href = canvas.toDataURL(`image/${format}`, 0.95);
       link.click();
     } catch (error) {
@@ -101,7 +101,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
         background: '#ffffff',
         useCORS: true,
         allowTaint: false,
-        width: 1400,
+        width: 1600,
         height: 900,
         scale: 2,
       });
@@ -118,7 +118,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       
       pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-      pdf.save('football-lineups.pdf');
+      pdf.save('premier-league-lineups.pdf');
     } catch (error) {
       console.error('Failed to export as PDF:', error);
       alert('Failed to export as PDF. Please try again.');
@@ -128,58 +128,44 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
     }
   };
 
-  // Team configurations with authentic football club colors
+  // Professional club configurations with authentic Premier League styling
   const getTeamConfig = (index: number) => {
     const configs = [
       // Borussia Dortmund - Yellow & Black
       {
         name: 'Borussia Dortmund',
-        primaryColor: '#FDE047', // Bright yellow
-        secondaryColor: '#000000', // Black
-        accentColor: '#FACC15', // Golden yellow
+        shortName: 'BVB',
+        primaryColor: '#FDE047',
+        secondaryColor: '#000000',
         textColor: '#000000',
-        badgeGradient: 'linear-gradient(135deg, #FDE047 0%, #FACC15 50%, #EAB308 100%)',
-        backgroundPattern: `
-          radial-gradient(circle at 20% 30%, rgba(253, 224, 71, 0.15) 0%, transparent 50%),
-          radial-gradient(circle at 80% 70%, rgba(250, 204, 21, 0.1) 0%, transparent 50%),
-          linear-gradient(45deg, rgba(0, 0, 0, 0.02) 25%, transparent 25%),
-          linear-gradient(-45deg, rgba(0, 0, 0, 0.02) 25%, transparent 25%)
-        `,
-        clubBadge: '⚡',
-        established: '1909'
+        badgeBg: 'linear-gradient(145deg, #FDE047 0%, #FACC15 100%)',
+        established: '1909',
+        stadium: 'Signal Iduna Park',
+        formation: '4-3-3'
       },
-      // Chelsea - Blue & White
+      // Chelsea - Royal Blue
       {
         name: 'Chelsea FC',
-        primaryColor: '#034694', // Chelsea blue
-        secondaryColor: '#FFFFFF', // White
-        accentColor: '#FFD700', // Gold
+        shortName: 'CHE',
+        primaryColor: '#034694',
+        secondaryColor: '#FFFFFF',
         textColor: '#FFFFFF',
-        badgeGradient: 'linear-gradient(135deg, #034694 0%, #0066CC 50%, #4169E1 100%)',
-        backgroundPattern: `
-          radial-gradient(circle at 25% 25%, rgba(3, 70, 148, 0.15) 0%, transparent 50%),
-          radial-gradient(circle at 75% 75%, rgba(0, 102, 204, 0.1) 0%, transparent 50%),
-          linear-gradient(60deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%),
-          linear-gradient(-30deg, rgba(255, 215, 0, 0.03) 25%, transparent 25%)
-        `,
-        clubBadge: '🦁',
-        established: '1905'
+        badgeBg: 'linear-gradient(145deg, #034694 0%, #0066CC 100%)',
+        established: '1905',
+        stadium: 'Stamford Bridge',
+        formation: '4-2-3-1'
       },
-      // Juventus - Black & White stripes
+      // Juventus - Black & White
       {
         name: 'Juventus FC',
-        primaryColor: '#000000', // Black
-        secondaryColor: '#FFFFFF', // White
-        accentColor: '#D4AF37', // Gold
+        shortName: 'JUV',
+        primaryColor: '#000000',
+        secondaryColor: '#FFFFFF',
         textColor: '#FFFFFF',
-        badgeGradient: 'linear-gradient(135deg, #000000 0%, #2D2D2D 50%, #1A1A1A 100%)',
-        backgroundPattern: `
-          repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0px, rgba(255, 255, 255, 0.1) 20px, transparent 20px, transparent 40px),
-          repeating-linear-gradient(45deg, rgba(212, 175, 55, 0.05) 0px, rgba(212, 175, 55, 0.05) 10px, transparent 10px, transparent 20px),
-          radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 70%)
-        `,
-        clubBadge: '👑',
-        established: '1897'
+        badgeBg: 'linear-gradient(145deg, #000000 0%, #2D2D2D 100%)',
+        established: '1897',
+        stadium: 'Allianz Stadium',
+        formation: '3-5-2'
       }
     ];
     return configs[index];
@@ -190,75 +176,102 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
       ref={exportRef}
       className="export-preview"
       style={{
-        width: '1400px',
+        width: '1600px',
         height: '900px',
-        padding: '40px',
-        background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #334155 100%)',
-        color: 'white',
-        fontFamily: '"Segoe UI", -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+        background: '#0B1426',
+        color: '#FFFFFF',
+        fontFamily: '"Inter", "Helvetica Neue", sans-serif',
         position: 'absolute',
         left: '-9999px',
         top: '-9999px',
         display: 'flex',
         flexDirection: 'column',
         backgroundImage: `
-          radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
-          radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.02) 0%, transparent 50%),
-          radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.01) 0%, transparent 50%)
+          radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 40%),
+          radial-gradient(circle at 80% 60%, rgba(139, 92, 246, 0.1) 0%, transparent 40%),
+          radial-gradient(circle at 40% 80%, rgba(16, 185, 129, 0.08) 0%, transparent 40%)
         `
       }}
     >
-      {/* Header Section */}
+      {/* Header with Premier League Branding */}
       <div style={{ 
-        textAlign: 'center', 
-        marginBottom: '40px',
-        background: 'rgba(255, 255, 255, 0.05)',
-        padding: '30px',
-        borderRadius: '20px',
-        border: '2px solid rgba(255, 255, 255, 0.1)',
-        backdropFilter: 'blur(10px)'
+        background: 'linear-gradient(135deg, #3B0764 0%, #1E1B4B 50%, #0F172A 100%)',
+        padding: '30px 50px',
+        borderBottom: '4px solid #8B5CF6',
+        position: 'relative',
+        overflow: 'hidden'
       }}>
+        {/* Background Pattern */}
         <div style={{
-          fontSize: '48px',
-          fontWeight: '900',
-          background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF6B35 100%)',
-          backgroundClip: 'text',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          marginBottom: '15px',
-          textShadow: '0 4px 8px rgba(0,0,0,0.3)',
-          letterSpacing: '2px'
-        }}>
-          TEAM LINEUPS
-        </div>
-        <div style={{
-          fontSize: '18px',
-          color: '#E2E8F0',
-          fontWeight: '500',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '20px'
-        }}>
-          <span>⚽ MATCHDAY</span>
-          <span style={{ color: '#FFD700' }}>•</span>
-          <span>{new Date().toLocaleDateString('en-GB', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          })}</span>
-          <span style={{ color: '#FFD700' }}>•</span>
-          <span>OFFICIAL LINEUPS</span>
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: `
+            repeating-linear-gradient(45deg, rgba(139, 92, 246, 0.03) 0px, rgba(139, 92, 246, 0.03) 2px, transparent 2px, transparent 20px),
+            repeating-linear-gradient(-45deg, rgba(59, 130, 246, 0.02) 0px, rgba(59, 130, 246, 0.02) 2px, transparent 2px, transparent 20px)
+          `,
+          zIndex: 1
+        }}></div>
+
+        <div style={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <div style={{
+              fontSize: '42px',
+              fontWeight: '900',
+              background: 'linear-gradient(135deg, #FFFFFF 0%, #E2E8F0 100%)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              letterSpacing: '2px',
+              textShadow: '0 4px 12px rgba(0,0,0,0.5)'
+            }}>
+              PREMIER LEAGUE
+            </div>
+            <div style={{
+              fontSize: '16px',
+              color: '#8B5CF6',
+              fontWeight: '600',
+              letterSpacing: '1px',
+              marginTop: '5px'
+            }}>
+              OFFICIAL TEAM LINEUPS
+            </div>
+          </div>
+          
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ 
+              fontSize: '24px', 
+              fontWeight: '700', 
+              color: '#FFFFFF',
+              marginBottom: '5px' 
+            }}>
+              MATCHDAY
+            </div>
+            <div style={{ 
+              fontSize: '14px', 
+              color: '#CBD5E1',
+              fontWeight: '500'
+            }}>
+              {new Date().toLocaleDateString('en-GB', { 
+                weekday: 'long', 
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+              }).toUpperCase()}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Teams Grid */}
+      {/* Teams Section */}
       <div style={{ 
+        flex: 1,
+        padding: '40px 50px',
         display: 'grid', 
         gridTemplateColumns: 'repeat(3, 1fr)', 
-        gap: '30px', 
-        flex: 1 
+        gap: '40px'
       }}>
         {teams.map((team, index) => {
           const config = getTeamConfig(index);
@@ -266,117 +279,113 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
             <div
               key={index}
               style={{
-                background: config.badgeGradient,
-                borderRadius: '25px',
-                padding: '30px',
+                background: 'rgba(15, 23, 42, 0.8)',
+                borderRadius: '16px',
+                padding: '0',
                 position: 'relative',
                 overflow: 'hidden',
-                boxShadow: '0 20px 40px rgba(0,0,0,0.3), 0 8px 16px rgba(0,0,0,0.2)',
-                border: `3px solid ${config.accentColor}`,
-                backgroundImage: config.backgroundPattern,
-                backgroundSize: '60px 60px, 80px 80px, 40px 40px, 40px 40px'
+                border: '1px solid rgba(148, 163, 184, 0.2)',
+                boxShadow: '0 25px 50px rgba(0, 0, 0, 0.4)'
               }}
             >
-              {/* Club Header */}
+              {/* Team Header */}
               <div style={{
+                background: config.badgeBg,
+                padding: '25px 30px',
                 textAlign: 'center',
-                marginBottom: '25px',
-                padding: '20px',
-                background: 'rgba(0, 0, 0, 0.2)',
-                borderRadius: '15px',
-                border: `2px solid ${config.accentColor}20`
+                position: 'relative',
+                borderBottom: '3px solid rgba(255,255,255,0.1)'
               }}>
                 <div style={{
-                  fontSize: '36px',
-                  marginBottom: '8px'
-                }}>
-                  {config.clubBadge}
-                </div>
-                <div style={{
-                  fontSize: '22px',
-                  fontWeight: '800',
+                  fontSize: '28px',
+                  fontWeight: '900',
                   color: config.textColor,
-                  textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
-                  marginBottom: '5px',
-                  letterSpacing: '1px'
+                  marginBottom: '8px',
+                  letterSpacing: '1px',
+                  textShadow: config.textColor === '#FFFFFF' ? '0 2px 4px rgba(0,0,0,0.3)' : '0 2px 4px rgba(255,255,255,0.3)'
                 }}>
                   {team.name || config.name}
                 </div>
                 <div style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: '15px',
                   fontSize: '12px',
-                  color: config.accentColor,
                   fontWeight: '600',
-                  opacity: 0.9
+                  color: config.textColor === '#FFFFFF' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)'
                 }}>
-                  EST. {config.established}
+                  <span>EST. {config.established}</span>
+                  <span>•</span>
+                  <span>{config.shortName}</span>
+                  <span>•</span>
+                  <span>{config.formation}</span>
                 </div>
               </div>
 
-              {/* Squad List */}
+              {/* Player List */}
               <div style={{
-                background: 'rgba(255, 255, 255, 0.95)',
-                borderRadius: '15px',
-                padding: '20px',
-                minHeight: '320px',
-                boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
+                padding: '30px',
+                background: 'rgba(255, 255, 255, 0.98)',
+                margin: '0',
+                minHeight: '400px'
               }}>
                 <div style={{
-                  fontSize: '16px',
-                  fontWeight: '700',
+                  fontSize: '14px',
+                  fontWeight: '800',
                   color: config.primaryColor,
-                  marginBottom: '15px',
                   textAlign: 'center',
-                  padding: '10px',
-                  background: `${config.accentColor}20`,
+                  marginBottom: '25px',
+                  padding: '12px',
+                  background: `${config.primaryColor}10`,
                   borderRadius: '8px',
-                  border: `2px solid ${config.accentColor}40`
+                  border: `2px solid ${config.primaryColor}20`,
+                  letterSpacing: '1px'
                 }}>
-                  STARTING XI
+                  STARTING ELEVEN
                 </div>
 
-                {team.players.length > 0 ? (
-                  team.players.slice(0, 11).map((player, playerIndex) => (
-                    <div
-                      key={playerIndex}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '12px 15px',
-                        margin: '8px 0',
-                        background: playerIndex % 2 === 0 ? '#F8FAFC' : '#FFFFFF',
-                        borderRadius: '10px',
-                        border: `2px solid ${config.primaryColor}10`,
-                        transition: 'all 0.2s ease'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ marginBottom: '25px' }}>
+                  {team.players.length > 0 ? (
+                    team.players.slice(0, 11).map((player, playerIndex) => (
+                      <div
+                        key={playerIndex}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          padding: '12px 0',
+                          borderBottom: '1px solid #F1F5F9',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
                         <div style={{
-                          width: '32px',
-                          height: '32px',
-                          borderRadius: '50%',
-                          background: config.badgeGradient,
+                          width: '35px',
+                          height: '35px',
+                          borderRadius: '4px',
+                          background: config.badgeBg,
                           color: config.textColor,
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontSize: '14px',
-                          fontWeight: '700',
-                          boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
+                          fontSize: '16px',
+                          fontWeight: '800',
+                          marginRight: '15px',
+                          boxShadow: '0 4px 8px rgba(0,0,0,0.15)'
                         }}>
                           {playerIndex + 1}
                         </div>
-                        <div>
+                        
+                        <div style={{ flex: 1 }}>
                           <div style={{
-                            fontSize: '15px',
+                            fontSize: '16px',
                             fontWeight: '700',
-                            color: config.primaryColor,
-                            lineHeight: '1.2'
+                            color: '#1E293B',
+                            marginBottom: '2px'
                           }}>
                             {player.name}
                           </div>
                           <div style={{
-                            fontSize: '11px',
+                            fontSize: '12px',
                             color: '#64748B',
                             fontFamily: 'monospace',
                             fontWeight: '500'
@@ -384,71 +393,90 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
                             @{player.intra}
                           </div>
                         </div>
-                      </div>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px'
-                      }}>
+
                         <div style={{
-                          background: `${config.accentColor}20`,
-                          color: config.primaryColor,
-                          padding: '4px 8px',
+                          background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+                          color: 'white',
+                          padding: '4px 10px',
                           borderRadius: '6px',
-                          fontSize: '11px',
-                          fontWeight: '600'
+                          fontSize: '12px',
+                          fontWeight: '700',
+                          boxShadow: '0 2px 4px rgba(245, 158, 11, 0.3)'
                         }}>
-                          ⭐ {player.rating || 1}
+                          {player.rating || 1}★
                         </div>
                       </div>
+                    ))
+                  ) : (
+                    <div style={{
+                      textAlign: 'center',
+                      color: '#94A3B8',
+                      fontStyle: 'italic',
+                      padding: '60px 20px',
+                      fontSize: '14px'
+                    }}>
+                      No players selected
                     </div>
-                  ))
-                ) : (
-                  <div style={{
-                    textAlign: 'center',
-                    color: '#64748B',
-                    fontStyle: 'italic',
-                    padding: '40px 20px',
-                    fontSize: '14px'
-                  }}>
-                    No players selected
-                  </div>
-                )}
+                  )}
+                </div>
 
-                {/* Team Stats */}
+                {/* Team Statistics */}
                 <div style={{
-                  marginTop: '20px',
-                  padding: '15px',
-                  background: `${config.primaryColor}05`,
-                  borderRadius: '10px',
-                  border: `2px solid ${config.primaryColor}20`
+                  background: 'linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%)',
+                  padding: '20px',
+                  borderRadius: '12px',
+                  border: '1px solid #E2E8F0'
                 }}>
                   <div style={{
                     display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: '15px',
-                    fontSize: '12px',
-                    fontWeight: '600'
+                    gridTemplateColumns: '1fr 1px 1fr',
+                    alignItems: 'center',
+                    gap: '20px'
                   }}>
-                    <div style={{
-                      textAlign: 'center',
-                      color: config.primaryColor
-                    }}>
-                      <div style={{ fontSize: '18px', fontWeight: '800' }}>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{
+                        fontSize: '24px',
+                        fontWeight: '900',
+                        color: config.primaryColor,
+                        marginBottom: '5px'
+                      }}>
                         {team.players.length}
                       </div>
-                      <div>SQUAD SIZE</div>
+                      <div style={{
+                        fontSize: '11px',
+                        fontWeight: '700',
+                        color: '#475569',
+                        letterSpacing: '1px'
+                      }}>
+                        SQUAD SIZE
+                      </div>
                     </div>
+                    
                     <div style={{
-                      textAlign: 'center',
-                      color: config.primaryColor
-                    }}>
-                      <div style={{ fontSize: '18px', fontWeight: '800' }}>
+                      width: '1px',
+                      height: '40px',
+                      background: '#CBD5E1'
+                    }}></div>
+                    
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{
+                        fontSize: '24px',
+                        fontWeight: '900',
+                        color: config.primaryColor,
+                        marginBottom: '5px'
+                      }}>
                         {team.players.length > 0 
                           ? (team.players.reduce((sum, p) => sum + (p.rating || 1), 0) / team.players.length).toFixed(1)
                           : '0.0'}
                       </div>
-                      <div>AVG RATING</div>
+                      <div style={{
+                        fontSize: '11px',
+                        fontWeight: '700',
+                        color: '#475569',
+                        letterSpacing: '1px'
+                      }}>
+                        AVG RATING
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -458,27 +486,42 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
         })}
       </div>
 
-      {/* Footer Badge */}
+      {/* Footer */}
       <div style={{
-        position: 'absolute',
-        bottom: '20px',
-        right: '20px',
-        background: 'rgba(0, 0, 0, 0.8)',
-        color: 'white',
-        padding: '15px 25px',
-        borderRadius: '50px',
-        fontSize: '14px',
-        fontWeight: '600',
+        background: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)',
+        padding: '25px 50px',
+        borderTop: '2px solid #374151',
         display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        boxShadow: '0 8px 16px rgba(0,0,0,0.3)',
-        border: '2px solid #FFD700'
+        justifyContent: 'space-between',
+        alignItems: 'center'
       }}>
-        <span style={{ fontSize: '18px' }}>⚽</span>
-        <span>OFFICIAL LINEUP</span>
-        <span style={{ color: '#FFD700' }}>•</span>
-        <span>{new Date().toLocaleDateString('en-GB')}</span>
+        <div style={{
+          fontSize: '14px',
+          color: '#94A3B8',
+          fontWeight: '500'
+        }}>
+          Premier League Official • Matchday Lineups
+        </div>
+        
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '15px',
+          fontSize: '14px',
+          fontWeight: '600',
+          color: '#FFFFFF'
+        }}>
+          <span style={{
+            background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 100%)',
+            padding: '8px 16px',
+            borderRadius: '20px',
+            fontSize: '12px',
+            letterSpacing: '1px'
+          }}>
+            LIVE
+          </span>
+          <span>{new Date().toLocaleDateString('en-GB')}</span>
+        </div>
       </div>
     </div>
   );
@@ -492,30 +535,31 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
         onClick={() => setShowExportMenu(!showExportMenu)}
         disabled={isExporting}
         style={{
-          background: 'linear-gradient(135deg, #16A34A 0%, #15803D 100%)',
+          background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
           color: 'white',
           border: 'none',
-          padding: '14px 24px',
+          padding: '16px 28px',
           borderRadius: '12px',
           cursor: 'pointer',
           fontSize: '16px',
           fontWeight: '700',
           display: 'flex',
           alignItems: 'center',
-          gap: '10px',
-          boxShadow: '0 6px 12px rgba(22, 163, 74, 0.3)',
+          gap: '12px',
+          boxShadow: '0 8px 20px rgba(139, 92, 246, 0.4)',
           transition: 'all 0.3s ease',
-          border: '2px solid rgba(255, 255, 255, 0.2)'
+          border: '2px solid rgba(255, 255, 255, 0.1)',
+          fontFamily: '"Inter", "Helvetica Neue", sans-serif'
         }}
         onMouseOver={(e) => {
-          e.currentTarget.style.background = 'linear-gradient(135deg, #15803D 0%, #166534 100%)';
+          e.currentTarget.style.background = 'linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%)';
           e.currentTarget.style.transform = 'translateY(-2px)';
-          e.currentTarget.style.boxShadow = '0 8px 16px rgba(22, 163, 74, 0.4)';
+          e.currentTarget.style.boxShadow = '0 12px 24px rgba(139, 92, 246, 0.5)';
         }}
         onMouseOut={(e) => {
-          e.currentTarget.style.background = 'linear-gradient(135deg, #16A34A 0%, #15803D 100%)';
+          e.currentTarget.style.background = 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)';
           e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = '0 6px 12px rgba(22, 163, 74, 0.3)';
+          e.currentTarget.style.boxShadow = '0 8px 20px rgba(139, 92, 246, 0.4)';
         }}
       >
         {isExporting ? (
@@ -537,14 +581,15 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
             position: 'absolute',
             top: '100%',
             left: '0',
-            marginTop: '10px',
+            marginTop: '12px',
             background: 'white',
             border: '2px solid #E2E8F0',
-            borderRadius: '12px',
-            boxShadow: '0 12px 24px rgba(0,0,0,0.15)',
+            borderRadius: '16px',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
             zIndex: 1000,
-            minWidth: '200px',
-            overflow: 'hidden'
+            minWidth: '220px',
+            overflow: 'hidden',
+            backdropFilter: 'blur(10px)'
           }}
         >
           <button
@@ -552,24 +597,27 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
             disabled={isExporting}
             style={{
               width: '100%',
-              padding: '14px 20px',
+              padding: '16px 24px',
               border: 'none',
               background: 'transparent',
               textAlign: 'left',
               cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: '500',
+              fontSize: '15px',
+              fontWeight: '600',
               borderBottom: '1px solid #F1F5F9',
               color: '#374151',
               display: 'flex',
               alignItems: 'center',
-              gap: '10px'
+              gap: '12px',
+              transition: 'all 0.2s ease'
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.background = '#F8FAFC';
+              e.currentTarget.style.background = 'linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%)';
+              e.currentTarget.style.color = '#1E293B';
             }}
             onMouseOut={(e) => {
               e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = '#374151';
             }}
           >
             <span>📄</span>
@@ -581,24 +629,27 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
             disabled={isExporting}
             style={{
               width: '100%',
-              padding: '14px 20px',
+              padding: '16px 24px',
               border: 'none',
               background: 'transparent',
               textAlign: 'left',
               cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: '500',
+              fontSize: '15px',
+              fontWeight: '600',
               borderBottom: '1px solid #F1F5F9',
               color: '#374151',
               display: 'flex',
               alignItems: 'center',
-              gap: '10px'
+              gap: '12px',
+              transition: 'all 0.2s ease'
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.background = '#F8FAFC';
+              e.currentTarget.style.background = 'linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%)';
+              e.currentTarget.style.color = '#1E293B';
             }}
             onMouseOut={(e) => {
               e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = '#374151';
             }}
           >
             <span>🖼️</span>
@@ -610,24 +661,27 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
             disabled={isExporting}
             style={{
               width: '100%',
-              padding: '14px 20px',
+              padding: '16px 24px',
               border: 'none',
               background: 'transparent',
               textAlign: 'left',
               cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: '500',
+              fontSize: '15px',
+              fontWeight: '600',
               borderBottom: '1px solid #F1F5F9',
               color: '#374151',
               display: 'flex',
               alignItems: 'center',
-              gap: '10px'
+              gap: '12px',
+              transition: 'all 0.2s ease'
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.background = '#F8FAFC';
+              e.currentTarget.style.background = 'linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%)';
+              e.currentTarget.style.color = '#1E293B';
             }}
             onMouseOut={(e) => {
               e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = '#374151';
             }}
           >
             <span>🖼️</span>
@@ -639,23 +693,26 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
             disabled={isExporting}
             style={{
               width: '100%',
-              padding: '14px 20px',
+              padding: '16px 24px',
               border: 'none',
               background: 'transparent',
               textAlign: 'left',
               cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: '500',
+              fontSize: '15px',
+              fontWeight: '600',
               color: '#374151',
               display: 'flex',
               alignItems: 'center',
-              gap: '10px'
+              gap: '12px',
+              transition: 'all 0.2s ease'
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.background = '#F8FAFC';
+              e.currentTarget.style.background = 'linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%)';
+              e.currentTarget.style.color = '#1E293B';
             }}
             onMouseOut={(e) => {
               e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = '#374151';
             }}
           >
             <span>📋</span>
