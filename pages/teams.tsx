@@ -339,8 +339,8 @@ const Teams: React.FC = () => {
   if (loading) {
     return (
       <>
-        <Navbar />
         <div className="teams-container">
+        <Navbar />
           <div className="teams-header">
             <h1>Team Selection</h1>
             <div className="loading-state">Loading players...</div>
@@ -353,9 +353,9 @@ const Teams: React.FC = () => {
 
   return (
     <>
-      <Navbar />
       <div className="teams-container">
-        <div className="teams-header">
+		<Navbar />
+	    <div className="teams-header">
           <h1>Team Selection (3 Teams of 7)</h1>
           <div className="teams-controls">
             <button onClick={autoBalance}>

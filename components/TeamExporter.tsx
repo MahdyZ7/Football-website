@@ -32,8 +32,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
     try {
       setIsExporting(true);
       let textContent = '📋 FOOTBALL TEAM ROSTERS\n';
-      textContent += '=' * 40 + '\n\n';
-      
+      textContent += '='.repeat(40) + '\n\n';
       teams.forEach((team, index) => {
         if (team.players.length > 0) {
           textContent += `🏆 ${team.name.toUpperCase()}\n`;
@@ -41,7 +40,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
           
           team.players.forEach((player, playerIndex) => {
             const rating = '⭐'.repeat(player.rating || 1);
-            textContent += `${playerIndex + 1}. ${player.name} (${player.intra}) ${rating}\n`;
+            textContent += `${playerIndex + 1}. ${player.name} (${player.intra})\n`;
           });
           
           const avgRating = team.players.length > 0 
@@ -70,8 +69,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
       setIsExporting(true);
       
       const canvas = await html2canvas(exportRef.current, {
-        backgroundColor: '#ffffff',
-        scale: 2,
+        background: '#ffffff',
         useCORS: true,
         allowTaint: false,
         width: 1200,
@@ -98,8 +96,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
       setIsExporting(true);
       
       const canvas = await html2canvas(exportRef.current, {
-        backgroundColor: '#ffffff',
-        scale: 2,
+        background: '#ffffff',
         useCORS: true,
         allowTaint: false,
         width: 1200,
@@ -135,7 +132,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
         width: '1200px',
         height: '800px',
         padding: '40px',
-        backgroundColor: '#1a5c3a',
+        background: '#1a5c3a',
         backgroundImage: `
           radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
           radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
@@ -182,7 +179,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
             key={index}
             style={{
               flex: 1,
-              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              background: 'rgba(255, 255, 255, 0.95)',
               border: '3px solid #FFD700',
               borderRadius: '15px',
               padding: '20px',
@@ -212,7 +209,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
                       alignItems: 'center',
                       padding: '8px 12px',
                       margin: '6px 0',
-                      backgroundColor: playerIndex % 2 === 0 ? '#f8f9fa' : 'white',
+                      background: playerIndex % 2 === 0 ? '#f8f9fa' : 'white',
                       borderRadius: '8px',
                       fontSize: '16px',
                       border: '1px solid #e9ecef'
@@ -229,9 +226,9 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
                       }}>
                         {player.intra}
                       </span>
-                      <span style={{ color: '#FFD700' }}>
+                      {/* <span style={{ color: '#FFD700' }}>
                         {'⭐'.repeat(player.rating || 1)}
-                      </span>
+                      </span> */}
                     </div>
                   </div>
                 ))
@@ -287,7 +284,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
         onClick={() => setShowExportMenu(!showExportMenu)}
         disabled={isExporting}
         style={{
-          backgroundColor: '#28a745',
+          background: '#28a745',
           color: 'white',
           border: 'none',
           padding: '12px 20px',
@@ -302,11 +299,11 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
           transition: 'all 0.2s ease'
         }}
         onMouseOver={(e) => {
-          e.currentTarget.style.backgroundColor = '#218838';
+          e.currentTarget.style.background = '#218838';
           e.currentTarget.style.transform = 'translateY(-2px)';
         }}
         onMouseOut={(e) => {
-          e.currentTarget.style.backgroundColor = '#28a745';
+          e.currentTarget.style.background = '#28a745';
           e.currentTarget.style.transform = 'translateY(0)';
         }}
       >
@@ -320,12 +317,12 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
             top: '100%',
             left: '0',
             marginTop: '8px',
-            backgroundColor: 'white',
+            background: 'white',
             border: '1px solid #ccc',
             borderRadius: '8px',
             boxShadow: '0 8px 16px rgba(0,0,0,0.2)',
             zIndex: 1000,
-            minWidth: '200px'
+            minWidth: '150px'
           }}
         >
           <button
@@ -335,17 +332,18 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
               width: '100%',
               padding: '12px 16px',
               border: 'none',
-              backgroundColor: 'transparent',
+              background: 'transparent',
               textAlign: 'left',
               cursor: 'pointer',
               fontSize: '14px',
-              borderBottom: '1px solid #eee'
+              borderBottom: '1px solid #eee',
+              color: '#333'
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = '#f8f9fa';
+              e.currentTarget.style.background = '#f8f9fa';
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.background = 'transparent';
             }}
           >
             📄 Export as PDF
@@ -358,17 +356,18 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
               width: '100%',
               padding: '12px 16px',
               border: 'none',
-              backgroundColor: 'transparent',
+              background: 'transparent',
               textAlign: 'left',
               cursor: 'pointer',
               fontSize: '14px',
-              borderBottom: '1px solid #eee'
+              borderBottom: '1px solid #eee',
+              color: '#333'
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = '#f8f9fa';
+              e.currentTarget.style.background = '#f8f9fa';
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.background = 'transparent';
             }}
           >
             🖼️ Export as PNG
@@ -381,17 +380,18 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
               width: '100%',
               padding: '12px 16px',
               border: 'none',
-              backgroundColor: 'transparent',
+              background: 'transparent',
               textAlign: 'left',
               cursor: 'pointer',
               fontSize: '14px',
-              borderBottom: '1px solid #eee'
+              borderBottom: '1px solid #eee',
+              color: '#333'
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = '#f8f9fa';
+              e.currentTarget.style.background = '#f8f9fa';
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.background = 'transparent';
             }}
           >
             🖼️ Export as JPEG
@@ -404,16 +404,17 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
               width: '100%',
               padding: '12px 16px',
               border: 'none',
-              backgroundColor: 'transparent',
+              background: 'transparent',
               textAlign: 'left',
               cursor: 'pointer',
-              fontSize: '14px'
+              fontSize: '14px',
+              color: '#333'
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = '#f8f9fa';
+              e.currentTarget.style.background = '#f8f9fa';
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.background = 'transparent';
             }}
           >
             📋 Copy to Clipboard
