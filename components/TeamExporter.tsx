@@ -162,7 +162,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
         fontFamily: '"Inter", "Helvetica Neue", sans-serif',
         position: 'absolute',
         left: '-9999px',
-        top: '-9999px',
+        top: '0px',
         display: 'flex',
         flexDirection: 'column',
         backgroundImage: `
@@ -174,7 +174,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
     >
       <div style={{ 
         background: 'linear-gradient(135deg, #3B0764 0%, #1E1B4B 50%, #0F172A 100%)',
-        padding: '30px 50px',
+        padding: '20px 40px',
         borderBottom: '4px solid #8B5CF6',
         position: 'relative',
         overflow: 'hidden'
@@ -195,23 +195,24 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
         <div style={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <div style={{
-              fontSize: '42px',
+              fontSize: '36px',
               fontWeight: '900',
               background: 'linear-gradient(135deg, #FFFFFF 0%, #E2E8F0 100%)',
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-              letterSpacing: '2px',
-              textShadow: '0 4px 12px rgba(0,0,0,0.5)'
+              letterSpacing: '1.5px',
+              textShadow: '0 4px 12px rgba(0,0,0,0.5)',
+              lineHeight: '1.1'
             }}>
               42 LEAGUE
             </div>
             <div style={{
-              fontSize: '16px',
+              fontSize: '14px',
               color: '#8B5CF6',
               fontWeight: '600',
               letterSpacing: '1px',
-              marginTop: '5px'
+              marginTop: '3px'
             }}>
               OFFICIAL TEAM LINEUPS
             </div>
@@ -245,10 +246,10 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
       {/* Teams Section */}
       <div style={{ 
         flex: 1,
-        padding: '40px 50px',
+        padding: '25px 40px',
         display: 'grid', 
         gridTemplateColumns: 'repeat(3, 1fr)', 
-        gap: '40px'
+        gap: '25px'
       }}>
         {teams.map((team, index) => {
           const config = getTeamConfig(index);
@@ -268,7 +269,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
               {/* Team Header */}
               <div style={{
                 background: config.badgeBg,
-                padding: '25px 30px',
+                padding: '20px 25px',
                 textAlign: 'center',
                 position: 'relative',
                 borderBottom: '3px solid rgba(255,255,255,0.1)'
@@ -297,10 +298,10 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
 
               {/* Player List */}
               <div style={{
-                padding: '30px',
+                padding: '20px',
                 background: 'rgba(255, 255, 255, 0.98)',
                 margin: '0',
-                minHeight: '400px'
+                minHeight: '320px'
               }}>
                 <div style={{
                   fontSize: '14px',
@@ -460,7 +461,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
       {/* Footer */}
       <div style={{
         background: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)',
-        padding: '25px 50px',
+        padding: '15px 40px',
         borderTop: '2px solid #374151',
         display: 'flex',
         justifyContent: 'space-between',
