@@ -31,7 +31,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
   const copyToClipboard = async () => {
     try {
       setIsExporting(true);
-      let textContent = 'PREMIER LEAGUE TEAM LINEUPS\n';
+      let textContent = '42 TEAMS LINEUPS\n';
       textContent += '='.repeat(50) + '\n\n';
       teams.forEach((team, index) => {
         if (team.players.length > 0) {
@@ -74,11 +74,10 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
         allowTaint: false,
         width: 1600,
         height: 900,
-        scale: 2,
       });
       
       const link = document.createElement('a');
-      link.download = `premier-league-lineups.${format}`;
+      link.download = `Matchday-lineups.${format}`;
       link.href = canvas.toDataURL(`image/${format}`, 0.95);
       link.click();
     } catch (error) {
@@ -103,7 +102,6 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
         allowTaint: false,
         width: 1600,
         height: 900,
-        scale: 2,
       });
       
       const imgData = canvas.toDataURL('image/png');
@@ -118,7 +116,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       
       pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-      pdf.save('premier-league-lineups.pdf');
+      pdf.save('Matchday-lineups.pdf');
     } catch (error) {
       console.error('Failed to export as PDF:', error);
       alert('Failed to export as PDF. Please try again.');
@@ -128,44 +126,25 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
     }
   };
 
-  // Professional club configurations with authentic Premier League styling
   const getTeamConfig = (index: number) => {
     const configs = [
-      // Borussia Dortmund - Yellow & Black
       {
-        name: 'Borussia Dortmund',
-        shortName: 'BVB',
         primaryColor: '#FDE047',
         secondaryColor: '#000000',
         textColor: '#000000',
         badgeBg: 'linear-gradient(145deg, #FDE047 0%, #FACC15 100%)',
-        established: '1909',
-        stadium: 'Signal Iduna Park',
-        formation: '4-3-3'
       },
-      // Chelsea - Royal Blue
       {
-        name: 'Chelsea FC',
-        shortName: 'CHE',
         primaryColor: '#034694',
         secondaryColor: '#FFFFFF',
         textColor: '#FFFFFF',
         badgeBg: 'linear-gradient(145deg, #034694 0%, #0066CC 100%)',
-        established: '1905',
-        stadium: 'Stamford Bridge',
-        formation: '4-2-3-1'
       },
-      // Juventus - Black & White
       {
-        name: 'Juventus FC',
-        shortName: 'JUV',
         primaryColor: '#000000',
         secondaryColor: '#FFFFFF',
         textColor: '#FFFFFF',
         badgeBg: 'linear-gradient(145deg, #000000 0%, #2D2D2D 100%)',
-        established: '1897',
-        stadium: 'Allianz Stadium',
-        formation: '3-5-2'
       }
     ];
     return configs[index];
@@ -193,7 +172,6 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
         `
       }}
     >
-      {/* Header with Premier League Branding */}
       <div style={{ 
         background: 'linear-gradient(135deg, #3B0764 0%, #1E1B4B 50%, #0F172A 100%)',
         padding: '30px 50px',
@@ -201,7 +179,6 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
         position: 'relative',
         overflow: 'hidden'
       }}>
-        {/* Background Pattern */}
         <div style={{
           position: 'absolute',
           top: 0,
@@ -227,7 +204,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
               letterSpacing: '2px',
               textShadow: '0 4px 12px rgba(0,0,0,0.5)'
             }}>
-              PREMIER LEAGUE
+              42 LEAGUE
             </div>
             <div style={{
               fontSize: '16px',
@@ -304,7 +281,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
                   letterSpacing: '1px',
                   textShadow: config.textColor === '#FFFFFF' ? '0 2px 4px rgba(0,0,0,0.3)' : '0 2px 4px rgba(255,255,255,0.3)'
                 }}>
-                  {team.name || config.name}
+                  {team.name}
                 </div>
                 <div style={{
                   display: 'flex',
@@ -315,11 +292,6 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
                   fontWeight: '600',
                   color: config.textColor === '#FFFFFF' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)'
                 }}>
-                  <span>EST. {config.established}</span>
-                  <span>•</span>
-                  <span>{config.shortName}</span>
-                  <span>•</span>
-                  <span>{config.formation}</span>
                 </div>
               </div>
 
@@ -403,7 +375,6 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
                           fontWeight: '700',
                           boxShadow: '0 2px 4px rgba(245, 158, 11, 0.3)'
                         }}>
-                          {player.rating || 1}★
                         </div>
                       </div>
                     ))
@@ -500,7 +471,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
           color: '#94A3B8',
           fontWeight: '500'
         }}>
-          Premier League Official • Matchday Lineups
+          42 Matchday Lineups
         </div>
         
         <div style={{
@@ -548,7 +519,6 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
           gap: '12px',
           boxShadow: '0 8px 20px rgba(139, 92, 246, 0.4)',
           transition: 'all 0.3s ease',
-          border: '2px solid rgba(255, 255, 255, 0.1)',
           fontFamily: '"Inter", "Helvetica Neue", sans-serif'
         }}
         onMouseOver={(e) => {
