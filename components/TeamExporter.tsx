@@ -1,6 +1,5 @@
 import React, { useRef, useState } from 'react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+// Dynamic imports for client-side only to avoid SSR issues
 
 type User = {
   name: string;
@@ -68,6 +67,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
     try {
       setIsExporting(true);
       
+      const html2canvas = (await import('html2canvas')).default;
       const canvas = await html2canvas(exportRef.current, {
         background: '#ffffff',
         useCORS: true,
@@ -95,6 +95,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
     try {
       setIsExporting(true);
       
+      const html2canvas = (await import('html2canvas')).default;
       const canvas = await html2canvas(exportRef.current, {
         background: '#ffffff',
         useCORS: true,
@@ -104,6 +105,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
       });
       
       const imgData = canvas.toDataURL('image/png');
+      const jsPDF = (await import('jspdf')).default;
       const pdf = new jsPDF({
         orientation: 'landscape',
         unit: 'mm',
@@ -256,7 +258,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
                           background: playerIndex % 2 === 0 ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.6)',
                           borderRadius: '10px',
                           fontSize: '16px',
-                          border: `2px solid ${styling.accentColor}20`,
+                          border: styling.accentColor === '#FF8C00' ? '2px solid rgba(255, 140, 0, 0.13)' : styling.accentColor === '#FFD700' ? '2px solid rgba(255, 215, 0, 0.13)' : '2px solid rgba(255, 215, 0, 0.13)',
                           boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                         }}
                       >
@@ -267,7 +269,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
                           fontSize: '14px', 
                           color: '#666',
                           fontFamily: 'monospace',
-                          background: styling.accentColor + '20',
+                          background: 'rgba(255, 140, 0, 0.13)',
                           padding: '4px 8px',
                           borderRadius: '6px'
                         }}>
@@ -290,7 +292,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
 
                 <div style={{ 
                   minWidth: '200px',
-                  background: `${styling.accentColor}20`,
+                  background: styling.accentColor === '#FF8C00' ? 'rgba(255, 140, 0, 0.13)' : styling.accentColor === '#FFD700' ? 'rgba(255, 215, 0, 0.13)' : 'rgba(255, 215, 0, 0.13)',
                   border: `2px solid ${styling.accentColor}`,
                   borderRadius: '12px',
                   padding: '20px',
