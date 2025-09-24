@@ -124,6 +124,57 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
     }
   };
 
+  // Helper function to get team-specific styling
+  const getTeamStyling = (index: number) => {
+    const styles = [
+      // Valencia/Borussia Dortmund - Yellow theme
+      {
+        background: `linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%)`,
+        backgroundPattern: `
+          radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.2) 2px, transparent 2px),
+          radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.15) 1px, transparent 1px),
+          linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%),
+          linear-gradient(-45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%)
+        `,
+        cardBg: 'rgba(255, 255, 255, 0.95)',
+        cardBorder: '3px solid #FF8C00',
+        textColor: '#B8860B',
+        headerColor: '#DAA520',
+        accentColor: '#FF8C00'
+      },
+      // Chelsea/Inter Milan - Blue theme  
+      {
+        background: `linear-gradient(135deg, #034694 0%, #0068A8 50%, #4169E1 100%)`,
+        backgroundPattern: `
+          radial-gradient(circle at 30% 40%, rgba(255, 215, 0, 0.3) 2px, transparent 2px),
+          radial-gradient(circle at 70% 20%, rgba(255, 255, 255, 0.2) 1px, transparent 1px),
+          linear-gradient(60deg, rgba(255, 215, 0, 0.1) 25%, transparent 25%),
+          linear-gradient(-30deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%)
+        `,
+        cardBg: 'rgba(255, 255, 255, 0.98)',
+        cardBorder: '3px solid #FFD700',
+        textColor: '#034694',
+        headerColor: '#0068A8',
+        accentColor: '#FFD700'
+      },
+      // Newcastle FC - Black and white theme
+      {
+        background: `linear-gradient(135deg, #241F20 0%, #36454F 50%, #2F4F4F 100%)`,
+        backgroundPattern: `
+          repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0px, rgba(255, 255, 255, 0.1) 10px, transparent 10px, transparent 20px),
+          repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.05) 0px, rgba(255, 255, 255, 0.05) 5px, transparent 5px, transparent 15px),
+          radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 2px, transparent 2px)
+        `,
+        cardBg: 'rgba(255, 255, 255, 0.95)',
+        cardBorder: '3px solid #FFD700',
+        textColor: '#241F20',
+        headerColor: '#36454F', 
+        accentColor: '#FFD700'
+      }
+    ];
+    return styles[index];
+  };
+
   const ExportPreview = () => (
     <div
       ref={exportRef}
@@ -131,146 +182,166 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
       style={{
         width: '1200px',
         height: '800px',
-        padding: '40px',
-        background: '#1a5c3a',
-        backgroundImage: `
-          radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-          radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-          radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-          radial-gradient(circle at 60% 60%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-          radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-          radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-          linear-gradient(45deg, transparent 49%, rgba(255, 255, 255, 0.03) 49%, rgba(255, 255, 255, 0.03) 51%, transparent 51%)
-        `,
-        backgroundSize: '100px 100px, 150px 150px, 200px 200px, 80px 80px, 120px 120px, 180px 180px, 60px 60px',
+        padding: '0',
+        background: '#f0f0f0',
         color: 'white',
         fontFamily: 'Arial, sans-serif',
         position: 'absolute',
         left: '-9999px',
         top: '-9999px',
+        display: 'flex',
+        flexDirection: 'column'
       }}
     >
-      <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-        <h1 style={{ 
-          fontSize: '48px', 
-          margin: '0', 
-          textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
-          color: '#FFD700'
-        }}>
-          ⚽ FOOTBALL TEAM ROSTERS ⚽
-        </h1>
-        <div style={{ 
-          fontSize: '18px', 
-          marginTop: '10px',
-          color: '#cccccc'
-        }}>
-          {new Date().toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          })}
-        </div>
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '20px' }}>
-        {teams.map((team, index) => (
+      {teams.map((team, index) => {
+        const styling = getTeamStyling(index);
+        return (
           <div
             key={index}
             style={{
-              flex: 1,
-              background: 'rgba(255, 255, 255, 0.95)',
-              border: '3px solid #FFD700',
-              borderRadius: '15px',
+              height: '33.33%',
+              background: styling.background,
+              backgroundImage: styling.backgroundPattern,
+              backgroundSize: '80px 80px, 60px 60px, 40px 40px, 30px 30px',
               padding: '20px',
-              color: '#1a5c3a',
-              boxShadow: '0 8px 16px rgba(0,0,0,0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'relative'
             }}
           >
-            <h2 style={{ 
-              textAlign: 'center', 
-              margin: '0 0 20px 0', 
-              fontSize: '28px',
-              color: '#1a5c3a',
-              borderBottom: '2px solid #FFD700',
-              paddingBottom: '10px'
-            }}>
-              {team.name}
-            </h2>
-            
-            <div style={{ marginBottom: '15px' }}>
-              {team.players.length > 0 ? (
-                team.players.map((player, playerIndex) => (
-                  <div
-                    key={playerIndex}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '8px 12px',
-                      margin: '6px 0',
-                      background: playerIndex % 2 === 0 ? '#f8f9fa' : 'white',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      border: '1px solid #e9ecef'
-                    }}
-                  >
-                    <span style={{ fontWeight: 'bold' }}>
-                      {playerIndex + 1}. {player.name}
-                    </span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ 
-                        fontSize: '12px', 
-                        color: '#666',
-                        fontFamily: 'monospace'
-                      }}>
-                        {player.intra}
-                      </span>
-                      {/* <span style={{ color: '#FFD700' }}>
-                        {'⭐'.repeat(player.rating || 1)}
-                      </span> */}
+            <div
+              style={{
+                width: '90%',
+                maxWidth: '1000px',
+                background: styling.cardBg,
+                border: styling.cardBorder,
+                borderRadius: '15px',
+                padding: '25px',
+                color: styling.textColor,
+                boxShadow: '0 12px 24px rgba(0,0,0,0.4)',
+                backdropFilter: 'blur(5px)'
+              }}
+            >
+              <h2 style={{ 
+                textAlign: 'center', 
+                margin: '0 0 20px 0', 
+                fontSize: '32px',
+                color: styling.headerColor,
+                borderBottom: `3px solid ${styling.accentColor}`,
+                paddingBottom: '12px',
+                fontWeight: 'bold',
+                textShadow: '1px 1px 2px rgba(0,0,0,0.1)'
+              }}>
+                {index === 0 && '🟡'} {index === 1 && '🔵'} {index === 2 && '⚫'} {team.name}
+              </h2>
+              
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                gap: '30px'
+              }}>
+                <div style={{ flex: 1 }}>
+                  {team.players.length > 0 ? (
+                    team.players.map((player, playerIndex) => (
+                      <div
+                        key={playerIndex}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '10px 15px',
+                          margin: '8px 0',
+                          background: playerIndex % 2 === 0 ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.6)',
+                          borderRadius: '10px',
+                          fontSize: '16px',
+                          border: `2px solid ${styling.accentColor}20`,
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                        }}
+                      >
+                        <span style={{ fontWeight: 'bold', fontSize: '18px' }}>
+                          {playerIndex + 1}. {player.name}
+                        </span>
+                        <span style={{ 
+                          fontSize: '14px', 
+                          color: '#666',
+                          fontFamily: 'monospace',
+                          background: styling.accentColor + '20',
+                          padding: '4px 8px',
+                          borderRadius: '6px'
+                        }}>
+                          {player.intra}
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <div style={{ 
+                      textAlign: 'center', 
+                      color: '#666', 
+                      fontStyle: 'italic',
+                      padding: '40px',
+                      fontSize: '18px'
+                    }}>
+                      No players assigned
                     </div>
-                  </div>
-                ))
-              ) : (
-                <div style={{ 
-                  textAlign: 'center', 
-                  color: '#666', 
-                  fontStyle: 'italic',
-                  padding: '20px'
-                }}>
-                  No players assigned
+                  )}
                 </div>
-              )}
+
+                <div style={{ 
+                  minWidth: '200px',
+                  background: `${styling.accentColor}20`,
+                  border: `2px solid ${styling.accentColor}`,
+                  borderRadius: '12px',
+                  padding: '20px',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ fontSize: '18px', marginBottom: '10px', fontWeight: 'bold' }}>
+                    👥 Players: {team.players.length}/7
+                  </div>
+                  <div style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                    📊 Avg Rating: {
+                      team.players.length > 0 
+                        ? (team.players.reduce((sum, p) => sum + (p.rating || 1), 0) / team.players.length).toFixed(1)
+                        : '0'
+                    }
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div style={{ 
-              borderTop: '2px solid #FFD700',
-              paddingTop: '15px',
-              textAlign: 'center'
+            {/* Club emblem corner decoration */}
+            <div style={{
+              position: 'absolute',
+              top: '10px',
+              right: '20px',
+              fontSize: '24px',
+              opacity: 0.7
             }}>
-              <div style={{ fontSize: '14px', marginBottom: '5px' }}>
-                <strong>Players: {team.players.length}/7</strong>
-              </div>
-              <div style={{ fontSize: '14px' }}>
-                <strong>Avg Rating: {
-                  team.players.length > 0 
-                    ? (team.players.reduce((sum, p) => sum + (p.rating || 1), 0) / team.players.length).toFixed(1)
-                    : '0'
-                }</strong>
-              </div>
+              {index === 0 && '🟨⚡'} {index === 1 && '🔷👑'} {index === 2 && '⚫⚪'}
             </div>
           </div>
-        ))}
-      </div>
+        );
+      })}
 
       <div style={{ 
-        textAlign: 'center', 
-        marginTop: '30px',
-        fontSize: '14px',
-        color: '#cccccc'
+        position: 'absolute',
+        top: '20px',
+        left: '20px',
+        background: 'rgba(0, 0, 0, 0.8)',
+        color: 'white',
+        padding: '15px 20px',
+        borderRadius: '10px',
+        fontSize: '16px',
+        fontWeight: 'bold',
+        zIndex: 10,
+        boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
       }}>
-        Generated by 42 Football Club Registration System
+        ⚽ FOOTBALL TEAM ROSTERS - {new Date().toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric' 
+        })}
       </div>
     </div>
   );
