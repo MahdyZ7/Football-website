@@ -15,10 +15,13 @@
     "db:setup": "chmod +x scripts/setup-database.sh && ./scripts/setup-database.sh"
   },
   "dependencies": {
+    "@types/html2canvas": "^0.5.35",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
     "autoprefixer": "^10.4.21",
     "axios": "^1.12.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.1",
     "lucide-react": "^0.532.0",
     "next": "^15.5.2",
     "next-auth": "^4.24.11",

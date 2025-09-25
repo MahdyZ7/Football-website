@@ -9,6 +9,8 @@
 .teams-header {
   text-align: center;
   margin-bottom: 1.5rem;
+  clear: both;
+  margin-top: 6rem;
 }
 
 .teams-header h1 {
@@ -29,6 +31,7 @@
   font-size: 0.9rem;
   border-radius: 8px;
   min-width: 150px;
+  width: 300px;
 }
 
 .teams-grid {

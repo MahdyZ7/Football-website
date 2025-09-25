@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import Footer from "./footer";
 import { GuaranteedSpot } from "../types/user";
+import TeamExporter from "../components/TeamExporter";
 
 type User = {
   name: string;
@@ -338,8 +339,8 @@ const Teams: React.FC = () => {
   if (loading) {
     return (
       <>
-        <Navbar />
         <div className="teams-container">
+        <Navbar />
           <div className="teams-header">
             <h1>Team Selection</h1>
             <div className="loading-state">Loading players...</div>
@@ -352,9 +353,9 @@ const Teams: React.FC = () => {
 
   return (
     <>
-      <Navbar />
       <div className="teams-container">
-        <div className="teams-header">
+		<Navbar />
+	    <div className="teams-header">
           <h1>Team Selection (3 Teams of 7)</h1>
           <div className="teams-controls">
             <button onClick={autoBalance}>
@@ -363,6 +364,7 @@ const Teams: React.FC = () => {
             <button onClick={clearTeams}>
               🗑️ Clear All Teams
             </button>
+            <TeamExporter team1={team1} team2={team2} team3={team3} />
           </div>
         </div>
 
