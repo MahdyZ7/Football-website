@@ -44,8 +44,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
           textContent += '-'.repeat(team.name.length + 4) + '\n';
           
           team.players.forEach((player, playerIndex) => {
-            const rating = '⭐'.repeat(player.rating || 1);
-            textContent += `#${playerIndex + 1} ${player.name} (${player.intra}) ${rating}\n`;
+            textContent += `#${playerIndex + 1} ${player.name} (${player.intra})\n`;
           });
           
           const avgRating = team.players.length > 0 
@@ -68,21 +67,21 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
   };
 
   const preloadFonts = async () => {
-    // Preload Inter font using FontFace API
+    // Preload Albert Sans font (Liverpool FC Albertus-style) using FontFace API
     try {
-      const interRegular = new FontFace('Inter', 'url(https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2)');
-      const interBold = new FontFace('Inter', 'url(https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYAZ9hiJ-Ek-_EeA.woff2)', { weight: '700' });
-      const interSemiBold = new FontFace('Inter', 'url(https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuFuYAZ9hiJ-Ek-_EeA.woff2)', { weight: '600' });
+      const albertRegular = new FontFace('Albert Sans', 'url(https://fonts.gstatic.com/s/albertsans/v1/i7dOIFdwYjGaAMFtZd_QA1ZVYFeQGQyUV3U.woff2)');
+      const albertBold = new FontFace('Albert Sans', 'url(https://fonts.gstatic.com/s/albertsans/v1/i7dJIFdwYjGaAMFtZd_QA1ZcYTuQFQyuXBo_RNy7OwYo.woff2)', { weight: '700' });
+      const albertSemiBold = new FontFace('Albert Sans', 'url(https://fonts.gstatic.com/s/albertsans/v1/i7dJIFdwYjGaAMFtZd_QA1ZcYTuQFQyuXCo_RNy7OwYo.woff2)', { weight: '600' });
       
       await Promise.all([
-        interRegular.load(),
-        interBold.load(),
-        interSemiBold.load()
+        albertRegular.load(),
+        albertBold.load(),
+        albertSemiBold.load()
       ]);
       
-      document.fonts.add(interRegular);
-      document.fonts.add(interBold);
-      document.fonts.add(interSemiBold);
+      document.fonts.add(albertRegular);
+      document.fonts.add(albertBold);
+      document.fonts.add(albertSemiBold);
       
       // Wait for fonts to be applied
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -117,7 +116,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
           const style = clonedDoc.createElement('style');
           style.textContent = `
             * {
-              font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
+              font-family: 'Albert Sans', 'Albertus MT', system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
             }
           `;
           clonedDoc.head.appendChild(style);
@@ -125,7 +124,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
           const allElements = clonedDoc.querySelectorAll('*');
           allElements.forEach((el: any) => {
             if (el.style) {
-              el.style.fontFamily = 'Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
+              el.style.fontFamily = 'Albert Sans, Albertus MT, system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
             }
           });
         }
@@ -153,8 +152,10 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
     try {
       setIsExporting(true);
       
-      // Wait a moment for the preview to become visible
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Wait for fonts to load and layout to commit
+      await preloadFonts();
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      await new Promise(resolve => setTimeout(resolve, 200));
       
       console.log('Starting PDF export...', { element: exportRef.current });
       
@@ -166,8 +167,26 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
         allowTaint: false,
         width: 1200,
         height: 800,
-        logging: true, // Enable logging for debugging
-        scale: 1, // Reduce scale for debugging
+        logging: true,
+        scale: 2,
+        foreignObjectRendering: true,
+        onclone: (clonedDoc: Document) => {
+          // Force font family on all text elements in the cloned document
+          const style = clonedDoc.createElement('style');
+          style.textContent = `
+            * {
+              font-family: 'Albert Sans', 'Albertus MT', system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
+            }
+          `;
+          clonedDoc.head.appendChild(style);
+          
+          const allElements = clonedDoc.querySelectorAll('*');
+          allElements.forEach((el: any) => {
+            if (el.style) {
+              el.style.fontFamily = 'Albert Sans, Albertus MT, system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
+            }
+          });
+        }
       } as any);
       
       console.log('Canvas created for PDF:', { width: canvas.width, height: canvas.height });
@@ -289,7 +308,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
         zIndex: isExporting ? 9999 : -1,
         display: 'flex',
         flexDirection: 'column',
-        fontFamily: "'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+        fontFamily: "'Albert Sans', 'Albertus MT', system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
         overflow: 'hidden'
       }}
     >
@@ -505,11 +524,6 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
                           gap: '10px'
                         }}>
                           <span style={{ fontFamily: 'monospace' }}>{player.intra}</span>
-                          {player.rating && (
-                            <span style={{ color: '#FFD700' }}>
-                              {'★'.repeat(player.rating)}
-                            </span>
-                          )}
                         </div>
                       </div>
                     </div>
@@ -625,21 +639,21 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
         onClick={() => setShowExportMenu(!showExportMenu)}
         disabled={isExporting}
         style={{
-          background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
-          color: 'white',
-          border: 'none',
-          padding: '14px 24px',
-          borderRadius: '10px',
-          cursor: 'pointer',
-          fontSize: '16px',
-          fontWeight: 700,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          boxShadow: '0 4px 12px rgba(40, 167, 69, 0.3)',
-          transition: 'all 0.3s ease',
-          textTransform: 'uppercase',
-          letterSpacing: '1px'
+          // background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
+          // color: 'white',
+          // border: 'none',
+          // padding: '14px 24px',
+          // borderRadius: '10px',
+          // cursor: 'pointer',
+          // fontSize: '16px',
+          // fontWeight: 700,
+          // display: 'flex',
+          // alignItems: 'center',
+          // gap: '10px',
+          // boxShadow: '0 4px 12px rgba(40, 167, 69, 0.3)',
+          // transition: 'all 0.3s ease',
+          // textTransform: 'uppercase',
+          // letterSpacing: '1px'
         }}
         data-testid="button-export-teams"
         onMouseOver={(e) => {
