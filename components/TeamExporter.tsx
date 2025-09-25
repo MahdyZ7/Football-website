@@ -67,11 +67,40 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
     }
   };
 
+  const preloadFonts = async () => {
+    // Preload Inter font using FontFace API
+    try {
+      const interRegular = new FontFace('Inter', 'url(https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2)');
+      const interBold = new FontFace('Inter', 'url(https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYAZ9hiJ-Ek-_EeA.woff2)', { weight: '700' });
+      const interSemiBold = new FontFace('Inter', 'url(https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuFuYAZ9hiJ-Ek-_EeA.woff2)', { weight: '600' });
+      
+      await Promise.all([
+        interRegular.load(),
+        interBold.load(),
+        interSemiBold.load()
+      ]);
+      
+      document.fonts.add(interRegular);
+      document.fonts.add(interBold);
+      document.fonts.add(interSemiBold);
+      
+      // Wait for fonts to be applied
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    } catch (error) {
+      console.warn('Font preloading failed:', error);
+      // Wait anyway to allow fallback fonts
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+  };
+
   const exportAsImage = async (format: 'png' | 'jpeg') => {
     if (!exportRef.current) return;
     
     try {
       setIsExporting(true);
+      
+      // Wait for fonts to load before capturing
+      await preloadFonts();
       
       const html2canvas = (await import('html2canvas')).default;
       const canvas = await html2canvas(exportRef.current, {
@@ -80,6 +109,26 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
         allowTaint: false,
         width: 1200,
         height: 800,
+        scale: 2,
+        logging: false,
+        foreignObjectRendering: true,
+        onclone: (clonedDoc: Document) => {
+          // Force font family on all text elements in the cloned document
+          const style = clonedDoc.createElement('style');
+          style.textContent = `
+            * {
+              font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
+            }
+          `;
+          clonedDoc.head.appendChild(style);
+          
+          const allElements = clonedDoc.querySelectorAll('*');
+          allElements.forEach((el: any) => {
+            if (el.style) {
+              el.style.fontFamily = 'Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
+            }
+          });
+        }
       } as any);
       
       const link = document.createElement('a');
@@ -96,19 +145,36 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
   };
 
   const exportAsPDF = async () => {
-    if (!exportRef.current) return;
+    if (!exportRef.current) {
+      console.error('Export ref not found');
+      return;
+    }
     
     try {
       setIsExporting(true);
       
+      // Wait a moment for the preview to become visible
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      console.log('Starting PDF export...', { element: exportRef.current });
+      
       const html2canvas = (await import('html2canvas')).default;
+      
       const canvas = await html2canvas(exportRef.current, {
         backgroundColor: '#0a0a0a',
         useCORS: true,
         allowTaint: false,
         width: 1200,
         height: 800,
+        logging: true, // Enable logging for debugging
+        scale: 1, // Reduce scale for debugging
       } as any);
+      
+      console.log('Canvas created for PDF:', { width: canvas.width, height: canvas.height });
+      
+      if (canvas.width === 0 || canvas.height === 0) {
+        throw new Error('Canvas has zero dimensions');
+      }
       
       const imgData = canvas.toDataURL('image/png');
       const jsPDF = (await import('jspdf')).default;
@@ -123,12 +189,17 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
       
       pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
       pdf.save('match-day-lineup.pdf');
+      
+      console.log('PDF export successful');
     } catch (error) {
       console.error('Failed to export as PDF:', error);
-      alert('Failed to export as PDF. Please try again.');
+      alert(`Failed to export as PDF: ${error.message || error}`);
     } finally {
-      setIsExporting(false);
-      setShowExportMenu(false);
+      // Keep visible for a moment then hide
+      setTimeout(() => {
+        setIsExporting(false);
+        setShowExportMenu(false);
+      }, 100);
     }
   };
 
@@ -149,7 +220,12 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
         statsColor: '#000000',
         stripesPattern: 'repeating-linear-gradient(90deg, transparent, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px)',
         teamBadgeBg: '#FFD700',
-        teamBadgeText: '#000000'
+        teamBadgeText: '#000000',
+        badgePattern: `
+          linear-gradient(45deg, transparent 45%, rgba(0,0,0,0.03) 45%, rgba(0,0,0,0.03) 55%, transparent 55%),
+          linear-gradient(-45deg, transparent 45%, rgba(255,255,255,0.04) 45%, rgba(255,255,255,0.04) 55%, transparent 55%)
+        `,
+        badgeSize: '60px 60px, 60px 60px'
       },
       {
         // Chelsea / PSG style - Deep Blue
@@ -166,7 +242,12 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
         statsColor: '#034694',
         stripesPattern: 'repeating-linear-gradient(90deg, transparent, transparent 10px, rgba(255,215,0,0.1) 10px, rgba(255,215,0,0.1) 20px)',
         teamBadgeBg: '#034694',
-        teamBadgeText: '#FFFFFF'
+        teamBadgeText: '#FFFFFF',
+        badgePattern: `
+          linear-gradient(60deg, transparent 45%, rgba(255,215,0,0.04) 45%, rgba(255,215,0,0.04) 55%, transparent 55%),
+          linear-gradient(-60deg, transparent 45%, rgba(255,255,255,0.03) 45%, rgba(255,255,255,0.03) 55%, transparent 55%)
+        `,
+        badgeSize: '70px 70px, 70px 70px'
       },
       {
         // Juventus / Newcastle style - Black and White stripes
@@ -183,7 +264,12 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
         statsColor: '#000000',
         stripesPattern: 'none',
         teamBadgeBg: '#000000',
-        teamBadgeText: '#FFFFFF'
+        teamBadgeText: '#FFFFFF',
+        badgePattern: `
+          linear-gradient(45deg, transparent 45%, rgba(0,0,0,0.04) 45%, rgba(0,0,0,0.04) 55%, transparent 55%),
+          linear-gradient(-45deg, transparent 45%, rgba(255,255,255,0.06) 45%, rgba(255,255,255,0.06) 55%, transparent 55%)
+        `,
+        badgeSize: '50px 50px, 50px 50px'
       }
     ];
     return styles[index];
@@ -197,15 +283,31 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
         width: '1200px',
         height: '800px',
         background: '#0a0a0a',
-        position: 'absolute',
-        left: '-9999px',
-        top: '-9999px',
+        position: 'fixed',
+        left: isExporting ? '0' : '-9999px',
+        top: isExporting ? '0' : '-9999px',
+        zIndex: isExporting ? 9999 : -1,
         display: 'flex',
         flexDirection: 'column',
-        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+        fontFamily: "'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
         overflow: 'hidden'
       }}
     >
+      {/* Simplified field pattern background */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        backgroundImage: `
+          linear-gradient(90deg, transparent 49%, rgba(255,255,255,0.03) 49%, rgba(255,255,255,0.03) 51%, transparent 51%),
+          linear-gradient(0deg, transparent 49%, rgba(255,255,255,0.03) 49%, rgba(255,255,255,0.03) 51%, transparent 51%),
+          radial-gradient(circle at 50% 50%, transparent 30%, rgba(255,255,255,0.05) 30%, rgba(255,255,255,0.05) 32%, transparent 32%)
+        `,
+        backgroundSize: '100% 100%, 100% 100%, 400px 400px',
+        backgroundPosition: 'center, center, center',
+        pointerEvents: 'none',
+        opacity: 0.6
+      }} />
+      
       {/* Stadium lights effect at top */}
       <div style={{
         position: 'absolute',
@@ -277,6 +379,16 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
                 overflow: 'hidden'
               }}
             >
+              {/* Badge pattern texture overlay */}
+              <div style={{
+                position: 'absolute',
+                inset: 0,
+                backgroundImage: style.badgePattern,
+                backgroundSize: style.badgeSize,
+                pointerEvents: 'none',
+                opacity: 0.5
+              }} />
+              
               {/* Stripes overlay for extra texture */}
               <div style={{
                 position: 'absolute',

@@ -12,8 +12,8 @@ function MyApp({ Component, pageProps }: AppProps) {
     <ErrorBoundary>
       <ThemeProvider>
         <Component {...pageProps} />
-		<Analytics />
-		<SpeedInsights />
+                <Analytics />
+                <SpeedInsights />
       </ThemeProvider>
     </ErrorBoundary>
   );
