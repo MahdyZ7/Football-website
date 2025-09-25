@@ -41,9 +41,6 @@ export default function Navbar() {
                                 <NavLink href="/teams" isActive={currentRoute === "/teams"}>
                                         Teams
                                 </NavLink>
-                                <NavLink href="/export-preview" isActive={currentRoute === "/export-preview"}>
-                                        Export Debug
-                                </NavLink>
                                 <NavLink href="/admin" isActive={currentRoute === "/admin"}>
                                         Admin
                                 </NavLink>
