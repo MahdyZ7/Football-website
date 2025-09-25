@@ -193,7 +193,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
       console.log('PDF export successful');
     } catch (error) {
       console.error('Failed to export as PDF:', error);
-      alert(`Failed to export as PDF: ${error.message || error}`);
+      alert(`Failed to export as PDF: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       // Keep visible for a moment then hide
       setTimeout(() => {
