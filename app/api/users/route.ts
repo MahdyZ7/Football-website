@@ -12,6 +12,7 @@ export async function GET() {
 			intra: row.intra,
 			verified: row.verified,
 			created_at: row.created_at,
+			email: row.email,
 		} satisfies User));
 
 		return NextResponse.json(players);

@@ -3,6 +3,7 @@ import React from 'react';
 import Navbar from './Navbar';
 import Footer from './footer';
 import { useAdminLogs } from '../../hooks/useQueries';
+import { AdminLog } from '../../types/user';
 
 
 const AdminLogs: React.FC = () => {
@@ -88,7 +89,7 @@ const AdminLogs: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {logs.map((log) => (
+                  {logs.map((log: AdminLog) => (
                     <tr key={log.id}>
                       <td data-label="Timestamp">
                         {formatTimestamp(log.timestamp)}

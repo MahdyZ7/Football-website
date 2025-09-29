@@ -3,6 +3,7 @@ import Link from "next/link";
 import Navbar from "./Navbar";
 import Footer from "./footer";
 import { useMoney } from "../../hooks/useQueries";
+import { MoneyRecord } from "../../types/user";
 
 
 const Money = () => {
@@ -50,7 +51,7 @@ const Money = () => {
 								<td colSpan={5}> No data available </td>
 							</tr>
 						) : (
-					moneyData.map((record, index) => (
+					moneyData.map((record: MoneyRecord, index: number) => (
 								<tr
 									key={index}
 									className={record.paid ? "paid-row" : "unpaid-row"}
@@ -79,12 +80,12 @@ const Money = () => {
 						</tr>
 						<tr style={{ backgroundColor: "var(--bg-secondary)", borderCollapse: "collapse" }}>
 							<td colSpan={3}>Total Paid</td>
-							<td>{moneyData.reduce((acc, record) => record.paid ? acc + record.amount : acc, 0)} Dhs</td>
+							<td>{moneyData.reduce((acc: number, record: MoneyRecord) => record.paid ? acc + record.amount : acc, 0)} Dhs</td>
 							<td></td>
 						</tr>
 						<tr style={{ backgroundColor: "var(--bg-secondary)" }}>
 							<td colSpan={3}>Total Unpaid</td>
-							<td>{moneyData.reduce((acc, record) => !record.paid ? acc + record.amount : acc, 0)} Dhs</td>
+							<td>{moneyData.reduce((acc: number, record: MoneyRecord) => !record.paid ? acc + record.amount : acc, 0)} Dhs</td>
 							<td></td>
 						</tr>
 						<tr style={{ backgroundColor: "var(--bg-primary)" }}>
@@ -92,7 +93,7 @@ const Money = () => {
 						</tr>
 						<tr style={{ backgroundColor: "var(--bg-secondary)" }}>
 							<td colSpan={3}>Total</td>
-							<td>{moneyData.reduce((acc, record) => acc + record.amount, 0)} Dhs</td>
+							<td>{moneyData.reduce((acc: number, record: MoneyRecord) => acc + record.amount, 0)} Dhs</td>
 							<td></td>
 						</tr>
 					</tbody>

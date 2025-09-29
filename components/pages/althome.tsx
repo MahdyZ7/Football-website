@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo, FormEvent, useCallback } from 'react';
+import React, { useState, useEffect, memo, FormEvent } from 'react';
 import axios from "axios";
 import { 
   Home, 
@@ -13,7 +13,10 @@ import {
   AlertCircle,
   ExternalLink
 } from 'lucide-react';
-import { User, GuaranteedSpot, Toast } from "../../types/user"; 
+import { User, GuaranteedSpot, Toast, MoneyRecord } from "../../types/user";
+import { useUsers, useAllowedStatus, useRegisterUser } from "../../hooks/useQueries";
+import { useMoney } from "../../hooks/useQueries";
+import { useBannedUsers } from '../../hooks/useQueries';
 
 // Utility function for consistent date formatting
 const formatDate = (dateString: string, locale: string = 'en-GB', options?: Intl.DateTimeFormatOptions) => {
@@ -355,8 +358,16 @@ const FootballApp = () => {
   const [name, setName] = useState("");
   const [intra, setIntra] = useState("");
   const [timeUntilNext] = useState("2h 30m 15s");
-  const [isSubmissionAllowed] = useState(true);
   const [toasts, setToasts] = useState<Toast[]>([]);
+
+  // React Query hooks
+  const { data: registeredUsers = [], isLoading: usersLoading } = useUsers();
+  const { data: allowedData } = useAllowedStatus();
+  const { data: moneyData = [], isLoading: moneyLoading } = useMoney();
+  const { data: bannedUsers = [], isLoading: bannedUsersLoading } = useBannedUsers();
+  const registerUserMutation = useRegisterUser();
+
+  const isSubmissionAllowed = allowedData?.isAllowed ?? false;
 
     const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
 	  const newToast: Toast = {
@@ -376,49 +387,6 @@ const FootballApp = () => {
 	  setToasts(prev => prev.filter(toast => toast.id !== id));
 	};
   
-  useEffect (() => {
-	  fetch("/api/users")
-		  .then(response => response.json())
-		  .then(data => {
-			  setRegisteredUsers(data);
-		  })
-		  .catch(error => {
-			  console.error("Error fetching users:", error);
-			  setRegisteredUsers([]);
-		  });
-  }, []);
-
-  // money data
-  useEffect(() => {
-	const fetchMoneyData = async () => {
-	  try {
-		const response = await fetch('/api/moneyDb');
-		if (!response.ok) throw new Error('Network response was not ok');
-		const data = await response.json();
-		setMoneyData(data);
-	  } catch (error) {
-		console.error('Error fetching money data:', error);
-		setMoneyData([]);
-	  }
-	};
-	fetchMoneyData();
-  }, []);
-
-  // banned users
-  useEffect(() => {
-	const fetchBannedUsers = async () => {
-		try {
-			const response = await fetch('/api/banned-users');
-			if (!response.ok) throw new Error('Network response was not ok');
-			const data = await response.json();
-			setBannedUsers(data);
-		} catch (error) {
-			console.error('Error fetching banned users:', error);
-			setBannedUsers([]);
-		}
-	};
-	fetchBannedUsers();
-  }, []);
 
   // Close popup after 3 seconds
   useEffect(() => {
@@ -438,15 +406,6 @@ const FootballApp = () => {
     { label: 'Directions', icon: Navigation, url: 'https://maps.app.goo.gl/iEZR2Fia2xf4cdQ87' },
   ];
 
-    const checkSubmissionAllowed = useCallback(async () => {
-	  try {
-		const response = await axios.get("/api/allowed");
-		return response.status === 200 ? response.data.isAllowed : false;
-	  } catch (error) {
-		console.error("Error checking submission allowed:", error);
-		return false;
-	  }
-	}, []);
 const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
@@ -469,8 +428,7 @@ const handleSubmit = async (event: FormEvent) => {
       }
     }
     // Validate submission
-    const isAllowed = await checkSubmissionAllowed();
-    if (!isAllowed) {
+    if (!isSubmissionAllowed) {
       showToast("Registration is only allowed on Sunday and Wednesday after 12 PM (noon) till 8 PM the next day.", 'error');
       return;
     }
@@ -489,37 +447,40 @@ const handleSubmit = async (event: FormEvent) => {
     };
     setToasts(prev => [...prev, loadingToast]);
 
-    // Submit registration
-    try {
-      await axios.post("/api/register", { name, intra });
-      const updatedUsers = await fetch('/api/users').then(response => response.json());
-      setRegisteredUsers(updatedUsers);
-      
-      // Remove loading toast and show success
-      removeToast(loadingToastId);
-      showToast('Registration successful!', 'success');
-      setName("");
-      setIntra("");
-      // Focus back to name field for next registration
-    } catch (error) {
-      // Remove loading toast first
-      removeToast(loadingToastId);
-      
-      if (axios.isAxiosError(error) && error.response) {
-        const { status } = error.response;
-        if (status === 403) {
-          showToast("Players limit reached. Better luck next time!", 'error');
-        } else if (status === 409) {
-          showToast(`A user with the Intra-login ${intra} already exists.`, 'error');
-        } else if (status === 404) {
-          showToast(`User with Intra-login ${intra} not found. Please enter name also`, 'error');
-        } else {
-          showToast("Registration failed. Please try again.", 'error');
+    // Submit registration using React Query mutation
+    registerUserMutation.mutate(
+      { name, intra },
+      {
+        onSuccess: () => {
+          // Remove loading toast and show success
+          removeToast(loadingToastId);
+          showToast('Registration successful!', 'success');
+          setName("");
+          setIntra("");
+          // Focus back to name field for next registration
+        },
+        onError: (error: unknown) => {
+          // Remove loading toast first
+          removeToast(loadingToastId);
+
+          if (typeof error === 'object' && error !== null && 'response' in error) {
+            const response = (error as { response: { status: number } }).response;
+            const { status } = response;
+            if (status === 403) {
+              showToast("Players limit reached. Better luck next time!", 'error');
+            } else if (status === 409) {
+              showToast(`A user with the Intra-login ${intra} already exists.`, 'error');
+            } else if (status === 404) {
+              showToast(`User with Intra-login ${intra} not found. Please enter name also`, 'error');
+            } else {
+              showToast("Registration failed. Please try again.", 'error');
+            }
+          } else {
+            showToast("Registration failed. Please try again.", 'error');
+          }
         }
-      } else {
-        showToast("Registration failed. Please try again.", 'error');
       }
-    }
+    );
   };
 
   const Sidebar = () => (
@@ -606,7 +567,7 @@ const handleSubmit = async (event: FormEvent) => {
               <div className="ml-4">
                 <p className="text-sm font-medium text-slate-600">Total Paid</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {moneyData.filter(r => r.paid).reduce((acc, r) => acc + r.amount, 0)} AED
+                  {moneyData.filter((r: MoneyRecord) => r.paid).reduce((acc: number, r: MoneyRecord) => acc + r.amount, 0)} AED
                 </p>
               </div>
             </div>
@@ -622,7 +583,7 @@ const handleSubmit = async (event: FormEvent) => {
               <div className="ml-4">
                 <p className="text-sm font-medium text-slate-600">Total Unpaid</p>
                 <p className="text-2xl font-bold text-orange-600">
-                  {moneyData.filter(r => !r.paid).reduce((acc, r) => acc + r.amount, 0)} AED
+                  {moneyData.filter((r: MoneyRecord) => !r.paid).reduce((acc: number, r: MoneyRecord) => acc + r.amount, 0)} AED
                 </p>
               </div>
             </div>
@@ -638,7 +599,7 @@ const handleSubmit = async (event: FormEvent) => {
               <div className="ml-4">
                 <p className="text-sm font-medium text-slate-600">Total Amount</p>
                 <p className="text-2xl font-bold text-blue-600">
-                  {moneyData.reduce((acc, r) => acc + r.amount, 0)} AED
+                  {moneyData.reduce((acc: number, r: MoneyRecord) => acc + r.amount, 0)} AED
                 </p>
               </div>
             </div>
@@ -676,7 +637,7 @@ const handleSubmit = async (event: FormEvent) => {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  moneyData.map((record, index) => (
+                  moneyData.map((record: MoneyRecord, index: number) => (
                     <TableRow key={index} className={record.paid ? 'bg-green-50' : 'bg-orange-50'}>
                       <TableCell>
                         {formatDate(record.date, 'en-GB', { 
@@ -937,7 +898,7 @@ const handleSubmit = async (event: FormEvent) => {
             handleNameChange={(e) => setName(e.target.value)}
             handleIntraChange={(e) => setIntra(e.target.value)}
             handleSubmit={handleSubmit}
-            loading={usersLoading}
+            loading={usersLoading || registerUserMutation.isPending}
             registeredUsers={registeredUsers}
           />
         );
@@ -957,7 +918,7 @@ const handleSubmit = async (event: FormEvent) => {
             handleNameChange={(e) => setName(e.target.value)}
             handleIntraChange={(e) => setIntra(e.target.value)}
             handleSubmit={handleSubmit}
-            loading={usersLoading}
+            loading={usersLoading || registerUserMutation.isPending}
             registeredUsers={registeredUsers}
           />
         );
