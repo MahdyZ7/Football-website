@@ -1,0 +1,339 @@
+
+import React, { useState, useEffect, FormEvent, useRef, KeyboardEvent } from "react";
+import Link from "next/link";
+import Navbar from "./Navbar";
+import Footer from "./footer";
+import { User, GuaranteedSpot, Toast } from "../../types/user";
+import { getNextRegistration } from "../../lib/utils/allowed_times";
+import { useUsers, useAllowedStatus, useRegisterUser } from "../../hooks/useQueries";
+
+
+const Home: React.FC = () => {
+  // State management
+  const [showPopup, setShowPopup] = useState(false);
+  const [name, setName] = useState("");
+  const [intra, setIntra] = useState("");
+  const [timeUntilNext, setTimeUntilNext] = useState("");
+  const [toasts, setToasts] = useState<Toast[]>([]);
+
+  // Refs for form navigation
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const intraInputRef = useRef<HTMLInputElement>(null);
+  const submitButtonRef = useRef<HTMLButtonElement>(null);
+
+  // React Query hooks
+  const { data: registeredUsers = [], isLoading: loading, error: usersError } = useUsers();
+  const { data: allowedData, isLoading: allowedLoading, error: allowedError } = useAllowedStatus();
+  const registerUserMutation = useRegisterUser();
+
+  const isSubmissionAllowed = allowedData?.isAllowed ?? false;
+
+  // Timer effects
+  useEffect(() => {
+	const next = getNextRegistration();
+    const updateCountdown = () => {
+      const now = new Date();
+      const diff = next.getTime() - now.getTime();
+
+      if (diff > 0) {
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        if (days > 0) {
+          setTimeUntilNext(`${days}d ${hours}h ${minutes}m ${seconds}s`);
+        } else {
+          setTimeUntilNext(`${hours}h ${minutes}m ${seconds}s`);
+        }
+      } else {
+        setTimeUntilNext("Registration should be open now");
+      }
+    };
+
+    // Update countdown every second for accurate display
+    const countdownTimer = setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    return () => {
+      clearInterval(countdownTimer);
+    };
+  }, []);
+
+  // Popup timer
+  useEffect(() => {
+    const timer = setTimeout(() => setShowPopup(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    const newToast: Toast = {
+      id: Date.now(),
+      message,
+      type
+    };
+    setToasts(prev => [...prev, newToast]);
+    
+    // Auto remove toast after 4 seconds
+    setTimeout(() => {
+      setToasts(prev => prev.filter(toast => toast.id !== newToast.id));
+    }, 4000);
+  };
+
+  const removeToast = (id: number) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>, currentField: 'name' | 'intra') => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      
+      if (currentField === 'name' && intraInputRef.current) {
+        intraInputRef.current.focus();
+      } else if (currentField === 'intra' && submitButtonRef.current) {
+        submitButtonRef.current.click();
+      }
+    }
+  };
+
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+
+    // Handle admin reset
+    if (name.toLowerCase().endsWith("mangoose")) {
+      const loadingToastId = Date.now();
+      showToast("Resetting user list...", 'info');
+      try {
+        const axios = (await import('axios')).default;
+        await axios.delete("/api/register", {
+          data: { name, intra },
+          headers: { "X-Secret-Header": name },
+        });
+        removeToast(loadingToastId);
+        showToast("User list has been reset.", 'success');
+        return;
+      } catch {
+        removeToast(loadingToastId);
+        showToast("Error resetting user list.", 'error');
+        return;
+      }
+    }
+
+    // Validate submission
+    if (!isSubmissionAllowed) {
+      showToast("Registration is only allowed on Sunday and Wednesday after 12 PM (noon) till 8 PM the next day.", 'error');
+      return;
+    }
+
+    if (!intra) {
+      showToast("Please fill in both name and Intra login fields", 'error');
+      return;
+    }
+
+    // Submit registration using React Query mutation
+    registerUserMutation.mutate(
+      { name, intra },
+      {
+        onSuccess: () => {
+          showToast('Registration successful!', 'success');
+          setName("");
+          setIntra("");
+          // Focus back to name field for next registration
+          nameInputRef.current?.focus();
+        },
+        onError: (error: any) => {
+          if (error?.response?.status) {
+            const { status } = error.response;
+            if (status === 403) {
+              showToast("Players limit reached. Better luck next time!", 'error');
+            } else if (status === 409) {
+              showToast(`A user with the Intra-login ${intra} already exists.`, 'error');
+            } else if (status === 404) {
+              showToast(`User with Intra-login ${intra} not found. Please enter name also`, 'error');
+            } else {
+              showToast("Registration failed. Please try again.", 'error');
+            }
+          } else {
+            showToast("Registration failed. Please try again.", 'error');
+          }
+        }
+      }
+    );
+  };
+
+  return (
+    <>
+      <Navbar />
+      <div className="container">
+        <h1>Football Registration</h1>
+        <form onSubmit={handleSubmit}>
+          <label htmlFor="name">Name:</label>
+          <input
+            ref={nameInputRef}
+            type="text"
+            id="name"
+            value={name}
+            autoComplete="name"
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => handleKeyDown(e, 'name')}
+          />
+
+          <label htmlFor="intra">Intra login:</label>
+          <input
+            ref={intraInputRef}
+            type="text"
+            id="intra"
+            value={intra}
+            autoComplete="intra"
+            onChange={(e) => setIntra(e.target.value)}
+            onKeyDown={(e) => handleKeyDown(e, 'intra')}
+          />
+
+          {!loading && (
+            <>
+              <button ref={submitButtonRef} type="submit">
+                Submit
+              </button>
+              {!isSubmissionAllowed && (
+                <p style={{ textAlign: 'center', marginTop: '10px', color: '#805b30' }}>
+                  Next registration opens in: {timeUntilNext}
+                </p>
+              )}
+            </>
+          )}
+        </form>
+
+        <div style={{ height: "3rem" }} />
+
+        <div className="card">
+          <div className="card-header">
+            <h3>Late TIG</h3>
+          </div>
+          <div className="card-body">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Action</th>
+                  <th>Ban Duration</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th>Not ready when booking time starts</th>
+                  <th>Half a week</th>
+                </tr>
+                <tr>
+                  <th>Cancel reservation</th>
+                  <th>One week</th>
+                </tr>
+                <tr>
+                  <th>Late {">"} 15 minutes</th>
+                  <th>One week</th>
+                </tr>
+                <tr>
+                  <th>Cancel reservation on game day after 5 PM</th>
+                  <th>Two weeks</th>
+                </tr>
+                <tr>
+                  <th>No Show without notice</th>
+                  <th>Four weeks</th>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="registered-users">
+          <h2>Player list (orange is waitlist)</h2>
+          <p>Max Spots: {GuaranteedSpot},
+             playing: {Math.min(registeredUsers.length, GuaranteedSpot)},
+             open spots: {Math.max(GuaranteedSpot - registeredUsers.length, 0)},
+             waitlist: {Math.max(registeredUsers.length - GuaranteedSpot, 0)} </p>
+          <ul className="user-list">
+            {loading ? (
+              <li>Loading players...</li>
+            ) : usersError ? (
+              <li style={{ color: "#ff8080", textAlign: "center" }}>
+                Error loading players. Please refresh the page.
+              </li>
+            ) : registeredUsers.length === 0 ? (
+              <li style={{ color: "#ffaa99", fontWeight: "bold", textAlign: "center" }}>
+                Dare to be First
+              </li>
+            ) : (
+              registeredUsers.map((user, index) => (
+                <li
+                  key={user.intra}
+                  className={index < GuaranteedSpot ? "registered" : "waitlist"}
+                >
+                  {index + 1}: {user.name} - {user.intra} -{" "}
+                  {user.verified ? (
+                    "✅"
+                  ) : (
+                    <span style={{ color: '#ff8080' }}>Invalid Intra</span>
+                  )}
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
+
+        <div className="card" style={{ marginTop: '2rem' }}>
+          <div className="card-header">
+            <h3>Banned Players</h3>
+          </div>
+          <div className="card-body">
+            <p style={{ textAlign: 'center', marginBottom: '1rem', color: 'var(--text-secondary)' }}>
+              Players currently banned from registering
+            </p>
+            <div style={{ textAlign: 'center' }}>
+              <Link
+                href="/banned-players"
+                style={{
+                  display: 'inline-block',
+                  padding: '0.8rem 1.5rem',
+                  background: 'var(--ft-primary)',
+                  color: 'white',
+                  textDecoration: 'none',
+                  borderRadius: '4px',
+                  fontWeight: 'bold',
+                  transition: 'background 0.2s'
+                }}
+                onMouseEnter={(e) => (e.target as HTMLElement).style.background = '#005580'}
+                onMouseLeave={(e) => (e.target as HTMLElement).style.background = 'var(--ft-primary)'}
+              >
+                View Banned Players List
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+      <Footer />
+      {showPopup && (
+        <div className="popup">
+          <h1>Back to Al Maryah Alert</h1>
+          <p>Game @ Active Al Maryah. Check The location from the nav bar</p>
+          <button onClick={() => setShowPopup(false)}>Close</button>
+        </div>
+      )}
+      
+      {/* Toast Container */}
+      <div className="toast-container">
+        {toasts.map((toast) => (
+          <div
+            key={toast.id}
+            className={`toast toast-${toast.type}`}
+            onClick={() => removeToast(toast.id)}
+          >
+            <span>{toast.message}</span>
+            <button className="toast-close" onClick={() => removeToast(toast.id)}>
+              ×
+            </button>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+};
+
+export default Home;
