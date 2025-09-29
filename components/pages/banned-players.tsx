@@ -3,7 +3,6 @@ import React from 'react';
 import Link from 'next/link';
 import Navbar from './Navbar';
 import Footer from './footer';
-import { BannedUser } from '../../types/user';
 import { useBannedUsers } from '../../hooks/useQueries';
 
 
@@ -83,8 +82,8 @@ const BannedPlayersPage: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {activeBans.map((user) => (
-                          <tr key={user.intra}>
+                        {activeBans.map((user, idx) => (
+                          <tr key={`${user.intra}-${user.banned_at}-${idx}`}>
                             <td style={{ padding: '0.8rem', borderBottom: '1px solid var(--bg-secondary)' }}>
                               {user.name}
                             </td>
@@ -130,8 +129,8 @@ const BannedPlayersPage: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {expiredBans.map((user) => (
-                          <tr key={user.intra}>
+                        {expiredBans.map((user, idx) => (
+                          <tr key={`${user.intra}-${user.banned_at}-${idx}`}>
                             <td style={{ padding: '0.8rem', borderBottom: '1px solid var(--bg-secondary)' }}>
                               {user.name}
                             </td>

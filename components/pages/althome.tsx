@@ -13,7 +13,7 @@ import {
   AlertCircle,
   ExternalLink
 } from 'lucide-react';
-import { User, BannedUser, GuaranteedSpot, Toast } from "../../types/user"; 
+import { User, GuaranteedSpot, Toast } from "../../types/user"; 
 
 // Utility function for consistent date formatting
 const formatDate = (dateString: string, locale: string = 'en-GB', options?: Intl.DateTimeFormatOptions) => {

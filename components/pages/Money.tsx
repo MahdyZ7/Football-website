@@ -4,13 +4,6 @@ import Navbar from "./Navbar";
 import Footer from "./footer";
 import { useMoney } from "../../hooks/useQueries";
 
-interface MoneyRecord {
-	date: string;
-	name: string;
-	intra: string;
-	amount: number;
-	paid?: boolean;
-}
 
 const Money = () => {
 	const tbodyRef = React.useRef<HTMLTableElement>(null);

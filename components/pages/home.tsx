@@ -3,7 +3,7 @@ import React, { useState, useEffect, FormEvent, useRef, KeyboardEvent } from "re
 import Link from "next/link";
 import Navbar from "./Navbar";
 import Footer from "./footer";
-import { User, GuaranteedSpot, Toast } from "../../types/user";
+import { GuaranteedSpot, Toast } from "../../types/user";
 import { getNextRegistration } from "../../lib/utils/allowed_times";
 import { useUsers, useAllowedStatus, useRegisterUser } from "../../hooks/useQueries";
 
@@ -23,7 +23,7 @@ const Home: React.FC = () => {
 
   // React Query hooks
   const { data: registeredUsers = [], isLoading: loading, error: usersError } = useUsers();
-  const { data: allowedData, isLoading: allowedLoading, error: allowedError } = useAllowedStatus();
+  const { data: allowedData } = useAllowedStatus();
   const registerUserMutation = useRegisterUser();
 
   const isSubmissionAllowed = allowedData?.isAllowed ?? false;
@@ -141,9 +141,10 @@ const Home: React.FC = () => {
           // Focus back to name field for next registration
           nameInputRef.current?.focus();
         },
-        onError: (error: any) => {
-          if (error?.response?.status) {
-            const { status } = error.response;
+        onError: (error: unknown) => {
+          if (typeof error === 'object' && error !== null && 'response' in error) {
+            const response = (error as { response: { status: number } }).response;
+            const { status } = response;
             if (status === 403) {
               showToast("Players limit reached. Better luck next time!", 'error');
             } else if (status === 409) {

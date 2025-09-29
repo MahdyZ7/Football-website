@@ -10,7 +10,7 @@ import {
   useAdminDeleteUser,
   useVerifyUser
 } from '../../hooks/useQueries';
-import { User, BannedUser, Toast } from '../../types/user';
+import { Toast } from '../../types/user';
 
 const Admin: React.FC = () => {
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -18,8 +18,8 @@ const Admin: React.FC = () => {
 
   // React Query hooks
   const { data: authData, isLoading: authLoading, error: authError } = useAdminAuth();
-  const { data: users = [], isLoading: usersLoading, error: usersError, refetch: refetchUsers } = useUsers();
-  const { data: bannedUsers = [], isLoading: bannedLoading, error: bannedError, refetch: refetchBanned } = useAdminBanned();
+  const { data: users = [], isLoading: usersLoading, error: usersError } = useUsers();
+  const { data: bannedUsers = [], isLoading: bannedLoading, error: bannedError } = useAdminBanned();
 
   // Mutation hooks
   const banUserMutation = useBanUser();

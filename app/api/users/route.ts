@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import pool from "../../../lib/utils/db";
 import { User } from "../../../types/user";
 
@@ -12,7 +12,7 @@ export async function GET() {
 			intra: row.intra,
 			verified: row.verified,
 			created_at: row.created_at,
-		} as User));
+		} satisfies User));
 
 		return NextResponse.json(players);
 

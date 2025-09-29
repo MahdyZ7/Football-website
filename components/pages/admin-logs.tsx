@@ -4,15 +4,6 @@ import Navbar from './Navbar';
 import Footer from './footer';
 import { useAdminLogs } from '../../hooks/useQueries';
 
-type AdminLog = {
-  id: number;
-  admin_user: string;
-  action: string;
-  target_user?: string;
-  target_name?: string;
-  details?: string;
-  timestamp: string;
-};
 
 const AdminLogs: React.FC = () => {
   const { data: logs = [], isLoading: loading, error } = useAdminLogs();
