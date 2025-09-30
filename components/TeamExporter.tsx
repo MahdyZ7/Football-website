@@ -38,7 +38,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
         day: 'numeric' 
       }) + '\n\n';
       
-      teams.forEach((team, index) => {
+      teams.forEach((team) => {
         if (team.players.length > 0) {
           textContent += `${team.name.toUpperCase()}\n`;
           textContent += '-'.repeat(team.name.length + 4) + '\n';
@@ -122,13 +122,13 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
           clonedDoc.head.appendChild(style);
           
           const allElements = clonedDoc.querySelectorAll('*');
-          allElements.forEach((el: any) => {
-            if (el.style) {
+          allElements.forEach((el: Element) => {
+            if (el instanceof HTMLElement && el.style) {
               el.style.fontFamily = 'Albert Sans, Albertus MT, system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
             }
           });
         }
-      } as any);
+      } as Parameters<typeof html2canvas>[1]);
       
       const link = document.createElement('a');
       link.download = `match-day-lineup.${format}`;
@@ -181,13 +181,13 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
           clonedDoc.head.appendChild(style);
           
           const allElements = clonedDoc.querySelectorAll('*');
-          allElements.forEach((el: any) => {
-            if (el.style) {
+          allElements.forEach((el: Element) => {
+            if (el instanceof HTMLElement && el.style) {
               el.style.fontFamily = 'Albert Sans, Albertus MT, system-ui, -apple-system, BlinkMacSystemFont, sans-serif';
             }
           });
         }
-      } as any);
+      } as Parameters<typeof html2canvas>[1]);
       
       console.log('Canvas created for PDF:', { width: canvas.width, height: canvas.height });
       

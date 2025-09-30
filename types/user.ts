@@ -23,3 +23,21 @@ export type Toast = {
   message: string;
   type: 'success' | 'error' | 'info';
 };
+
+export type MoneyRecord = {
+  date: string;
+  name: string;
+  intra: string;
+  amount: number;
+  paid: boolean;
+};
+
+export type AdminLog = {
+  id: number;
+  admin_user: string;
+  action: string;
+  target_user?: string;
+  target_name?: string;
+  details?: string;
+  timestamp: string;
+};

@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "db:migrate": "node scripts/database-migration.js migrate",
     "db:backup": "node scripts/database-migration.js backup",
     "db:restore": "node scripts/database-migration.js restore",
@@ -15,6 +15,8 @@
     "db:setup": "chmod +x scripts/setup-database.sh && ./scripts/setup-database.sh"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.90.2",
+    "@tanstack/react-query-devtools": "^5.90.2",
     "@types/html2canvas": "^0.5.35",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
@@ -23,14 +25,17 @@
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
     "lucide-react": "^0.532.0",
-    "next": "^15.5.2",
+    "next": "^15.5.4",
     "next-auth": "^4.24.11",
+    "npm": "^11.6.1",
     "pg": "^8.12.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
     "simple-oauth2": "^5.1.0"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.36.0",
     "@tailwindcss/postcss": "^4.1.11",
     "@types/node": "^22.7.4",
     "@types/pg": "^8.11.10",
@@ -38,7 +43,7 @@
     "@types/react-dom": "^18.3.0",
     "@types/simple-oauth2": "^5.0.7",
     "eslint": "^9.12.0",
-    "eslint-config-next": "^15.0.0",
+    "eslint-config-next": "^15.5.4",
     "typescript": "^5.6.2"
   },
   "description": "This website is a registration site for the 42 Football Club. It is built using react and NextJS",
