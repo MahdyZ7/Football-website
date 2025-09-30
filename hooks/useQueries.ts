@@ -16,7 +16,6 @@ const api = {
     delete: async (intra: string) => {
       const { data } = await axios.delete('/api/register', {
         data: { intra },
-        headers: { 'x-secret-header': process.env.resetuser || '' }
       });
       return data;
     },
