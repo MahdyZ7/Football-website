@@ -26,8 +26,9 @@ async function handlePost(req: NextRequest) {
   if (!allowed_times()) {
     return NextResponse.json({ error: "Registration is not allowed at this time." }, { status: 403 });
   }
-
-  const user = await req.json() as User;
+  const json = await req.json();
+  const user = json as User;
+  console.log(json);
   
   // Input validation
   if (!user || typeof user !== 'object') {
@@ -64,7 +65,10 @@ if (dangerousPattern.test(user.intra) || (user.name && dangerousPattern.test(use
 async function handleDelete(req: NextRequest) {
   const secretHeader = req.headers.get("x-secret-header");
   const mySecret = process.env["resetuser"];
-  const user = await req.json() as User;
+  console.log("the body is ", req.body)
+  const json = await req.json();
+  console.log(json)
+  const user = json as User;
 
   if (!secretHeader || !mySecret || secretHeader !== mySecret) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -78,10 +82,10 @@ async function handleDelete(req: NextRequest) {
 
     const result = await deleteUser({ ...user, intra: user.intra.trim() });
     return NextResponse.json(result, { status: result.status || 200 });
+  } else{
+    const result = await resetList();
+    return NextResponse.json(result, { status: result.status || 200 });
   }
-
-  const result = await resetList();
-  return NextResponse.json(result, { status: result.status || 200 });
 }
 
 async function registerUser(user: User) {
