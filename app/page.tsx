@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Home from '../components/pages/home';
 import FootballApp from '../components/pages/althome';
-import SpecialEventToast from '../components/SpecialEventToast';
 
 export default function Index() {
 	const [showHome, setShowHome] = useState(true); // Default to Home for SSR
@@ -23,7 +22,6 @@ export default function Index() {
 	// After hydration, show the randomly selected component
 	return (
 		<>
-			<SpecialEventToast />
 			{showHome ? <Home /> : <FootballApp />}
 		</>
 	);

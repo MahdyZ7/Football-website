@@ -1,5 +1,5 @@
-export const GuaranteedSpot = 10;
-export const MaxPlayers = 20;
+export const GuaranteedSpot = 21;
+export const MaxPlayers = 40;
 
 export type BannedUser = {
 	intra: string;
