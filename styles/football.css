@@ -623,3 +623,121 @@ nav a.active {
 .admin-info-box strong {
   color: var(--ft-primary);
 }
+
+/* Special Event Toast Styles */
+.special-event-toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10001;
+  max-width: 90%;
+  width: 500px;
+  animation: specialToastFadeIn 0.4s ease-out;
+  cursor: pointer;
+}
+
+.special-event-content {
+  background: linear-gradient(135deg, var(--ft-primary) 0%, var(--ft-secondary) 100%);
+  color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: flex-start;
+  gap: 1.2rem;
+  position: relative;
+}
+
+.special-event-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+  animation: bounce 1s ease-in-out infinite;
+}
+
+.special-event-message {
+  flex: 1;
+}
+
+.special-event-message strong {
+  display: block;
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.special-event-message p {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.special-event-close {
+  position: absolute;
+  top: 0.8rem;
+  right: 0.8rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  padding: 0;
+  line-height: 1;
+}
+
+.special-event-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+@keyframes specialToastFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* Mobile responsive special event toast */
+@media (max-width: 600px) {
+  .special-event-toast {
+    width: 90%;
+  }
+
+  .special-event-content {
+    padding: 1.5rem;
+    gap: 1rem;
+  }
+
+  .special-event-icon {
+    font-size: 2rem;
+  }
+
+  .special-event-message strong {
+    font-size: 1.1rem;
+  }
+
+  .special-event-message p {
+    font-size: 0.9rem;
+  }
+}
