@@ -26,6 +26,40 @@
   align-items: center;
 }
 
+.team-mode-selector {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.team-mode-selector label {
+  font-weight: bold;
+  color: var(--text-primary);
+}
+
+.team-mode-button {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  border: 2px solid var(--ft-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--card-bg);
+  color: var(--text-primary);
+  font-weight: normal;
+}
+
+.team-mode-button.active {
+  background: var(--ft-primary);
+  color: white;
+  font-weight: bold;
+}
+
+.team-mode-button:hover {
+  opacity: 0.8;
+}
+
 .teams-controls button {
   padding: 0.8rem 1.5rem;
   font-size: 0.9rem;

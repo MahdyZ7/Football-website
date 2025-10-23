@@ -19,6 +19,7 @@ type Team = {
 };
 
 const Teams: React.FC = () => {
+  const [teamMode, setTeamMode] = useState<2 | 3>(3); // 2 or 3 teams
   const [availablePlayers, setAvailablePlayers] = useState<User[]>([]);
   const [waitingListPlayers, setWaitingListPlayers] = useState<User[]>([]);
   const [team1, setTeam1] = useState<Team>({ name: "Team 1", players: [] });
@@ -106,6 +107,8 @@ const Teams: React.FC = () => {
       return;
     }
 
+    const maxPlayersPerTeam = teamMode === 2 ? 10 : 7;
+
     // Remove from source
     if (dragSource === 'available') {
       setAvailablePlayers(prev => prev.filter(p => p.intra !== draggedPlayer.intra));
@@ -120,11 +123,11 @@ const Teams: React.FC = () => {
     // Add to target
     if (target === 'available') {
       setAvailablePlayers(prev => [...prev, draggedPlayer]);
-    } else if (target === 'team1' && team1.players.length < 7) {
+    } else if (target === 'team1' && team1.players.length < maxPlayersPerTeam) {
       setTeam1(prev => ({ ...prev, players: [...prev.players, draggedPlayer] }));
-    } else if (target === 'team2' && team2.players.length < 7) {
+    } else if (target === 'team2' && team2.players.length < maxPlayersPerTeam) {
       setTeam2(prev => ({ ...prev, players: [...prev.players, draggedPlayer] }));
-    } else if (target === 'team3' && team3.players.length < 7) {
+    } else if (target === 'team3' && team3.players.length < maxPlayersPerTeam && teamMode === 3) {
       setTeam3(prev => ({ ...prev, players: [...prev.players, draggedPlayer] }));
     }
 
@@ -134,9 +137,14 @@ const Teams: React.FC = () => {
 
   const addToTeam = (player: User, teamNumber: 1 | 2 | 3) => {
     const targetTeam = teamNumber === 1 ? team1 : teamNumber === 2 ? team2 : team3;
+    const maxPlayersPerTeam = teamMode === 2 ? 10 : 7;
 
-    if (targetTeam.players.length >= 7) {
+    if (targetTeam.players.length >= maxPlayersPerTeam) {
       return;
+    }
+
+    if (teamNumber === 3 && teamMode === 2) {
+      return; // Don't allow adding to team 3 in 2-team mode
     }
 
     if (teamNumber === 1) {
@@ -164,31 +172,59 @@ const Teams: React.FC = () => {
     const allEligiblePlayers = [...availablePlayers, ...team1.players, ...team2.players, ...team3.players];
     const sortedPlayers = allEligiblePlayers.sort((a, b) => (b.rating || 1) - (a.rating || 1));
 
-    const teams: User[][] = [[], [], []];
+    if (teamMode === 2) {
+      // 2-team mode: 10 players per team (20 total)
+      const teams: User[][] = [[], []];
+      const randomFirstPick = Math.floor(Math.random() * 2);
 
-	const randomfirstpick = Math.floor(Math.random() * 3);
-
-    const pickOrder: number[] = [];
-    for (let round = 0; round < 7; round++) {
-      if (round % 2 === 0) {
-        pickOrder.push(randomfirstpick, (randomfirstpick + 1) % 3, (randomfirstpick + 2) % 3);
-      } else {
-        pickOrder.push((randomfirstpick + 2) % 3, (randomfirstpick + 1) % 3, randomfirstpick);
+      const pickOrder: number[] = [];
+      for (let round = 0; round < 10; round++) {
+        if (round % 2 === 0) {
+          pickOrder.push(randomFirstPick, (randomFirstPick + 1) % 2);
+        } else {
+          pickOrder.push((randomFirstPick + 1) % 2, randomFirstPick);
+        }
       }
+
+      // Assign players using snake draft order
+      sortedPlayers.slice(0, 20).forEach((player, index) => {
+        const teamIndex = pickOrder[index];
+        teams[teamIndex].push(player);
+      });
+
+      const remainingPlayers = sortedPlayers.slice(20);
+
+      setTeam1({ name: team1.name, players: teams[0] });
+      setTeam2({ name: team2.name, players: teams[1] });
+      setTeam3({ name: team3.name, players: [] });
+      setAvailablePlayers(remainingPlayers);
+    } else {
+      // 3-team mode: 7 players per team (21 total)
+      const teams: User[][] = [[], [], []];
+      const randomFirstPick = Math.floor(Math.random() * 3);
+
+      const pickOrder: number[] = [];
+      for (let round = 0; round < 7; round++) {
+        if (round % 2 === 0) {
+          pickOrder.push(randomFirstPick, (randomFirstPick + 1) % 3, (randomFirstPick + 2) % 3);
+        } else {
+          pickOrder.push((randomFirstPick + 2) % 3, (randomFirstPick + 1) % 3, randomFirstPick);
+        }
+      }
+
+      // Assign players using snake draft order
+      sortedPlayers.slice(0, 21).forEach((player, index) => {
+        const teamIndex = pickOrder[index];
+        teams[teamIndex].push(player);
+      });
+
+      const remainingPlayers = sortedPlayers.slice(21);
+
+      setTeam1({ name: team1.name, players: teams[0] });
+      setTeam2({ name: team2.name, players: teams[1] });
+      setTeam3({ name: team3.name, players: teams[2] });
+      setAvailablePlayers(remainingPlayers);
     }
-
-    // Assign players using snake draft order
-    sortedPlayers.slice(0, 21).forEach((player, index) => {
-      const teamIndex = pickOrder[index];
-      teams[teamIndex].push(player);
-    });
-
-    const remainingPlayers = allEligiblePlayers.slice(21);
-
-    setTeam1({ name: team1.name, players: teams[0] });
-    setTeam2({ name: team2.name, players: teams[1] });
-    setTeam3({ name: team3.name, players: teams[2] });
-    setAvailablePlayers(remainingPlayers);
   };
 
   const removeFromEligible = (playerId: string) => {
@@ -299,27 +335,29 @@ const Teams: React.FC = () => {
           <button
             className="team-button team1"
             onClick={() => addToTeam(player, 1)}
-            disabled={team1.players.length >= 7}
+            disabled={team1.players.length >= (teamMode === 2 ? 10 : 7)}
             title="Add to Team 1"
           >
-            <span>🟦</span> T1 {team1.players.length >= 7 ? '(Full)' : ''}
+            <span>🟦</span> T1 {team1.players.length >= (teamMode === 2 ? 10 : 7) ? '(Full)' : ''}
           </button>
           <button
             className="team-button team2"
             onClick={() => addToTeam(player, 2)}
-            disabled={team2.players.length >= 7}
+            disabled={team2.players.length >= (teamMode === 2 ? 10 : 7)}
             title="Add to Team 2"
           >
-            <span>🟩</span> T2 {team2.players.length >= 7 ? '(Full)' : ''}
+            <span>🟩</span> T2 {team2.players.length >= (teamMode === 2 ? 10 : 7) ? '(Full)' : ''}
           </button>
-          <button
-            className="team-button team3"
-            onClick={() => addToTeam(player, 3)}
-            disabled={team3.players.length >= 7}
-            title="Add to Team 3"
-          >
-            <span>🟨</span> T3 {team3.players.length >= 7 ? '(Full)' : ''}
-          </button>
+          {teamMode === 3 && (
+            <button
+              className="team-button team3"
+              onClick={() => addToTeam(player, 3)}
+              disabled={team3.players.length >= 7}
+              title="Add to Team 3"
+            >
+              <span>🟨</span> T3 {team3.players.length >= 7 ? '(Full)' : ''}
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -362,8 +400,23 @@ const Teams: React.FC = () => {
       <div className="teams-container">
 		<Navbar />
 	    <div className="teams-header">
-          <h1>Team Selection (3 Teams of 7)</h1>
+          <h1>Team Selection ({teamMode === 2 ? '2 Teams of 10' : '3 Teams of 7'})</h1>
           <div className="teams-controls">
+            <div className="team-mode-selector">
+              <label>Mode:</label>
+              <button
+                onClick={() => setTeamMode(2)}
+                className={`team-mode-button ${teamMode === 2 ? 'active' : ''}`}
+              >
+                2 Teams
+              </button>
+              <button
+                onClick={() => setTeamMode(3)}
+                className={`team-mode-button ${teamMode === 3 ? 'active' : ''}`}
+              >
+                3 Teams
+              </button>
+            </div>
             <button onClick={autoBalance}>
               ⚖️ Auto Balance Teams
             </button>
@@ -417,7 +470,7 @@ const Teams: React.FC = () => {
                 className="team-name-input"
                 placeholder="Team 1 Name"
               />
-              <span className="team-count">({team1.players.length}/7)</span>
+              <span className="team-count">({team1.players.length}/{teamMode === 2 ? 10 : 7})</span>
             </div>
             <div className="player-list">
               {team1.players.length === 0 ? (
@@ -451,7 +504,7 @@ const Teams: React.FC = () => {
                 className="team-name-input"
                 placeholder="Team 2 Name"
               />
-              <span className="team-count">({team2.players.length}/7)</span>
+              <span className="team-count">({team2.players.length}/{teamMode === 2 ? 10 : 7})</span>
             </div>
             <div className="player-list">
               {team2.players.length === 0 ? (
@@ -471,39 +524,41 @@ const Teams: React.FC = () => {
             </div>
           </div>
 
-          {/* Team 3 */}
-          <div 
-            className="team-card team3-players"
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, 'team3')}
-          >
-            <div className="team-header">
-              <input
-                type="text"
-                value={team3.name}
-                onChange={(e) => updateTeamName(3, e.target.value)}
-                className="team-name-input"
-                placeholder="Team 3 Name"
-              />
-              <span className="team-count">({team3.players.length}/7)</span>
+          {/* Team 3 - Only show in 3-team mode */}
+          {teamMode === 3 && (
+            <div
+              className="team-card team3-players"
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, 'team3')}
+            >
+              <div className="team-header">
+                <input
+                  type="text"
+                  value={team3.name}
+                  onChange={(e) => updateTeamName(3, e.target.value)}
+                  className="team-name-input"
+                  placeholder="Team 3 Name"
+                />
+                <span className="team-count">({team3.players.length}/7)</span>
+              </div>
+              <div className="player-list">
+                {team3.players.length === 0 ? (
+                  <div className="empty-state">
+                    Drag players here or use buttons
+                  </div>
+                ) : (
+                  team3.players.map((player, index) => (
+                    <PlayerCard
+                      key={player.intra}
+                      player={player}
+                      index={index}
+                      source="team3"
+                    />
+                  ))
+                )}
+              </div>
             </div>
-            <div className="player-list">
-              {team3.players.length === 0 ? (
-                <div className="empty-state">
-                  Drag players here or use buttons
-                </div>
-              ) : (
-                team3.players.map((player, index) => (
-                  <PlayerCard 
-                    key={player.intra} 
-                    player={player} 
-                    index={index} 
-                    source="team3"
-                  />
-                ))
-              )}
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Removed Players Section */}
@@ -565,11 +620,13 @@ const Teams: React.FC = () => {
               <p>{team2.players.length} players</p>
               <p>Avg Rating: {team2.players.length > 0 ? (team2.players.reduce((sum, p) => sum + (p.rating || 1), 0) / team2.players.length).toFixed(1) : '0'}</p>
             </div>
-            <div className="summary-item">
-              <h4 style={{ color: '#28a745' }}>🟨 {team3.name}</h4>
-              <p>{team3.players.length} players</p>
-              <p>Avg Rating: {team3.players.length > 0 ? (team3.players.reduce((sum, p) => sum + (p.rating || 1), 0) / team3.players.length).toFixed(1) : '0'}</p>
-            </div>
+            {teamMode === 3 && (
+              <div className="summary-item">
+                <h4 style={{ color: '#28a745' }}>🟨 {team3.name}</h4>
+                <p>{team3.players.length} players</p>
+                <p>Avg Rating: {team3.players.length > 0 ? (team3.players.reduce((sum, p) => sum + (p.rating || 1), 0) / team3.players.length).toFixed(1) : '0'}</p>
+              </div>
+            )}
             <div className="summary-item">
               <h4 style={{ color: 'var(--text-secondary)' }}>📋 Available</h4>
               <p>{availablePlayers.length} players</p>
