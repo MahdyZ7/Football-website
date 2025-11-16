@@ -196,7 +196,7 @@ const Home: React.FC = () => {
                 Submit
               </button>
               {!isSubmissionAllowed && (
-                <p style={{ textAlign: 'center', marginTop: '10px', color: '#805b30' }}>
+                <p className="text-center mt-2 text-warning">
                   Next registration opens in: {timeUntilNext}
                 </p>
               )}
@@ -204,7 +204,7 @@ const Home: React.FC = () => {
           )}
         </form>
 
-        <div style={{ height: "3rem" }} />
+        <div className="spacer-3" />
 
         <div className="card">
           <div className="card-header">
@@ -254,11 +254,11 @@ const Home: React.FC = () => {
             {loading ? (
               <li>Loading players...</li>
             ) : usersError ? (
-              <li style={{ color: "#ff8080", textAlign: "center" }}>
+              <li className="text-error text-center">
                 Error loading players. Please refresh the page.
               </li>
             ) : registeredUsers.length === 0 ? (
-              <li style={{ color: "#ffaa99", fontWeight: "bold", textAlign: "center" }}>
+              <li className="text-error font-bold text-center">
                 Dare to be First
               </li>
             ) : (
@@ -271,7 +271,7 @@ const Home: React.FC = () => {
                   {user.verified ? (
                     "✅"
                   ) : (
-                    <span style={{ color: '#ff8080' }}>Invalid Intra</span>
+                    <span className="text-error">Invalid Intra</span>
                   )}
                 </li>
               ))
@@ -279,30 +279,16 @@ const Home: React.FC = () => {
           </ul>
         </div>
 
-        <div className="card" style={{ marginTop: '2rem' }}>
+        <div className="card mt-8">
           <div className="card-header">
             <h3>Banned Players</h3>
           </div>
           <div className="card-body">
-            <p style={{ textAlign: 'center', marginBottom: '1rem', color: 'var(--text-secondary)' }}>
+            <p className="text-center mb-4 text-muted">
               Players currently banned from registering
             </p>
-            <div style={{ textAlign: 'center' }}>
-              <Link
-                href="/banned-players"
-                style={{
-                  display: 'inline-block',
-                  padding: '0.8rem 1.5rem',
-                  background: 'var(--ft-primary)',
-                  color: 'white',
-                  textDecoration: 'none',
-                  borderRadius: '4px',
-                  fontWeight: 'bold',
-                  transition: 'background 0.2s'
-                }}
-                onMouseEnter={(e) => (e.target as HTMLElement).style.background = '#005580'}
-                onMouseLeave={(e) => (e.target as HTMLElement).style.background = 'var(--ft-primary)'}
-              >
+            <div className="text-center">
+              <Link href="/banned-players" className="btn-link">
                 View Banned Players List
               </Link>
             </div>

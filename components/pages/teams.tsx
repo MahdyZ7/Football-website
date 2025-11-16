@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import Footer from "./footer";
@@ -18,18 +20,15 @@ type Team = {
   players: User[];
 };
 
-const Teams: React.FC = () => {
-  const [teamMode, setTeamMode] = useState<2 | 3>(3); // 2 or 3 teams
+const TeamsImproved: React.FC = () => {
+  const [teamMode, setTeamMode] = useState<2 | 3>(3);
   const [availablePlayers, setAvailablePlayers] = useState<User[]>([]);
   const [waitingListPlayers, setWaitingListPlayers] = useState<User[]>([]);
+  const [discardedPlayers, setDiscardedPlayers] = useState<User[]>([]);
   const [team1, setTeam1] = useState<Team>({ name: "Team 1", players: [] });
   const [team2, setTeam2] = useState<Team>({ name: "Team 2", players: [] });
   const [team3, setTeam3] = useState<Team>({ name: "Team 3", players: [] });
-  const [removedPlayers, setRemovedPlayers] = useState<User[]>([]);
-  const [draggedPlayer, setDraggedPlayer] = useState<User | null>(null);
-  const [dragSource, setDragSource] = useState<'available' | 'team1' | 'team2' | 'team3' | null>(null);
 
-  // React Query hook
   const { data: registeredUsers = [], isLoading: loading, error: usersError } = useUsers();
 
   useEffect(() => {
@@ -43,32 +42,13 @@ const Teams: React.FC = () => {
   }, [registeredUsers]);
 
   const updatePlayerRating = (playerId: string, rating: number) => {
-    setAvailablePlayers(prev => 
-      prev.map(player => 
-        player.intra === playerId ? { ...player, rating } : player
-      )
-    );
+    const updateInList = (players: User[]) =>
+      players.map(player => player.intra === playerId ? { ...player, rating } : player);
 
-    setTeam1(prev => ({
-      ...prev,
-      players: prev.players.map(player => 
-        player.intra === playerId ? { ...player, rating } : player
-      )
-    }));
-
-    setTeam2(prev => ({
-      ...prev,
-      players: prev.players.map(player => 
-        player.intra === playerId ? { ...player, rating } : player
-      )
-    }));
-
-    setTeam3(prev => ({
-      ...prev,
-      players: prev.players.map(player => 
-        player.intra === playerId ? { ...player, rating } : player
-      )
-    }));
+    setAvailablePlayers(updateInList);
+    setTeam1(prev => ({ ...prev, players: updateInList(prev.players) }));
+    setTeam2(prev => ({ ...prev, players: updateInList(prev.players) }));
+    setTeam3(prev => ({ ...prev, players: updateInList(prev.players) }));
   };
 
   const StarRating = ({ rating, onRatingChange }: { rating: number, onRatingChange: (rating: number) => void }) => {
@@ -78,9 +58,7 @@ const Teams: React.FC = () => {
           <span
             key={star}
             onClick={() => onRatingChange(star)}
-            style={{
-              color: star <= rating ? '#FFD700' : '#ccc',
-            }}
+            className={star <= rating ? 'star-filled' : 'star-empty'}
           >
             ★
           </span>
@@ -89,63 +67,12 @@ const Teams: React.FC = () => {
     );
   };
 
-  const handleDragStart = (e: React.DragEvent, player: User, source: 'available' | 'team1' | 'team2' | 'team3') => {
-    setDraggedPlayer(player);
-    setDragSource(source);
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  };
-
-  const handleDrop = (e: React.DragEvent, target: 'available' | 'team1' | 'team2' | 'team3') => {
-    e.preventDefault();
-
-    if (!draggedPlayer || !dragSource || dragSource === target) {
-      return;
-    }
-
-    const maxPlayersPerTeam = teamMode === 2 ? 10 : 7;
-
-    // Remove from source
-    if (dragSource === 'available') {
-      setAvailablePlayers(prev => prev.filter(p => p.intra !== draggedPlayer.intra));
-    } else if (dragSource === 'team1') {
-      setTeam1(prev => ({ ...prev, players: prev.players.filter(p => p.intra !== draggedPlayer.intra) }));
-    } else if (dragSource === 'team2') {
-      setTeam2(prev => ({ ...prev, players: prev.players.filter(p => p.intra !== draggedPlayer.intra) }));
-    } else if (dragSource === 'team3') {
-      setTeam3(prev => ({ ...prev, players: prev.players.filter(p => p.intra !== draggedPlayer.intra) }));
-    }
-
-    // Add to target
-    if (target === 'available') {
-      setAvailablePlayers(prev => [...prev, draggedPlayer]);
-    } else if (target === 'team1' && team1.players.length < maxPlayersPerTeam) {
-      setTeam1(prev => ({ ...prev, players: [...prev.players, draggedPlayer] }));
-    } else if (target === 'team2' && team2.players.length < maxPlayersPerTeam) {
-      setTeam2(prev => ({ ...prev, players: [...prev.players, draggedPlayer] }));
-    } else if (target === 'team3' && team3.players.length < maxPlayersPerTeam && teamMode === 3) {
-      setTeam3(prev => ({ ...prev, players: [...prev.players, draggedPlayer] }));
-    }
-
-    setDraggedPlayer(null);
-    setDragSource(null);
-  };
-
   const addToTeam = (player: User, teamNumber: 1 | 2 | 3) => {
     const targetTeam = teamNumber === 1 ? team1 : teamNumber === 2 ? team2 : team3;
     const maxPlayersPerTeam = teamMode === 2 ? 10 : 7;
 
-    if (targetTeam.players.length >= maxPlayersPerTeam) {
-      return;
-    }
-
-    if (teamNumber === 3 && teamMode === 2) {
-      return; // Don't allow adding to team 3 in 2-team mode
-    }
+    if (targetTeam.players.length >= maxPlayersPerTeam) return;
+    if (teamNumber === 3 && teamMode === 2) return;
 
     if (teamNumber === 1) {
       setTeam1(prev => ({ ...prev, players: [...prev.players, player] }));
@@ -168,16 +95,32 @@ const Teams: React.FC = () => {
     setAvailablePlayers(prev => [...prev, player]);
   };
 
+  const discardPlayer = (player: User) => {
+    setAvailablePlayers(prev => prev.filter(p => p.intra !== player.intra));
+    setDiscardedPlayers(prev => [...prev, player]);
+
+    // Try to move first waiting list player to available if there's space
+    if (waitingListPlayers.length > 0) {
+      const nextPlayer = waitingListPlayers[0];
+      setWaitingListPlayers(prev => prev.slice(1));
+      setAvailablePlayers(prev => [...prev.filter(p => p.intra !== player.intra), { ...nextPlayer, rating: 1 }]);
+    }
+  };
+
+  const reAddPlayer = (player: User) => {
+    setDiscardedPlayers(prev => prev.filter(p => p.intra !== player.intra));
+    setAvailablePlayers(prev => [...prev, player]);
+  };
+
   const autoBalance = () => {
     const allEligiblePlayers = [...availablePlayers, ...team1.players, ...team2.players, ...team3.players];
     const sortedPlayers = allEligiblePlayers.sort((a, b) => (b.rating || 1) - (a.rating || 1));
 
     if (teamMode === 2) {
-      // 2-team mode: 10 players per team (20 total)
       const teams: User[][] = [[], []];
       const randomFirstPick = Math.floor(Math.random() * 2);
-
       const pickOrder: number[] = [];
+
       for (let round = 0; round < 10; round++) {
         if (round % 2 === 0) {
           pickOrder.push(randomFirstPick, (randomFirstPick + 1) % 2);
@@ -186,24 +129,19 @@ const Teams: React.FC = () => {
         }
       }
 
-      // Assign players using snake draft order
       sortedPlayers.slice(0, 20).forEach((player, index) => {
-        const teamIndex = pickOrder[index];
-        teams[teamIndex].push(player);
+        teams[pickOrder[index]].push(player);
       });
-
-      const remainingPlayers = sortedPlayers.slice(20);
 
       setTeam1({ name: team1.name, players: teams[0] });
       setTeam2({ name: team2.name, players: teams[1] });
       setTeam3({ name: team3.name, players: [] });
-      setAvailablePlayers(remainingPlayers);
+      setAvailablePlayers(sortedPlayers.slice(20));
     } else {
-      // 3-team mode: 7 players per team (21 total)
       const teams: User[][] = [[], [], []];
       const randomFirstPick = Math.floor(Math.random() * 3);
-
       const pickOrder: number[] = [];
+
       for (let round = 0; round < 7; round++) {
         if (round % 2 === 0) {
           pickOrder.push(randomFirstPick, (randomFirstPick + 1) % 3, (randomFirstPick + 2) % 3);
@@ -212,72 +150,34 @@ const Teams: React.FC = () => {
         }
       }
 
-      // Assign players using snake draft order
       sortedPlayers.slice(0, 21).forEach((player, index) => {
-        const teamIndex = pickOrder[index];
-        teams[teamIndex].push(player);
+        teams[pickOrder[index]].push(player);
       });
-
-      const remainingPlayers = sortedPlayers.slice(21);
 
       setTeam1({ name: team1.name, players: teams[0] });
       setTeam2({ name: team2.name, players: teams[1] });
       setTeam3({ name: team3.name, players: teams[2] });
-      setAvailablePlayers(remainingPlayers);
-    }
-  };
-
-  const removeFromEligible = (playerId: string) => {
-    const removedPlayer = availablePlayers.find(p => p.intra === playerId);
-    if (!removedPlayer) return;
-
-    const updatedAvailable = availablePlayers.filter(p => p.intra !== playerId);
-    setRemovedPlayers(prev => [...prev, removedPlayer]);
-
-    if (waitingListPlayers.length > 0) {
-      const nextPlayer = waitingListPlayers[0];
-      const promotedPlayer = { ...nextPlayer, rating: 1 };
-
-      setAvailablePlayers([...updatedAvailable, promotedPlayer]);
-      setWaitingListPlayers(prev => prev.slice(1));
-    } else {
-      setAvailablePlayers(updatedAvailable);
-    }
-  };
-
-  const restoreRemovedPlayer = (playerId: string) => {
-    const playerToRestore = removedPlayers.find(p => p.intra === playerId);
-    if (!playerToRestore) return;
-
-    setRemovedPlayers(prev => prev.filter(p => p.intra !== playerId));
-
-    if (availablePlayers.length >= GuaranteedSpot) {
-      const playerToWaitingList = availablePlayers[availablePlayers.length - 1];
-      setWaitingListPlayers(prev => [playerToWaitingList, ...prev]);
-      setAvailablePlayers(prev => [...prev.slice(0, -1), playerToRestore]);
-    } else {
-      setAvailablePlayers(prev => [...prev, playerToRestore]);
+      setAvailablePlayers(sortedPlayers.slice(21));
     }
   };
 
   const clearTeams = () => {
-    const allCurrentPlayers = [...availablePlayers, ...team1.players, ...team2.players, ...team3.players];
+    const allCurrentPlayers = [...availablePlayers, ...team1.players, ...team2.players, ...team3.players, ...discardedPlayers];
     const ratingMap = new Map();
     allCurrentPlayers.forEach(player => {
       ratingMap.set(player.intra, player.rating || 1);
     });
 
-    const verifiedPlayers = registeredUsers.filter(user => user);
-    const eligiblePlayers = verifiedPlayers.slice(0, GuaranteedSpot).map(user => ({ 
-      ...user, 
-      rating: ratingMap.get(user.intra) || 1 
+    const eligiblePlayers = registeredUsers.slice(0, GuaranteedSpot).map(user => ({
+      ...user,
+      rating: ratingMap.get(user.intra) || 1
     }));
 
     setAvailablePlayers(eligiblePlayers);
     setTeam1({ name: "Team 1", players: [] });
     setTeam2({ name: "Team 2", players: [] });
     setTeam3({ name: "Team 3", players: [] });
-    setRemovedPlayers([]);
+    setDiscardedPlayers([]);
   };
 
   const updateTeamName = (teamNumber: 1 | 2 | 3, newName: string) => {
@@ -290,85 +190,19 @@ const Teams: React.FC = () => {
     }
   };
 
-  const PlayerCard = ({ player, index, source, showTeamButtons = false }: { 
-    player: User; 
-    index: number; 
-    source: 'available' | 'team1' | 'team2' | 'team3';
-    showTeamButtons?: boolean;
-  }) => (
-    <div
-      className="player-card"
-      draggable
-      onDragStart={(e) => handleDragStart(e, player, source)}
-    >
-      <div className="player-info">
-        <span className="player-name">
-          {index >= 0 && `${index + 1}. `}{player.name} ({player.intra})
-        </span>
-        <div className="player-actions">
-          <StarRating 
-            rating={player.rating || 1} 
-            onRatingChange={(rating) => updatePlayerRating(player.intra, rating)}
-          />
-          {source === 'available' && (
-            <button
-              className="icon-button"
-              onClick={() => removeFromEligible(player.intra)}
-              title="Remove from eligible players"
-            >
-              🗑️
-            </button>
-          )}
-          {source !== 'available' && (
-            <button
-              className="icon-button"
-              onClick={() => removeFromTeam(player, source === 'team1' ? 1 : source === 'team2' ? 2 : 3)}
-              title="Remove from team"
-            >
-              ❌
-            </button>
-          )}
-        </div>
-      </div>
-      {showTeamButtons && (
-        <div className="team-buttons">
-          <button
-            className="team-button team1"
-            onClick={() => addToTeam(player, 1)}
-            disabled={team1.players.length >= (teamMode === 2 ? 10 : 7)}
-            title="Add to Team 1"
-          >
-            <span>🟦</span> T1 {team1.players.length >= (teamMode === 2 ? 10 : 7) ? '(Full)' : ''}
-          </button>
-          <button
-            className="team-button team2"
-            onClick={() => addToTeam(player, 2)}
-            disabled={team2.players.length >= (teamMode === 2 ? 10 : 7)}
-            title="Add to Team 2"
-          >
-            <span>🟩</span> T2 {team2.players.length >= (teamMode === 2 ? 10 : 7) ? '(Full)' : ''}
-          </button>
-          {teamMode === 3 && (
-            <button
-              className="team-button team3"
-              onClick={() => addToTeam(player, 3)}
-              disabled={team3.players.length >= 7}
-              title="Add to Team 3"
-            >
-              <span>🟨</span> T3 {team3.players.length >= 7 ? '(Full)' : ''}
-            </button>
-          )}
-        </div>
-      )}
-    </div>
-  );
+  const getTeamStats = (team: Team) => {
+    const avgRating = team.players.length > 0
+      ? (team.players.reduce((sum, p) => sum + (p.rating || 1), 0) / team.players.length).toFixed(1)
+      : '0';
+    return { avgRating, count: team.players.length };
+  };
 
   if (loading) {
     return (
       <>
-        <div className="teams-container">
         <Navbar />
-          <div className="teams-header">
+        <div className="teams-container-v2">
+          <div className="teams-header-v2">
             <h1>Team Selection</h1>
             <div className="loading-state">Loading players...</div>
           </div>
@@ -381,13 +215,11 @@ const Teams: React.FC = () => {
   if (usersError) {
     return (
       <>
-        <div className="teams-container">
         <Navbar />
-          <div className="teams-header">
+        <div className="teams-container-v2">
+          <div className="teams-header-v2">
             <h1>Team Selection</h1>
-            <div className="error-state" style={{ color: '#ff8080', textAlign: 'center', padding: '2rem' }}>
-              Error loading players. Please refresh the page.
-            </div>
+            <div className="error-state">Error loading players. Please refresh the page.</div>
           </div>
         </div>
         <Footer />
@@ -397,258 +229,278 @@ const Teams: React.FC = () => {
 
   return (
     <>
-      <div className="teams-container">
-		<Navbar />
-	    <div className="teams-header">
-          <h1>Team Selection ({teamMode === 2 ? '2 Teams of 10' : '3 Teams of 7'})</h1>
-          <div className="teams-controls">
-            <div className="team-mode-selector">
-              <label>Mode:</label>
-              <button
-                onClick={() => setTeamMode(2)}
-                className={`team-mode-button ${teamMode === 2 ? 'active' : ''}`}
-              >
-                2 Teams
-              </button>
-              <button
-                onClick={() => setTeamMode(3)}
-                className={`team-mode-button ${teamMode === 3 ? 'active' : ''}`}
-              >
-                3 Teams
-              </button>
-            </div>
-            <button onClick={autoBalance}>
-              ⚖️ Auto Balance Teams
+      <Navbar />
+      <div className="teams-container-v2">
+        {/* Header with Controls */}
+        <div className="teams-header-v2">
+          <h1>Team Selection</h1>
+
+          {/* Mode Selector */}
+          <div className="mode-selector">
+            <button
+              onClick={() => setTeamMode(2)}
+              className={`mode-btn ${teamMode === 2 ? 'active' : ''}`}
+            >
+              2 Teams (10 each)
             </button>
-            <button onClick={clearTeams}>
-              🗑️ Clear All Teams
+            <button
+              onClick={() => setTeamMode(3)}
+              className={`mode-btn ${teamMode === 3 ? 'active' : ''}`}
+            >
+              3 Teams (7 each)
+            </button>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="action-buttons">
+            <button onClick={autoBalance} className="btn-primary">
+              ⚖️ Auto Balance
+            </button>
+            <button onClick={clearTeams} className="btn-secondary">
+              🗑️ Clear All
             </button>
             <TeamExporter team1={team1} team2={team2} team3={team3} />
           </div>
         </div>
 
-        <div className="teams-grid">
-          {/* Available Players */}
-          <div 
-            className="team-card available-players"
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, 'available')}
-          >
-            <div className="team-header">
-              <h3>Available Players ({availablePlayers.length})</h3>
-            </div>
-            <div className="player-list">
+        {/* Main Content - Unified View */}
+        <div className="unified-view">
+          {/* Available Players Section */}
+          <div className="available-section">
+            <h2>Available Players ({availablePlayers.length})</h2>
+            <div className="player-grid">
               {availablePlayers.length === 0 ? (
-                <div className="empty-state">
-                  All eligible players assigned to teams
-                </div>
+                <div className="empty-state">All players assigned</div>
               ) : (
                 availablePlayers.map((player, index) => (
-                  <PlayerCard 
-                    key={player.intra} 
-                    player={player} 
-                    index={index} 
-                    source="available"
-                    showTeamButtons={true}
-                  />
+                  <div key={player.intra} className="player-card-v2">
+                    <div className="player-info-v2">
+                      <span className="player-number">#{index + 1}</span>
+                      <div className="player-details">
+                        <strong>{player.name}</strong>
+                        <span className="player-intra">{player.intra}</span>
+                      </div>
+                      <button
+                        onClick={() => discardPlayer(player)}
+                        className="discard-btn"
+                        title="Remove player (didn't show up)"
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    <StarRating
+                      rating={player.rating || 1}
+                      onRatingChange={(rating) => updatePlayerRating(player.intra, rating)}
+                    />
+
+                    <div className="assign-buttons">
+                      <button
+                        onClick={() => addToTeam(player, 1)}
+                        disabled={team1.players.length >= (teamMode === 2 ? 10 : 7)}
+                        className="assign-btn team1-btn"
+                      >
+                        T1 {team1.players.length >= (teamMode === 2 ? 10 : 7) ? '(Full)' : ''}
+                      </button>
+                      <button
+                        onClick={() => addToTeam(player, 2)}
+                        disabled={team2.players.length >= (teamMode === 2 ? 10 : 7)}
+                        className="assign-btn team2-btn"
+                      >
+                        T2 {team2.players.length >= (teamMode === 2 ? 10 : 7) ? '(Full)' : ''}
+                      </button>
+                      {teamMode === 3 && (
+                        <button
+                          onClick={() => addToTeam(player, 3)}
+                          disabled={team3.players.length >= 7}
+                          className="assign-btn team3-btn"
+                        >
+                          T3 {team3.players.length >= 7 ? '(Full)' : ''}
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 ))
               )}
             </div>
           </div>
 
-          {/* Team 1 */}
-          <div 
-            className="team-card team1-players"
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, 'team1')}
-          >
-            <div className="team-header">
-              <input
-                type="text"
-                value={team1.name}
-                onChange={(e) => updateTeamName(1, e.target.value)}
-                className="team-name-input"
-                placeholder="Team 1 Name"
-              />
-              <span className="team-count">({team1.players.length}/{teamMode === 2 ? 10 : 7})</span>
-            </div>
-            <div className="player-list">
-              {team1.players.length === 0 ? (
-                <div className="empty-state">
-                  Drag players here or use buttons
-                </div>
-              ) : (
-                team1.players.map((player, index) => (
-                  <PlayerCard 
-                    key={player.intra} 
-                    player={player} 
-                    index={index} 
-                    source="team1"
-                  />
-                ))
-              )}
-            </div>
-          </div>
-
-          {/* Team 2 */}
-          <div 
-            className="team-card team2-players"
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, 'team2')}
-          >
-            <div className="team-header">
-              <input
-                type="text"
-                value={team2.name}
-                onChange={(e) => updateTeamName(2, e.target.value)}
-                className="team-name-input"
-                placeholder="Team 2 Name"
-              />
-              <span className="team-count">({team2.players.length}/{teamMode === 2 ? 10 : 7})</span>
-            </div>
-            <div className="player-list">
-              {team2.players.length === 0 ? (
-                <div className="empty-state">
-                  Drag players here or use buttons
-                </div>
-              ) : (
-                team2.players.map((player, index) => (
-                  <PlayerCard 
-                    key={player.intra} 
-                    player={player} 
-                    index={index} 
-                    source="team2"
-                  />
-                ))
-              )}
-            </div>
-          </div>
-
-          {/* Team 3 - Only show in 3-team mode */}
-          {teamMode === 3 && (
-            <div
-              className="team-card team3-players"
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, 'team3')}
-            >
-              <div className="team-header">
+          {/* Live Team Rosters */}
+          <div className="teams-section">
+            <h2>Teams</h2>
+            <div className="view-teams">
+            {/* Team 1 */}
+            <div className="team-view-card team1-bg">
+              <div className="team-view-header">
                 <input
                   type="text"
-                  value={team3.name}
-                  onChange={(e) => updateTeamName(3, e.target.value)}
-                  className="team-name-input"
-                  placeholder="Team 3 Name"
+                  value={team1.name}
+                  onChange={(e) => updateTeamName(1, e.target.value)}
+                  className="team-name-input-v2"
+                  placeholder="Team 1 Name"
                 />
-                <span className="team-count">({team3.players.length}/7)</span>
+                <span className="team-badge">{team1.players.length}/{teamMode === 2 ? 10 : 7}</span>
               </div>
-              <div className="player-list">
-                {team3.players.length === 0 ? (
-                  <div className="empty-state">
-                    Drag players here or use buttons
-                  </div>
+
+              <div className="team-stats">
+                <span>Average Rating: {getTeamStats(team1).avgRating} ★</span>
+              </div>
+
+              <div className="team-players-list">
+                {team1.players.length === 0 ? (
+                  <div className="empty-state">No players assigned</div>
                 ) : (
-                  team3.players.map((player, index) => (
-                    <PlayerCard
-                      key={player.intra}
-                      player={player}
-                      index={index}
-                      source="team3"
-                    />
+                  team1.players.map((player, index) => (
+                    <div key={player.intra} className="team-player-item">
+                      <span className="player-position">#{index + 1}</span>
+                      <div className="player-info-compact">
+                        <strong>{player.name}</strong>
+                        <span className="player-rating">{'★'.repeat(player.rating || 1)}</span>
+                      </div>
+                      <button
+                        onClick={() => removeFromTeam(player, 1)}
+                        className="remove-btn"
+                        title="Remove from team"
+                      >
+                        ✕
+                      </button>
+                    </div>
                   ))
                 )}
               </div>
             </div>
-          )}
-        </div>
 
-        {/* Removed Players Section */}
-        {removedPlayers.length > 0 && (
-          <div className="summary-card">
-            <h3>Recently Removed Players ({removedPlayers.length})</h3>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-              Players removed from team selection (can be restored)
-            </p>
-            <div className="player-list" style={{ maxHeight: '200px' }}>
-              {removedPlayers.map((player) => (
-                <div key={player.intra} className="player-card">
-                  <div className="player-info">
-                    <span className="player-name">{player.name} ({player.intra})</span>
-                    <button
-                      className="icon-button"
-                      onClick={() => restoreRemovedPlayer(player.intra)}
-                      title="Restore player"
-                    >
-                      ↩️
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+            {/* Team 2 */}
+            <div className="team-view-card team2-bg">
+              <div className="team-view-header">
+                <input
+                  type="text"
+                  value={team2.name}
+                  onChange={(e) => updateTeamName(2, e.target.value)}
+                  className="team-name-input-v2"
+                  placeholder="Team 2 Name"
+                />
+                <span className="team-badge">{team2.players.length}/{teamMode === 2 ? 10 : 7}</span>
+              </div>
 
-        {/* Waiting List */}
-        {waitingListPlayers.length > 0 && (
-          <div className="summary-card">
-            <h3>Waiting List ({waitingListPlayers.length})</h3>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-              Players beyond the first 21 registered (not eligible for current game)
-            </p>
-            <div className="player-list" style={{ maxHeight: '200px' }}>
-              {waitingListPlayers.map((player, index) => (
-                <div key={player.intra} className="player-card">
-                  <span className="player-name">
-                    #{GuaranteedSpot + index + 1} {player.name} ({player.intra})
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+              <div className="team-stats">
+                <span>Average Rating: {getTeamStats(team2).avgRating} ★</span>
+              </div>
 
-        {/* Team Summary */}
-        <div className="summary-card">
-          <h3>Team Summary</h3>
-          <div className="summary-grid">
-            <div className="summary-item">
-              <h4 style={{ color: 'var(--ft-primary)' }}>🟦 {team1.name}</h4>
-              <p>{team1.players.length} players</p>
-              <p>Avg Rating: {team1.players.length > 0 ? (team1.players.reduce((sum, p) => sum + (p.rating || 1), 0) / team1.players.length).toFixed(1) : '0'}</p>
+              <div className="team-players-list">
+                {team2.players.length === 0 ? (
+                  <div className="empty-state">No players assigned</div>
+                ) : (
+                  team2.players.map((player, index) => (
+                    <div key={player.intra} className="team-player-item">
+                      <span className="player-position">#{index + 1}</span>
+                      <div className="player-info-compact">
+                        <strong>{player.name}</strong>
+                        <span className="player-rating">{'★'.repeat(player.rating || 1)}</span>
+                      </div>
+                      <button
+                        onClick={() => removeFromTeam(player, 2)}
+                        className="remove-btn"
+                        title="Remove from team"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
-            <div className="summary-item">
-              <h4 style={{ color: 'var(--ft-secondary)' }}>🟩 {team2.name}</h4>
-              <p>{team2.players.length} players</p>
-              <p>Avg Rating: {team2.players.length > 0 ? (team2.players.reduce((sum, p) => sum + (p.rating || 1), 0) / team2.players.length).toFixed(1) : '0'}</p>
-            </div>
+
+            {/* Team 3 */}
             {teamMode === 3 && (
-              <div className="summary-item">
-                <h4 style={{ color: '#28a745' }}>🟨 {team3.name}</h4>
-                <p>{team3.players.length} players</p>
-                <p>Avg Rating: {team3.players.length > 0 ? (team3.players.reduce((sum, p) => sum + (p.rating || 1), 0) / team3.players.length).toFixed(1) : '0'}</p>
+              <div className="team-view-card team3-bg">
+                <div className="team-view-header">
+                  <input
+                    type="text"
+                    value={team3.name}
+                    onChange={(e) => updateTeamName(3, e.target.value)}
+                    className="team-name-input-v2"
+                    placeholder="Team 3 Name"
+                  />
+                  <span className="team-badge">{team3.players.length}/7</span>
+                </div>
+
+                <div className="team-stats">
+                  <span>Average Rating: {getTeamStats(team3).avgRating} ★</span>
+                </div>
+
+                <div className="team-players-list">
+                  {team3.players.length === 0 ? (
+                    <div className="empty-state">No players assigned</div>
+                  ) : (
+                    team3.players.map((player, index) => (
+                      <div key={player.intra} className="team-player-item">
+                        <span className="player-position">#{index + 1}</span>
+                        <div className="player-info-compact">
+                          <strong>{player.name}</strong>
+                          <span className="player-rating">{'★'.repeat(player.rating || 1)}</span>
+                        </div>
+                        <button
+                          onClick={() => removeFromTeam(player, 3)}
+                          className="remove-btn"
+                          title="Remove from team"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             )}
-            <div className="summary-item">
-              <h4 style={{ color: 'var(--text-secondary)' }}>📋 Available</h4>
-              <p>{availablePlayers.length} players</p>
             </div>
-            {waitingListPlayers.length > 0 && (
-              <div className="summary-item">
-                <h4 style={{ color: 'var(--text-secondary)' }}>⏳ Waiting</h4>
-                <p>{waitingListPlayers.length} players</p>
-              </div>
-            )}
-            {removedPlayers.length > 0 && (
-              <div className="summary-item">
-                <h4 style={{ color: 'var(--ft-accent)' }}>🗑️ Removed</h4>
-                <p>{removedPlayers.length} players</p>
-              </div>
-            )}
           </div>
         </div>
+
+        {/* Waiting List (Always visible) */}
+        {waitingListPlayers.length > 0 && (
+          <div className="waiting-list-section">
+            <h3>⏳ Waiting List ({waitingListPlayers.length})</h3>
+            <p className="text-muted text-sm">Players beyond the first {GuaranteedSpot}</p>
+            <div className="waiting-list-grid">
+              {waitingListPlayers.map((player, index) => (
+                <div key={player.intra} className="waiting-player-card">
+                  <span className="waiting-number">#{GuaranteedSpot + index + 1}</span>
+                  <span>{player.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Discarded Players Section */}
+        {discardedPlayers.length > 0 && (
+          <div className="discarded-list-section">
+            <h3>🗑️ Discarded Players ({discardedPlayers.length})</h3>
+            <p className="text-muted text-sm">Players who did not show up</p>
+            <div className="discarded-list-grid">
+              {discardedPlayers.map((player) => (
+                <div key={player.intra} className="discarded-player-card">
+                  <div className="discarded-player-info">
+                    <strong>{player.name}</strong>
+                    <span className="player-intra">{player.intra}</span>
+                  </div>
+                  <button
+                    onClick={() => reAddPlayer(player)}
+                    className="readd-btn"
+                    title="Re-add player to available list"
+                  >
+                    ↩️
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
       <Footer />
     </>
   );
 };
 
-export default Teams;
+export default TeamsImproved;

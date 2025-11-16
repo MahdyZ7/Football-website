@@ -201,16 +201,11 @@ const Admin: React.FC = () => {
         <h1>Admin Dashboard</h1>
 
         {/* Tab Navigation */}
-        <div style={{ 
-          marginBottom: '2rem',
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '0.5rem'
-        }}>
-          <button 
+        <div className="flex flex-wrap gap-2 mb-8">
+          <button
             onClick={() => setActiveTab('users')}
-            style={{ 
-              flex: '1',
+            className="flex-1"
+            style={{
               minWidth: '120px',
               background: activeTab === 'users' ? 'var(--ft-primary)' : 'var(--bg-secondary)',
               color: activeTab === 'users' ? 'white' : 'var(--text-primary)'
@@ -218,10 +213,10 @@ const Admin: React.FC = () => {
           >
             User Management
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('banned')}
-            style={{ 
-              flex: '1',
+            className="flex-1"
+            style={{
               minWidth: '120px',
               background: activeTab === 'banned' ? 'var(--ft-primary)' : 'var(--bg-secondary)',
               color: activeTab === 'banned' ? 'white' : 'var(--text-primary)'
@@ -238,36 +233,20 @@ const Admin: React.FC = () => {
 
             {/* Show loading/error states */}
             {usersLoading && (
-              <div style={{ textAlign: 'center', padding: '2rem' }}>
+              <div className="text-center p-8">
                 <p>Loading users...</p>
               </div>
             )}
             {usersError && (
-              <div style={{
-                background: '#ff6b6b',
-                color: 'white',
-                padding: '1rem',
-                borderRadius: '6px',
-                marginBottom: '2rem'
-              }}>
+              <div className="bg-error text-white p-4 rounded-md mb-8">
                 Failed to load users. Please try again.
               </div>
             )}
 
             {/* Ban User Form */}
-            <div style={{ 
-              background: 'var(--bg-card)', 
-              padding: '1.5rem', 
-              borderRadius: '8px', 
-              marginBottom: '2rem' 
-            }}>
+            <div className="bg-card p-6 rounded-md mb-8">
               <h3>Ban User</h3>
-              <form onSubmit={handleBanUser} style={{ 
-                display: 'grid', 
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '1rem',
-                alignItems: 'end'
-              }}>
+              <form onSubmit={handleBanUser} className="admin-form-grid">
                 <div>
                   <label>User ID:</label>
                   <input
@@ -275,7 +254,6 @@ const Admin: React.FC = () => {
                     value={banForm.userId}
                     onChange={(e) => setBanForm(prev => ({ ...prev, userId: e.target.value }))}
                     placeholder="Enter user intra login"
-                    style={{ width: '100%' }}
                   />
                 </div>
                 <div>
@@ -298,14 +276,6 @@ const Admin: React.FC = () => {
                         }
                       }
                     }}
-                    style={{ 
-                      width: '100%',
-                      padding: '0.5rem',
-                      borderRadius: '4px',
-                      border: '1px solid var(--bg-secondary)',
-                      background: 'var(--bg-primary)',
-                      color: 'var(--text-primary)'
-                    }}
                   >
                     {banReasons.map((reason) => (
                       <option key={reason.value} value={reason.value}>
@@ -322,7 +292,6 @@ const Admin: React.FC = () => {
                       value={banForm.reason}
                       onChange={(e) => setBanForm(prev => ({ ...prev, reason: e.target.value }))}
                       placeholder="Enter custom ban reason"
-                      style={{ width: '100%' }}
                     />
                   </div>
                 )}
@@ -335,7 +304,6 @@ const Admin: React.FC = () => {
                     min="0.5"
                     max="365"
                     step="0.5"
-                    style={{ width: '100%' }}
                     disabled={!isCustomReason && banForm.reason !== ''}
                   />
                   {banForm.duration > 0 && (
@@ -354,10 +322,8 @@ const Admin: React.FC = () => {
                 </div>
                 <button
                   type="submit"
-                  style={{
-                    background: 'var(--ft-accent)',
-                    gridColumn: 'span 1'
-                  }}
+                  className="grid-span-1"
+                  style={{ background: 'var(--ft-accent)' }}
                   disabled={banUserMutation.isPending}
                 >
                   {banUserMutation.isPending ? 'Banning...' : 'Ban User'}
@@ -385,33 +351,17 @@ const Admin: React.FC = () => {
                         <button
                           onClick={() => handleVerifyToggle(user.intra, user.verified)}
                           disabled={verifyUserMutation.isPending}
-                          style={{
-                            background: user.verified ? '#4CAF50' : '#ff6b6b',
-                            color: 'white',
-                            border: 'none',
-                            padding: '0.3rem 0.8rem',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '0.8rem'
-                          }}
+                          className={user.verified ? 'btn-verify' : 'btn-unverify'}
                         >
                           {user.verified ? '✅ Verified' : '❌ Unverified'}
                         </button>
                       </td>
                       <td data-label="Registered">{new Date(user.created_at).toLocaleDateString()}</td>
                       <td data-label="Actions">
-                        <div style={{ 
-                          display: 'flex', 
-                          flexDirection: 'column',
-                          gap: '0.3rem'
-                        }}>
+                        <div className="admin-action-buttons">
                           <button
                             onClick={() => handleDelete(user.intra)}
                             className="delete-btn"
-                            style={{
-                              fontSize: '0.8rem',
-                              padding: '0.4rem 0.8rem'
-                            }}
                             disabled={deleteUserMutation.isPending}
                           >
                             {deleteUserMutation.isPending ? 'Deleting...' : 'Delete'}
@@ -423,11 +373,7 @@ const Admin: React.FC = () => {
                               reason: 'Quick ban - 2 days',
                               duration: 2
                             }))}
-                            style={{ 
-                              background: 'var(--ft-accent)', 
-                              padding: '0.4rem 0.8rem',
-                              fontSize: '0.8rem'
-                            }}
+                            className="delete-btn"
                           >
                             Quick Ban (2d)
                           </button>
@@ -448,32 +394,19 @@ const Admin: React.FC = () => {
 
             {/* Show loading/error states */}
             {bannedLoading && (
-              <div style={{ textAlign: 'center', padding: '2rem' }}>
+              <div className="text-center p-8">
                 <p>Loading banned users...</p>
               </div>
             )}
             {bannedError && (
-              <div style={{
-                background: '#ff6b6b',
-                color: 'white',
-                padding: '1rem',
-                borderRadius: '6px',
-                marginBottom: '2rem'
-              }}>
+              <div className="bg-error text-white p-4 rounded-md mb-8">
                 Failed to load banned users. Please try again.
               </div>
             )}
 
             {/* Admin Info */}
-            <div style={{ 
-              background: 'var(--bg-card)', 
-              padding: '1rem', 
-              borderRadius: '8px', 
-              marginBottom: '1rem',
-              fontSize: '0.9rem',
-              color: 'var(--text-secondary)'
-            }}>
-              <strong>Admin Access:</strong> Currently only &apos;MahdyZ7&apos; has admin privileges. 
+            <div className="bg-card p-4 rounded-md mb-4 text-sm text-muted">
+              <strong>Admin Access:</strong> Currently only &apos;MahdyZ7&apos; has admin privileges.
               To add more admins, update the ADMIN_USERS array in /pages/api/admin/auth.ts
             </div>
             <div className="responsive-table-container">
@@ -493,28 +426,21 @@ const Admin: React.FC = () => {
                   {bannedUsers.map((user) => {
                     const isExpired = new Date(user.banned_until) < new Date();
                     return (
-                      <tr key={user.intra} style={{ opacity: isExpired ? 0.6 : 1 }}>
+                      <tr key={user.intra} className={isExpired ? 'opacity-60' : ''}>
                         <td data-label="Name">{user.name}</td>
                         <td data-label="ID">{user.intra}</td>
                         <td data-label="Reason">{user.reason}</td>
                         <td data-label="Banned Date">{new Date(user.banned_at).toLocaleDateString()}</td>
                         <td data-label="Ban Expires">{new Date(user.banned_until).toLocaleDateString()}</td>
                         <td data-label="Status">
-                          <span style={{ 
-                            color: isExpired ? '#4CAF50' : '#ff6b6b',
-                            fontWeight: 'bold'
-                          }}>
+                          <span className={`font-bold ${isExpired ? 'text-success' : 'text-error'}`}>
                             {isExpired ? 'Expired' : 'Active'}
                           </span>
                         </td>
                         <td data-label="Actions">
                           <button
                             onClick={() => handleUnban(user.intra)}
-                            style={{
-                              background: '#4CAF50',
-                              padding: '0.4rem 0.8rem',
-                              fontSize: '0.8rem'
-                            }}
+                            className="btn-success"
                             disabled={unbanUserMutation.isPending}
                           >
                             {unbanUserMutation.isPending ? 'Unbanning...' : 'Unban'}
