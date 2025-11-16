@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import Navbar from "./Navbar";
 import Footer from "./footer";
+import LoadingSpinner from "../LoadingSpinner";
 import { GuaranteedSpot } from "../../types/user";
 import TeamExporter from "../TeamExporter";
 import { useUsers } from "../../hooks/useQueries";
@@ -53,12 +55,14 @@ const TeamsImproved: React.FC = () => {
 
   const StarRating = ({ rating, onRatingChange }: { rating: number, onRatingChange: (rating: number) => void }) => {
     return (
-      <div className="star-rating">
+      <div className="flex gap-1 justify-center my-2">
         {[1, 2, 3, 4, 5].map((star) => (
           <span
             key={star}
             onClick={() => onRatingChange(star)}
-            className={star <= rating ? 'star-filled' : 'star-empty'}
+            className={`text-2xl cursor-pointer transition-all duration-200 hover:scale-110 ${
+              star <= rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'
+            }`}
           >
             ★
           </span>
@@ -199,307 +203,443 @@ const TeamsImproved: React.FC = () => {
 
   if (loading) {
     return (
-      <>
+      <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--bg-primary)' }}>
         <Navbar />
-        <div className="teams-container-v2">
-          <div className="teams-header-v2">
-            <h1>Team Selection</h1>
-            <div className="loading-state">Loading players...</div>
+        <main className="flex-1 pt-24 pb-8 px-4 md:px-8">
+          <div className="max-w-7xl mx-auto">
+            <h1 className="text-3xl md:text-4xl font-bold text-center mb-8" style={{ color: 'var(--text-primary)' }}>
+              Team Selection
+            </h1>
+            <div className="rounded-lg shadow-md p-8" style={{ backgroundColor: 'var(--bg-card)' }}>
+              <LoadingSpinner message="Loading players..." />
+            </div>
           </div>
-        </div>
+        </main>
         <Footer />
-      </>
+      </div>
     );
   }
 
   if (usersError) {
     return (
-      <>
+      <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--bg-primary)' }}>
         <Navbar />
-        <div className="teams-container-v2">
-          <div className="teams-header-v2">
-            <h1>Team Selection</h1>
-            <div className="error-state">Error loading players. Please refresh the page.</div>
+        <main className="flex-1 pt-24 pb-8 px-4 md:px-8">
+          <div className="max-w-7xl mx-auto">
+            <h1 className="text-3xl md:text-4xl font-bold text-center mb-8" style={{ color: 'var(--text-primary)' }}>
+              Team Selection
+            </h1>
+            <div className="rounded-lg shadow-md p-6 text-center bg-red-500 text-white">
+              <p className="font-medium">Error loading players. Please refresh the page.</p>
+            </div>
           </div>
-        </div>
+        </main>
         <Footer />
-      </>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--bg-primary)' }}>
       <Navbar />
-      <div className="teams-container-v2">
-        {/* Header with Controls */}
-        <div className="teams-header-v2">
-          <h1>Team Selection</h1>
 
-          {/* Mode Selector */}
-          <div className="mode-selector">
-            <button
-              onClick={() => setTeamMode(2)}
-              className={`mode-btn ${teamMode === 2 ? 'active' : ''}`}
-            >
-              2 Teams (10 each)
-            </button>
-            <button
-              onClick={() => setTeamMode(3)}
-              className={`mode-btn ${teamMode === 3 ? 'active' : ''}`}
-            >
-              3 Teams (7 each)
-            </button>
+      <main className="flex-1 pt-24 pb-8 px-4 md:px-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Header with Controls */}
+          <div className="mb-8">
+            <h1 className="text-3xl md:text-4xl font-bold text-center mb-6" style={{ color: 'var(--text-primary)' }}>
+              Team Selection
+            </h1>
+
+            {/* Back Link */}
+            <div className="mb-6">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-ft-primary hover:bg-ft-secondary
+                           text-white font-medium rounded transition-all duration-200 transform hover:scale-105"
+              >
+                ← Back to Registration
+              </Link>
+            </div>
+
+            {/* Mode Selector */}
+            <div className="flex gap-3 justify-center mb-6">
+              <button
+                onClick={() => setTeamMode(2)}
+                className={`px-6 py-3 font-medium rounded transition-all duration-200 ${
+                  teamMode === 2
+                    ? 'bg-ft-primary text-white'
+                    : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'
+                }`}
+                style={teamMode === 2 ? {} : { color: 'var(--text-primary)' }}
+              >
+                2 Teams (10 each)
+              </button>
+              <button
+                onClick={() => setTeamMode(3)}
+                className={`px-6 py-3 font-medium rounded transition-all duration-200 ${
+                  teamMode === 3
+                    ? 'bg-ft-primary text-white'
+                    : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'
+                }`}
+                style={teamMode === 3 ? {} : { color: 'var(--text-primary)' }}
+              >
+                3 Teams (7 each)
+              </button>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-3 justify-center">
+              <button
+                onClick={autoBalance}
+                className="px-6 py-3 bg-ft-primary hover:bg-ft-secondary text-white font-medium rounded
+                           transition-all duration-200 transform hover:scale-105"
+              >
+                ⚖️ Auto Balance
+              </button>
+              <button
+                onClick={clearTeams}
+                className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded
+                           transition-all duration-200 transform hover:scale-105"
+              >
+                🗑️ Clear All
+              </button>
+              <TeamExporter team1={team1} team2={team2} team3={team3} />
+            </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="action-buttons">
-            <button onClick={autoBalance} className="btn-primary">
-              ⚖️ Auto Balance
-            </button>
-            <button onClick={clearTeams} className="btn-secondary">
-              🗑️ Clear All
-            </button>
-            <TeamExporter team1={team1} team2={team2} team3={team3} />
-          </div>
-        </div>
-
-        {/* Main Content - Unified View */}
-        <div className="unified-view">
-          {/* Available Players Section */}
-          <div className="available-section">
-            <h2>Available Players ({availablePlayers.length})</h2>
-            <div className="player-grid">
-              {availablePlayers.length === 0 ? (
-                <div className="empty-state">All players assigned</div>
-              ) : (
-                availablePlayers.map((player, index) => (
-                  <div key={player.intra} className="player-card-v2">
-                    <div className="player-info-v2">
-                      <span className="player-number">#{index + 1}</span>
-                      <div className="player-details">
-                        <strong>{player.name}</strong>
-                        <span className="player-intra">{player.intra}</span>
-                      </div>
-                      <button
-                        onClick={() => discardPlayer(player)}
-                        className="discard-btn"
-                        title="Remove player (didn't show up)"
-                      >
-                        ✕
-                      </button>
-                    </div>
-
-                    <StarRating
-                      rating={player.rating || 1}
-                      onRatingChange={(rating) => updatePlayerRating(player.intra, rating)}
-                    />
-
-                    <div className="assign-buttons">
-                      <button
-                        onClick={() => addToTeam(player, 1)}
-                        disabled={team1.players.length >= (teamMode === 2 ? 10 : 7)}
-                        className="assign-btn team1-btn"
-                      >
-                        T1 {team1.players.length >= (teamMode === 2 ? 10 : 7) ? '(Full)' : ''}
-                      </button>
-                      <button
-                        onClick={() => addToTeam(player, 2)}
-                        disabled={team2.players.length >= (teamMode === 2 ? 10 : 7)}
-                        className="assign-btn team2-btn"
-                      >
-                        T2 {team2.players.length >= (teamMode === 2 ? 10 : 7) ? '(Full)' : ''}
-                      </button>
-                      {teamMode === 3 && (
-                        <button
-                          onClick={() => addToTeam(player, 3)}
-                          disabled={team3.players.length >= 7}
-                          className="assign-btn team3-btn"
-                        >
-                          T3 {team3.players.length >= 7 ? '(Full)' : ''}
-                        </button>
-                      )}
-                    </div>
+          {/* Main Content - Unified View */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            {/* Available Players Section */}
+            <div>
+              <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
+                Available Players ({availablePlayers.length})
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {availablePlayers.length === 0 ? (
+                  <div className="col-span-2 text-center py-8 rounded-lg" style={{
+                    backgroundColor: 'var(--bg-card)',
+                    color: 'var(--text-secondary)'
+                  }}>
+                    All players assigned
                   </div>
-                ))
-              )}
-            </div>
-          </div>
-
-          {/* Live Team Rosters */}
-          <div className="teams-section">
-            <h2>Teams</h2>
-            <div className="view-teams">
-            {/* Team 1 */}
-            <div className="team-view-card team1-bg">
-              <div className="team-view-header">
-                <input
-                  type="text"
-                  value={team1.name}
-                  onChange={(e) => updateTeamName(1, e.target.value)}
-                  className="team-name-input-v2"
-                  placeholder="Team 1 Name"
-                />
-                <span className="team-badge">{team1.players.length}/{teamMode === 2 ? 10 : 7}</span>
-              </div>
-
-              <div className="team-stats">
-                <span>Average Rating: {getTeamStats(team1).avgRating} ★</span>
-              </div>
-
-              <div className="team-players-list">
-                {team1.players.length === 0 ? (
-                  <div className="empty-state">No players assigned</div>
                 ) : (
-                  team1.players.map((player, index) => (
-                    <div key={player.intra} className="team-player-item">
-                      <span className="player-position">#{index + 1}</span>
-                      <div className="player-info-compact">
-                        <strong>{player.name}</strong>
-                        <span className="player-rating">{'★'.repeat(player.rating || 1)}</span>
-                      </div>
-                      <button
-                        onClick={() => removeFromTeam(player, 1)}
-                        className="remove-btn"
-                        title="Remove from team"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            {/* Team 2 */}
-            <div className="team-view-card team2-bg">
-              <div className="team-view-header">
-                <input
-                  type="text"
-                  value={team2.name}
-                  onChange={(e) => updateTeamName(2, e.target.value)}
-                  className="team-name-input-v2"
-                  placeholder="Team 2 Name"
-                />
-                <span className="team-badge">{team2.players.length}/{teamMode === 2 ? 10 : 7}</span>
-              </div>
-
-              <div className="team-stats">
-                <span>Average Rating: {getTeamStats(team2).avgRating} ★</span>
-              </div>
-
-              <div className="team-players-list">
-                {team2.players.length === 0 ? (
-                  <div className="empty-state">No players assigned</div>
-                ) : (
-                  team2.players.map((player, index) => (
-                    <div key={player.intra} className="team-player-item">
-                      <span className="player-position">#{index + 1}</span>
-                      <div className="player-info-compact">
-                        <strong>{player.name}</strong>
-                        <span className="player-rating">{'★'.repeat(player.rating || 1)}</span>
-                      </div>
-                      <button
-                        onClick={() => removeFromTeam(player, 2)}
-                        className="remove-btn"
-                        title="Remove from team"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            {/* Team 3 */}
-            {teamMode === 3 && (
-              <div className="team-view-card team3-bg">
-                <div className="team-view-header">
-                  <input
-                    type="text"
-                    value={team3.name}
-                    onChange={(e) => updateTeamName(3, e.target.value)}
-                    className="team-name-input-v2"
-                    placeholder="Team 3 Name"
-                  />
-                  <span className="team-badge">{team3.players.length}/7</span>
-                </div>
-
-                <div className="team-stats">
-                  <span>Average Rating: {getTeamStats(team3).avgRating} ★</span>
-                </div>
-
-                <div className="team-players-list">
-                  {team3.players.length === 0 ? (
-                    <div className="empty-state">No players assigned</div>
-                  ) : (
-                    team3.players.map((player, index) => (
-                      <div key={player.intra} className="team-player-item">
-                        <span className="player-position">#{index + 1}</span>
-                        <div className="player-info-compact">
-                          <strong>{player.name}</strong>
-                          <span className="player-rating">{'★'.repeat(player.rating || 1)}</span>
-                        </div>
+                  availablePlayers.map((player, index) => (
+                    <div
+                      key={player.intra}
+                      className="rounded-lg p-4 shadow-md"
+                      style={{ backgroundColor: 'var(--bg-card)' }}
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ft-primary text-white text-sm font-bold">
+                          #{index + 1}
+                        </span>
                         <button
-                          onClick={() => removeFromTeam(player, 3)}
-                          className="remove-btn"
-                          title="Remove from team"
+                          onClick={() => discardPlayer(player)}
+                          className="w-8 h-8 rounded-full bg-red-500 hover:bg-red-600 text-white font-bold transition-colors"
+                          title="Remove player (didn't show up)"
                         >
                           ✕
                         </button>
                       </div>
-                    ))
-                  )}
-                </div>
+
+                      <div className="mb-3">
+                        <strong className="block" style={{ color: 'var(--text-primary)' }}>
+                          {player.name}
+                        </strong>
+                        <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                          {player.intra}
+                        </span>
+                      </div>
+
+                      <StarRating
+                        rating={player.rating || 1}
+                        onRatingChange={(rating) => updatePlayerRating(player.intra, rating)}
+                      />
+
+                      <div className="flex gap-2 mt-3">
+                        <button
+                          onClick={() => addToTeam(player, 1)}
+                          disabled={team1.players.length >= (teamMode === 2 ? 10 : 7)}
+                          className="flex-1 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded
+                                     transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          T1 {team1.players.length >= (teamMode === 2 ? 10 : 7) ? '(Full)' : ''}
+                        </button>
+                        <button
+                          onClick={() => addToTeam(player, 2)}
+                          disabled={team2.players.length >= (teamMode === 2 ? 10 : 7)}
+                          className="flex-1 px-3 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded
+                                     transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          T2 {team2.players.length >= (teamMode === 2 ? 10 : 7) ? '(Full)' : ''}
+                        </button>
+                        {teamMode === 3 && (
+                          <button
+                            onClick={() => addToTeam(player, 3)}
+                            disabled={team3.players.length >= 7}
+                            className="flex-1 px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded
+                                       transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            T3 {team3.players.length >= 7 ? '(Full)' : ''}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
-            )}
             </div>
-          </div>
-        </div>
 
-        {/* Waiting List (Always visible) */}
-        {waitingListPlayers.length > 0 && (
-          <div className="waiting-list-section">
-            <h3>⏳ Waiting List ({waitingListPlayers.length})</h3>
-            <p className="text-muted text-sm">Players beyond the first {GuaranteedSpot}</p>
-            <div className="waiting-list-grid">
-              {waitingListPlayers.map((player, index) => (
-                <div key={player.intra} className="waiting-player-card">
-                  <span className="waiting-number">#{GuaranteedSpot + index + 1}</span>
-                  <span>{player.name}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Discarded Players Section */}
-        {discardedPlayers.length > 0 && (
-          <div className="discarded-list-section">
-            <h3>🗑️ Discarded Players ({discardedPlayers.length})</h3>
-            <p className="text-muted text-sm">Players who did not show up</p>
-            <div className="discarded-list-grid">
-              {discardedPlayers.map((player) => (
-                <div key={player.intra} className="discarded-player-card">
-                  <div className="discarded-player-info">
-                    <strong>{player.name}</strong>
-                    <span className="player-intra">{player.intra}</span>
+            {/* Live Team Rosters */}
+            <div>
+              <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
+                Teams
+              </h2>
+              <div className="space-y-4">
+                {/* Team 1 */}
+                <div className="rounded-lg p-4 shadow-md border-l-4 border-blue-500" style={{ backgroundColor: 'var(--bg-card)' }}>
+                  <div className="flex items-center justify-between mb-3">
+                    <input
+                      type="text"
+                      value={team1.name}
+                      onChange={(e) => updateTeamName(1, e.target.value)}
+                      className="flex-1 px-3 py-2 rounded border font-semibold text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      style={{
+                        backgroundColor: 'var(--input-bg)',
+                        borderColor: 'var(--border-color)',
+                        color: 'var(--text-primary)'
+                      }}
+                      placeholder="Team 1 Name"
+                    />
+                    <span className="ml-3 px-3 py-1 rounded-full bg-blue-500 text-white font-bold text-sm">
+                      {team1.players.length}/{teamMode === 2 ? 10 : 7}
+                    </span>
                   </div>
-                  <button
-                    onClick={() => reAddPlayer(player)}
-                    className="readd-btn"
-                    title="Re-add player to available list"
-                  >
-                    ↩️
-                  </button>
+
+                  <div className="mb-3 text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                    Average Rating: {getTeamStats(team1).avgRating} ★
+                  </div>
+
+                  <div className="space-y-2">
+                    {team1.players.length === 0 ? (
+                      <div className="text-center py-4" style={{ color: 'var(--text-secondary)' }}>
+                        No players assigned
+                      </div>
+                    ) : (
+                      team1.players.map((player, index) => (
+                        <div
+                          key={player.intra}
+                          className="flex items-center gap-3 p-2 rounded"
+                          style={{ backgroundColor: 'var(--bg-secondary)' }}
+                        >
+                          <span className="flex-shrink-0 w-8 text-center font-bold" style={{ color: 'var(--text-secondary)' }}>
+                            #{index + 1}
+                          </span>
+                          <div className="flex-1">
+                            <strong style={{ color: 'var(--text-primary)' }}>{player.name}</strong>
+                            <span className="ml-2 text-yellow-400">{'★'.repeat(player.rating || 1)}</span>
+                          </div>
+                          <button
+                            onClick={() => removeFromTeam(player, 1)}
+                            className="w-8 h-8 rounded-full bg-red-500 hover:bg-red-600 text-white font-bold transition-colors"
+                            title="Remove from team"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
-              ))}
+
+                {/* Team 2 */}
+                <div className="rounded-lg p-4 shadow-md border-l-4 border-green-500" style={{ backgroundColor: 'var(--bg-card)' }}>
+                  <div className="flex items-center justify-between mb-3">
+                    <input
+                      type="text"
+                      value={team2.name}
+                      onChange={(e) => updateTeamName(2, e.target.value)}
+                      className="flex-1 px-3 py-2 rounded border font-semibold text-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                      style={{
+                        backgroundColor: 'var(--input-bg)',
+                        borderColor: 'var(--border-color)',
+                        color: 'var(--text-primary)'
+                      }}
+                      placeholder="Team 2 Name"
+                    />
+                    <span className="ml-3 px-3 py-1 rounded-full bg-green-500 text-white font-bold text-sm">
+                      {team2.players.length}/{teamMode === 2 ? 10 : 7}
+                    </span>
+                  </div>
+
+                  <div className="mb-3 text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                    Average Rating: {getTeamStats(team2).avgRating} ★
+                  </div>
+
+                  <div className="space-y-2">
+                    {team2.players.length === 0 ? (
+                      <div className="text-center py-4" style={{ color: 'var(--text-secondary)' }}>
+                        No players assigned
+                      </div>
+                    ) : (
+                      team2.players.map((player, index) => (
+                        <div
+                          key={player.intra}
+                          className="flex items-center gap-3 p-2 rounded"
+                          style={{ backgroundColor: 'var(--bg-secondary)' }}
+                        >
+                          <span className="flex-shrink-0 w-8 text-center font-bold" style={{ color: 'var(--text-secondary)' }}>
+                            #{index + 1}
+                          </span>
+                          <div className="flex-1">
+                            <strong style={{ color: 'var(--text-primary)' }}>{player.name}</strong>
+                            <span className="ml-2 text-yellow-400">{'★'.repeat(player.rating || 1)}</span>
+                          </div>
+                          <button
+                            onClick={() => removeFromTeam(player, 2)}
+                            className="w-8 h-8 rounded-full bg-red-500 hover:bg-red-600 text-white font-bold transition-colors"
+                            title="Remove from team"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Team 3 */}
+                {teamMode === 3 && (
+                  <div className="rounded-lg p-4 shadow-md border-l-4 border-orange-500" style={{ backgroundColor: 'var(--bg-card)' }}>
+                    <div className="flex items-center justify-between mb-3">
+                      <input
+                        type="text"
+                        value={team3.name}
+                        onChange={(e) => updateTeamName(3, e.target.value)}
+                        className="flex-1 px-3 py-2 rounded border font-semibold text-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        style={{
+                          backgroundColor: 'var(--input-bg)',
+                          borderColor: 'var(--border-color)',
+                          color: 'var(--text-primary)'
+                        }}
+                        placeholder="Team 3 Name"
+                      />
+                      <span className="ml-3 px-3 py-1 rounded-full bg-orange-500 text-white font-bold text-sm">
+                        {team3.players.length}/7
+                      </span>
+                    </div>
+
+                    <div className="mb-3 text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                      Average Rating: {getTeamStats(team3).avgRating} ★
+                    </div>
+
+                    <div className="space-y-2">
+                      {team3.players.length === 0 ? (
+                        <div className="text-center py-4" style={{ color: 'var(--text-secondary)' }}>
+                          No players assigned
+                        </div>
+                      ) : (
+                        team3.players.map((player, index) => (
+                          <div
+                            key={player.intra}
+                            className="flex items-center gap-3 p-2 rounded"
+                            style={{ backgroundColor: 'var(--bg-secondary)' }}
+                          >
+                            <span className="flex-shrink-0 w-8 text-center font-bold" style={{ color: 'var(--text-secondary)' }}>
+                              #{index + 1}
+                            </span>
+                            <div className="flex-1">
+                              <strong style={{ color: 'var(--text-primary)' }}>{player.name}</strong>
+                              <span className="ml-2 text-yellow-400">{'★'.repeat(player.rating || 1)}</span>
+                            </div>
+                            <button
+                              onClick={() => removeFromTeam(player, 3)}
+                              className="w-8 h-8 rounded-full bg-red-500 hover:bg-red-600 text-white font-bold transition-colors"
+                              title="Remove from team"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        )}
-      </div>
+
+          {/* Waiting List */}
+          {waitingListPlayers.length > 0 && (
+            <div className="rounded-lg shadow-md p-6 mb-8" style={{ backgroundColor: 'var(--bg-card)' }}>
+              <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+                ⏳ Waiting List ({waitingListPlayers.length})
+              </h3>
+              <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
+                Players beyond the first {GuaranteedSpot}
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {waitingListPlayers.map((player, index) => (
+                  <div
+                    key={player.intra}
+                    className="flex items-center gap-2 p-3 rounded"
+                    style={{ backgroundColor: 'var(--bg-secondary)' }}
+                  >
+                    <span className="flex-shrink-0 px-2 py-1 rounded bg-ft-accent text-white text-xs font-bold">
+                      #{GuaranteedSpot + index + 1}
+                    </span>
+                    <span className="truncate text-sm" style={{ color: 'var(--text-primary)' }}>
+                      {player.name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Discarded Players Section */}
+          {discardedPlayers.length > 0 && (
+            <div className="rounded-lg shadow-md p-6 mb-8" style={{ backgroundColor: 'var(--bg-card)' }}>
+              <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+                🗑️ Discarded Players ({discardedPlayers.length})
+              </h3>
+              <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
+                Players who did not show up
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {discardedPlayers.map((player) => (
+                  <div
+                    key={player.intra}
+                    className="flex items-center justify-between p-3 rounded"
+                    style={{ backgroundColor: 'var(--bg-secondary)' }}
+                  >
+                    <div className="flex-1">
+                      <strong className="block" style={{ color: 'var(--text-primary)' }}>
+                        {player.name}
+                      </strong>
+                      <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                        {player.intra}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => reAddPlayer(player)}
+                      className="ml-3 w-10 h-10 rounded-full bg-green-500 hover:bg-green-600 text-white font-bold
+                                 transition-colors flex items-center justify-center"
+                      title="Re-add player to available list"
+                    >
+                      ↩️
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </main>
+
       <Footer />
-    </>
+    </div>
   );
 };
 

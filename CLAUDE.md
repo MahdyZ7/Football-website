@@ -76,6 +76,176 @@ All mutations automatically invalidate related queries:
 - `contexts/ThemeContext.tsx` - Light/dark theme management (client-side)
 - `providers/QueryProvider.tsx` - React Query configuration and DevTools
 
+### Styling & CSS Architecture
+
+**Tailwind CSS v4** is used throughout the application with a mobile-first, utility-first approach.
+
+#### CSS Files
+- `styles/globals.css` - **269 lines** (reduced from 1,022 lines)
+  - Tailwind v4 imports: `@import "tailwindcss";`
+  - Custom theme colors in `@theme` block
+  - CSS variables for light/dark theme support
+  - Toast notification styles (complex positioning)
+  - Special event toast styles
+- All page-specific CSS has been migrated to Tailwind utilities
+
+#### Theme Configuration
+**File**: `tailwind.config.ts`
+
+Custom colors:
+- `ft-primary`: #00babc (42 School teal)
+- `ft-secondary`: #00807e (dark teal)
+- `ft-accent`: #ff6b35 (orange accent)
+- `ft-dark`: #1a1a1a (dark background)
+
+Theme-aware CSS variables (support light/dark mode):
+```css
+[data-theme="light"] {
+  --bg-primary: #ffffff
+  --bg-secondary: #f6f9fc
+  --bg-card: #fff0d4
+  --text-primary: #525f7f
+  --text-secondary: #424f6f
+  /* ... */
+}
+
+[data-theme="dark"] {
+  --bg-primary: #1a1a1a
+  --bg-secondary: #2a2a2a
+  --bg-card: #3a3a3a
+  --text-primary: #e0e0e0
+  --text-secondary: #b0b0b0
+  /* ... */
+}
+```
+
+#### Consistent Design Patterns
+
+**Page Layout Structure** (use this for all pages):
+```tsx
+<div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--bg-primary)' }}>
+  <Navbar />
+  <main className="flex-1 pt-24 pb-8 px-4 md:px-8">
+    <div className="max-w-6xl mx-auto"> {/* or max-w-7xl for wider pages */}
+      {/* Page content */}
+    </div>
+  </main>
+  <Footer />
+</div>
+```
+
+**Button Styles** (use these patterns):
+```tsx
+// Primary action buttons
+className="px-6 py-3 bg-ft-primary hover:bg-ft-secondary text-white font-medium rounded
+           transition-all duration-200 transform hover:scale-105"
+
+// Secondary/gray buttons
+className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded
+           transition-all duration-200"
+
+// Delete/danger buttons
+className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded
+           transition-all duration-200"
+
+// Back to home link
+className="inline-flex items-center gap-2 px-4 py-2 bg-ft-primary hover:bg-ft-secondary
+           text-white font-medium rounded transition-all duration-200 transform hover:scale-105"
+```
+
+**Card Styles**:
+```tsx
+// Standard card
+className="rounded-lg shadow-md p-6"
+style={{ backgroundColor: 'var(--bg-card)' }}
+
+// Card with header
+<div className="rounded-lg shadow-md overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
+  <div className="px-6 py-4 border-b" style={{ borderColor: 'var(--border-color)' }}>
+    <h3 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>Title</h3>
+  </div>
+  <div className="p-6">{/* Content */}</div>
+</div>
+```
+
+**Table Styles**:
+```tsx
+<div className="rounded-lg shadow-md overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
+  <div className="overflow-x-auto">
+    <table className="w-full">
+      <thead style={{ backgroundColor: 'var(--bg-secondary)' }}>
+        <tr>
+          <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>
+            Header
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr className="border-b" style={{ borderColor: 'var(--border-color)' }}>
+          <td className="px-4 py-3" style={{ color: 'var(--text-primary)' }}>Content</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+```
+
+**Form Input Styles**:
+```tsx
+<input
+  className="w-full px-4 py-3 rounded border transition-all duration-200
+             focus:ring-2 focus:ring-ft-primary focus:outline-none"
+  style={{
+    backgroundColor: 'var(--input-bg)',
+    borderColor: 'var(--border-color)',
+    color: 'var(--text-primary)'
+  }}
+/>
+```
+
+**Loading States**:
+```tsx
+import LoadingSpinner from '../LoadingSpinner';
+
+// Use this instead of custom loading text
+{isLoading && (
+  <div className="rounded-lg shadow-md p-8" style={{ backgroundColor: 'var(--bg-card)' }}>
+    <LoadingSpinner message="Loading data..." />
+  </div>
+)}
+```
+
+**Mobile Navigation**:
+- Fixed navbar at top with `fixed top-0 left-0 right-0 z-50`
+- Hamburger menu on mobile (< 768px)
+- Slide-out drawer with overlay
+- All pages have `pt-24` on main content to account for fixed navbar
+
+#### Responsive Breakpoints
+- `sm:` - 640px (small tablets)
+- `md:` - 768px (tablets)
+- `lg:` - 1024px (laptops)
+- `xl:` - 1280px (desktops)
+
+#### Color Coding by Feature
+- **Team 1**: blue (blue-500, blue-600)
+- **Team 2**: green (green-500, green-600)
+- **Team 3**: orange (orange-500, orange-600)
+- **Verified/Success**: green-600
+- **Error/Delete**: red-600
+- **Warning/Accent**: ft-accent (orange)
+- **Paid status**: var(--paid-bg) light blue/teal
+- **Unpaid/Waitlist**: var(--unpaid-bg) light orange
+
+#### Best Practices
+1. **Always use theme-aware CSS variables** for backgrounds and text colors (not hardcoded colors)
+2. **Use Tailwind utilities** for spacing, sizing, and layout
+3. **Use inline styles with CSS variables** for theme-specific colors
+4. **Follow the button patterns** for consistency across all pages
+5. **Use LoadingSpinner component** instead of custom loading states
+6. **Keep the layout structure** (min-h-screen, flex, flex-col, pt-24)
+7. **Make all tables responsive** with overflow-x-auto wrapper
+
 ### Utility Functions
 Centralized in `lib/utils/`:
 - `db.ts` - PostgreSQL connection pool

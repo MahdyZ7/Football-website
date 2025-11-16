@@ -1,5 +1,4 @@
 import "../styles/globals.css";
-import "../styles/teams.css";
 import ErrorBoundary from "../components/ErrorBoundary";
 import { ThemeProvider } from "../contexts/ThemeContext";
 import { QueryProvider } from "../providers/QueryProvider";
