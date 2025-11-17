@@ -635,35 +635,12 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
       <ExportPreview />
       
       <button
-        className="export-button"
+        className="px-6 py-3 bg-ft-primary hover:bg-ft-secondary text-white font-medium rounded
+                           transition-all duration-200 transform hover:scale-105"
         onClick={() => setShowExportMenu(!showExportMenu)}
         disabled={isExporting}
-        style={{
-          // background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
-          // color: 'white',
-          // border: 'none',
-          // padding: '14px 24px',
-          // borderRadius: '10px',
-          // cursor: 'pointer',
-          // fontSize: '16px',
-          // fontWeight: 700,
-          // display: 'flex',
-          // alignItems: 'center',
-          // gap: '10px',
-          // boxShadow: '0 4px 12px rgba(40, 167, 69, 0.3)',
-          // transition: 'all 0.3s ease',
-          // textTransform: 'uppercase',
-          // letterSpacing: '1px'
-        }}
         data-testid="button-export-teams"
-        onMouseOver={(e) => {
-          e.currentTarget.style.transform = 'translateY(-2px)';
-          e.currentTarget.style.boxShadow = '0 6px 20px rgba(40, 167, 69, 0.4)';
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(40, 167, 69, 0.3)';
-        }}
+
       >
         {isExporting ? '⏳ Exporting...' : '📤 Export Lineup'}
       </button>
