@@ -194,6 +194,17 @@ const TeamsImproved: React.FC = () => {
     }
   };
 
+  const toggleTeamMode = () => {
+    setTeamMode(prevMode => {
+      if (prevMode === 3) {
+        setAvailablePlayers(prev => [...prev, ...team3.players]);
+        setTeam3(prev => ({ ...prev, players: [] }));
+        return 2;
+      }
+      return 3;
+    });
+  };
+
   const getTeamStats = (team: Team) => {
     const avgRating = team.players.length > 0
       ? (team.players.reduce((sum, p) => sum + (p.rating || 1), 0) / team.players.length).toFixed(1)
@@ -263,29 +274,43 @@ const TeamsImproved: React.FC = () => {
             </div>
 
             {/* Mode Selector */}
-            <div className="flex gap-3 justify-center mb-6">
-              <button
-                onClick={() => setTeamMode(2)}
-                className={`px-6 py-3 font-medium rounded transition-all duration-200 ${
-                  teamMode === 2
-                    ? 'bg-ft-primary text-white'
-                    : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'
-                }`}
-                style={teamMode === 2 ? {} : { color: 'var(--text-primary)' }}
-              >
-                2 Teams (10 each)
-              </button>
-              <button
-                onClick={() => setTeamMode(3)}
-                className={`px-6 py-3 font-medium rounded transition-all duration-200 ${
-                  teamMode === 3
-                    ? 'bg-ft-primary text-white'
-                    : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'
-                }`}
-                style={teamMode === 3 ? {} : { color: 'var(--text-primary)' }}
-              >
-                3 Teams (7 each)
-              </button>
+            <div className="flex flex-col items-center gap-2 mb-6 text-center">
+              <p className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
+                {teamMode === 2 ? '2 Teams • 10 players each' : '3 Teams • 7 players each'}
+              </p>
+              <div className="flex items-center gap-4">
+                <span
+                  className={`text-sm font-semibold ${
+                    teamMode === 2 ? 'text-ft-primary' : 'text-gray-500 dark:text-gray-400'
+                  }`}
+                >
+                  2 Teams
+                </span>
+                <button
+                  onClick={toggleTeamMode}
+                  role="switch"
+                  aria-checked={teamMode === 3}
+                  aria-label="Toggle between 2 and 3 team modes"
+                  className={`relative inline-flex h-10 w-20 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-4 focus:ring-offset-2 ${
+                    teamMode === 3
+                      ? 'bg-ft-primary focus:ring-ft-secondary'
+                      : 'bg-blue-500 focus:ring-blue-300'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-8 w-8 transform rounded-full bg-white transition duration-300 ${
+                      teamMode === 3 ? 'translate-x-10' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+                <span
+                  className={`text-sm font-semibold ${
+                    teamMode === 3 ? 'text-ft-primary' : 'text-gray-500 dark:text-gray-400'
+                  }`}
+                >
+                  3 Teams
+                </span>
+              </div>
             </div>
 
             {/* Action Buttons */}

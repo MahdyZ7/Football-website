@@ -18,7 +18,7 @@ const NavLink: React.FC<NavLinkProps> = ({ href, isActive, children, external = 
   const baseClasses = "px-4 py-3 rounded-xl transition-all duration-200 font-medium text-center";
   const activeClasses = isActive
     ? "bg-ft-primary text-white"
-    : "hover:bg-gray-100 dark:hover:bg-gray-800";
+    : "hover:bg-ft-secondary";
 
   const combinedClasses = `${baseClasses} ${activeClasses}`;
 

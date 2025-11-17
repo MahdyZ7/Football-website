@@ -229,42 +229,10 @@ const Home: React.FC = () => {
           <h1 className="text-3xl md:text-4xl font-bold text-center mb-6" style={{ color: 'var(--text-primary)' }}>
             Football Registration
           </h1>
+			<p className=" text-center text-m"> Game time: 9 PM - Mondays and Thursdays</p>
+			<p className=" text-center text-m"> Registration opens: 12 noon - Sundays and Wednesdays</p>
+			<p className=" text-center text-m mb-6"> Location: Outdoor Pitch 2 - Active Al Maria</p>
 
-          {/* Registration Status Banner */}
-          <div className={`max-w-2xl mx-auto mb-6 rounded-xl shadow-lg overflow-hidden transition-all duration-300
-                          ${isSubmissionAllowed ? 'bg-gradient-to-r from-green-500 to-emerald-600' : 'bg-gradient-to-r from-orange-500 to-red-600'}`}>
-            <div className="p-4 md:p-6">
-              <div className="flex items-center justify-between flex-wrap gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="text-3xl">{isSubmissionAllowed ? '✅' : '🔒'}</div>
-                  <div>
-                    <h3 className="text-white font-bold text-lg md:text-xl">
-                      {isSubmissionAllowed ? 'Registration Open!' : 'Registration Closed'}
-                    </h3>
-                    <p className="text-white/90 text-sm">
-                      {isSubmissionAllowed
-                        ? 'Sign up now before spots fill up'
-                        : `Opens in: ${timeUntilNext}`}
-                    </p>
-                  </div>
-                </div>
-                {isSubmissionAllowed && (
-                  <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 text-white">
-                    <div className="text-2xl font-bold">{registeredUsers.length}/21</div>
-                    <div className="text-xs">Spots Filled</div>
-                  </div>
-                )}
-              </div>
-            </div>
-            {isSubmissionAllowed && (
-              <div className="bg-black/20 h-2">
-                <div
-                  className="bg-white h-full transition-all duration-500 ease-out"
-                  style={{ width: `${Math.min((registeredUsers.length / 21) * 100, 100)}%` }}
-                />
-              </div>
-            )}
-          </div>
 
         {/* Registration Form */}
         <form
@@ -446,12 +414,19 @@ const Home: React.FC = () => {
           <h2 className="text-2xl font-semibold text-center mb-4" style={{ color: 'var(--text-secondary)' }}>
             Player List
           </h2>
-          <p className="text-center mb-6 text-sm" style={{ color: 'var(--text-secondary)' }}>
-            Max Spots: {GuaranteedSpot} |
-            Playing: {Math.min(registeredUsers.length, GuaranteedSpot)} |
-            Open: {Math.max(GuaranteedSpot - registeredUsers.length, 0)} |
-            Waitlist: {Math.max(registeredUsers.length - GuaranteedSpot, 0)}
-          </p>
+		  <div className={`max-w-2xl mx-auto mb-6 rounded-xl shadow-lg overflow-hidden transition-all duration-300 
+			bg-gradient-to-b from-stone-700 to-zinc-700`}>
+		  <div className="bg-white/20 backdrop-blur-sm text-center rounded-lg px-4 py-2 text-white">
+                <div className="text-2xl font-bold">{registeredUsers.length}/21</div>
+                <div className="text-xs">Spots Filled</div>
+            </div>
+		  <div className="bg-black/50 h-2 mb-6">
+                <div
+                  className="bg-white/50 h-full transition-all duration-500 ease-out"
+                  style={{ width: `${Math.min((registeredUsers.length / GuaranteedSpot) * 100, 100)}%` }}
+                />
+              </div>
+			</div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {loading ? (
               <div className="col-span-full text-center py-8" style={{ color: 'var(--text-secondary)' }}>
