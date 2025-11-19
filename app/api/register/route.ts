@@ -6,6 +6,7 @@ import player_limit_reached from "../../../lib/utils/player_limit";
 import verifyLogin from "../../../lib/utils/verify_login";
 import { User } from "../../../types/user";
 import { auth } from "../../../auth";
+import { logAdminAction } from "../../../lib/utils/adminLogger";
 
 export async function POST(req: NextRequest) {
   try {
@@ -70,27 +71,60 @@ if (dangerousPattern.test(user.intra) || (user.name && dangerousPattern.test(use
 }
 
 async function handleDelete(req: NextRequest) {
-  const secretHeader = req.headers.get("x-secret-header");
-  const mySecret = process.env["resetuser"];
-  console.log("the body is ", req.body)
-  const json = await req.json();
-  console.log(json)
-  const user = json as User;
+  // Validate API key for service account access
+  const apiKey = req.headers.get("x-api-key");
+  const validApiKey = process.env.SERVICE_API_KEY;
+  const serviceAccountUserId = process.env.SERVICE_ACCOUNT_USER_ID;
 
-  if (!secretHeader || !mySecret || secretHeader !== mySecret) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  if (!apiKey || !validApiKey || apiKey !== validApiKey) {
+    console.error("Unauthorized DELETE attempt - invalid API key");
+    return NextResponse.json({ error: "Unauthorized - Invalid API key" }, { status: 401 });
   }
 
+  if (!serviceAccountUserId) {
+    console.error("SERVICE_ACCOUNT_USER_ID not configured");
+    return NextResponse.json({ error: "Service account not configured" }, { status: 500 });
+  }
+
+  const json = await req.json();
+  const user = json as User;
+
   if (user.intra) {
-    // Input validation for delete
+    // Delete individual user
     if (typeof user.intra !== 'string' || user.intra.trim().length === 0) {
       return NextResponse.json({ error: "Valid user ID is required" }, { status: 400 });
     }
 
     const result = await deleteUser({ ...user, intra: user.intra.trim() });
+
+    // Log the action
+    if (result.success) {
+      await logAdminAction(
+        parseInt(serviceAccountUserId),
+        'automated_user_deletion',
+        user.intra,
+        user.name || 'Unknown',
+        'Individual user deleted by automated service'
+      );
+    }
+
     return NextResponse.json(result, { status: result.status || 200 });
-  } else{
+  } else {
+    // Reset entire list (for scheduled weekly reset)
     const result = await resetList();
+
+    // Log the action
+    if (result.success) {
+      await logAdminAction(
+        parseInt(serviceAccountUserId),
+        'scheduled_list_reset',
+        undefined,
+        undefined,
+        'Automated weekly player list reset'
+      );
+      console.log(`✅ Player list reset completed by service account (User ID: ${serviceAccountUserId})`);
+    }
+
     return NextResponse.json(result, { status: result.status || 200 });
   }
 }

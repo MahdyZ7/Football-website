@@ -14,7 +14,9 @@
     "db:status": "node scripts/database-migration.js status",
     "db:list-backups": "node scripts/database-migration.js list-backups",
     "db:setup": "chmod +x scripts/setup-database.sh && ./scripts/setup-database.sh",
-    "admin:manage": "tsx scripts/manage_admins.ts"
+    "admin:manage": "tsx scripts/manage_admins.ts",
+    "service:setup": "tsx scripts/setup_service_account.ts",
+    "db:migrate:uuid": "tsx scripts/migrate_to_uuid_ids.ts"
   },
   "dependencies": {
     "@auth/pg-adapter": "^1.11.1",
@@ -45,6 +47,7 @@
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@types/simple-oauth2": "^5.0.7",
+    "dotenv": "^17.2.3",
     "eslint": "^9.12.0",
     "eslint-config-next": "^16.0.3",
     "tsx": "^4.20.6",

@@ -39,3 +39,6 @@ yarn-error.log*
 
 #breakpoints
 .breakpoints
+
+#database backup
+database-backups/
