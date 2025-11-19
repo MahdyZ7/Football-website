@@ -144,15 +144,14 @@ const Admin: React.FC = () => {
     );
   };
 
-  const handleUnban = async (intra: string) => {
-    const bannedUser = bannedUsers.find((u: { intra: string }) => u.intra === intra);
+  const handleUnban = async (userId: number, userName: string) => {
     setConfirmDialog({
       isOpen: true,
       title: 'Unban User',
-      message: `Are you sure you want to unban "${bannedUser?.intra || 'this user'}"? They will be able to register again.`,
+      message: `Are you sure you want to unban "${userName}"? They will be able to register again.`,
       type: 'warning',
       onConfirm: () => {
-        unbanUserMutation.mutate(intra, {
+        unbanUserMutation.mutate(userId, {
           onSuccess: () => {
             showToast('User unbanned successfully', 'success');
           },
@@ -431,7 +430,7 @@ const Admin: React.FC = () => {
                           Name
                         </th>
                         <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>
-                          ID
+                          Intra
                         </th>
                         <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>
                           Verified
@@ -445,8 +444,8 @@ const Admin: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {users.map((user) => (
-                        <tr key={user.intra} className="border-b" style={{ borderColor: 'var(--border-color)' }}>
+                      {users.map((user, index) => (
+                        <tr key={user.intra + index} className="border-b" style={{ borderColor: 'var(--border-color)' }}>
                           <td className="px-4 py-3 font-medium" style={{ color: 'var(--text-primary)' }}>
                             {user.name}
                           </td>
@@ -536,7 +535,7 @@ const Admin: React.FC = () => {
                           Name
                         </th>
                         <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>
-                          ID
+                          Intra
                         </th>
                         <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>
                           Reason
@@ -556,10 +555,10 @@ const Admin: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {bannedUsers.map((user) => {
+                      {bannedUsers.map((user, index) => {
                         const isExpired = new Date(user.banned_until) < new Date();
                         return (
-                          <tr key={user.intra} className={`border-b ${isExpired ? 'opacity-60' : ''}`} style={{ borderColor: 'var(--border-color)' }}>
+                          <tr key={`${user.intra}-${index}`} className={`border-b ${isExpired ? 'opacity-60' : ''}`} style={{ borderColor: 'var(--border-color)' }}>
                             <td className="px-4 py-3 font-medium" style={{ color: 'var(--text-primary)' }}>
                               {user.name}
                             </td>
@@ -582,10 +581,10 @@ const Admin: React.FC = () => {
                             </td>
                             <td className="px-4 py-3">
                               <button
-                                onClick={() => handleUnban(user.intra)}
+                                onClick={() => user.user_id && handleUnban(user.user_id, user.name)}
                                 className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded
                                            transition-all duration-200 disabled:opacity-50"
-                                disabled={unbanUserMutation.isPending}
+                                disabled={unbanUserMutation.isPending || !user.user_id}
                               >
                                 {unbanUserMutation.isPending ? 'Unbanning...' : 'Unban'}
                               </button>

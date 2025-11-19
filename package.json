@@ -8,13 +8,16 @@
     "start": "next start",
     "lint": "eslint .",
     "db:migrate": "node scripts/database-migration.js migrate",
+    "db:migrate:auth": "tsx scripts/migrate_auth.ts",
     "db:backup": "node scripts/database-migration.js backup",
     "db:restore": "node scripts/database-migration.js restore",
     "db:status": "node scripts/database-migration.js status",
     "db:list-backups": "node scripts/database-migration.js list-backups",
-    "db:setup": "chmod +x scripts/setup-database.sh && ./scripts/setup-database.sh"
+    "db:setup": "chmod +x scripts/setup-database.sh && ./scripts/setup-database.sh",
+    "admin:manage": "tsx scripts/manage_admins.ts"
   },
   "dependencies": {
+    "@auth/pg-adapter": "^1.11.1",
     "@tailwindcss/postcss": "^4.1.17",
     "@tanstack/react-query": "^5.90.10",
     "@tanstack/react-query-devtools": "^5.90.2",
@@ -27,9 +30,11 @@
     "jspdf": "^3.0.1",
     "lucide-react": "^0.553.0",
     "next": "^16.0.3",
+    "next-auth": "^5.0.0-beta.30",
     "pg": "^8.12.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-icons": "^5.5.0",
     "simple-oauth2": "^5.1.0"
   },
   "devDependencies": {
@@ -42,6 +47,7 @@
     "@types/simple-oauth2": "^5.0.7",
     "eslint": "^9.12.0",
     "eslint-config-next": "^16.0.3",
+    "tsx": "^4.20.6",
     "typescript": "^5.6.2"
   },
   "description": "This website is a registration site for the 42 Football Club. It is built using react and NextJS",

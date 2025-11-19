@@ -5,6 +5,7 @@ import allowed_times from "../../../lib/utils/allowed_times";
 import player_limit_reached from "../../../lib/utils/player_limit";
 import verifyLogin from "../../../lib/utils/verify_login";
 import { User } from "../../../types/user";
+import { auth } from "../../../auth";
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,13 +24,19 @@ export async function DELETE(req: NextRequest) {
 }
 
 async function handlePost(req: NextRequest) {
+  // Check authentication
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Authentication required. Please sign in to register." }, { status: 401 });
+  }
+
   if (!allowed_times()) {
     return NextResponse.json({ error: "Registration is not allowed at this time." }, { status: 403 });
   }
   const json = await req.json();
   const user = json as User;
   console.log(json);
-  
+
   // Input validation
   if (!user || typeof user !== 'object') {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
@@ -42,7 +49,7 @@ async function handlePost(req: NextRequest) {
   if (user.name && typeof user.name !== 'string') {
     return NextResponse.json({ error: "Invalid name format" }, { status: 400 });
   }
-  
+
   // Sanitize inputs
   user.intra = user.intra.trim();
   if (user.name) {
@@ -54,7 +61,7 @@ if (dangerousPattern.test(user.intra) || (user.name && dangerousPattern.test(use
 	return NextResponse.json({ error: "Invalid characters detected in input" }, { status: 400 });
 }
 
-  const result = await registerUser(user);
+  const result = await registerUser(user, parseInt(session.user.id));
 
   if (result.success) {
     return NextResponse.json({ name: user.name, id: user.intra }, { status: 200 });
@@ -88,40 +95,40 @@ async function handleDelete(req: NextRequest) {
   }
 }
 
-async function registerUser(user: User) {
+async function registerUser(user: User, userId: number) {
   const client = await pool.connect();
-  
+
   try {
-    // Check if user is banned
+    // Check if user is banned (check both by intra and by user_id)
     const banCheck = await client.query(
-      "SELECT banned_until FROM banned_users WHERE id = $1 AND banned_until > NOW()",
-      [user.intra]
+      "SELECT banned_until FROM banned_users WHERE (id = $1 OR user_id = $2) AND banned_until > NOW()",
+      [user.intra, userId]
     );
-    
+
     if (banCheck.rows.length > 0) {
-      return { 
-        error: "Access denied", 
-        status: 403 
+      return {
+        error: "You are currently banned from registering",
+        status: 403
       };
     }
 
     const verifiedInfo: User = await verifyLogin(user.intra);
-    
+
     if (verifiedInfo.verified) {
       user.intra = verifiedInfo.intra;
       user.name = verifiedInfo.name;
     }
-    
+
     if (!verifiedInfo.verified && !user.name) {
       return { error: "Intra not found", status: 404 };
     }
 
     const { rows } = await client.query("SELECT name, intra FROM players");
-    
+
     if (player_limit_reached(rows.length)) {
       return { error: "Player limit reached", status: 403 };
     }
-    
+
     const player = rows.find(row => row.intra === user.intra);
     if (player) {
       return { error: "Player already exists", status: 409 };
@@ -132,9 +139,10 @@ async function registerUser(user: User) {
       date.setSeconds(date.getSeconds() + 10);
     }
 
+    // Link registration to authenticated user
     await client.query(
-      "INSERT INTO players (name, intra, verified, created_at) VALUES ($1, $2, $3, $4)",
-      [user.name, user.intra, false, date]
+      "INSERT INTO players (name, intra, verified, created_at, user_id) VALUES ($1, $2, $3, $4, $5)",
+      [user.name, user.intra, verifiedInfo.verified, date, userId]
     );
 
     return { success: true };

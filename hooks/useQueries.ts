@@ -61,8 +61,8 @@ const api = {
       const { data } = await axios.post('/api/admin/ban', banData);
       return data;
     },
-    unbanUser: async (userId: string) => {
-      const { data } = await axios.delete('/api/admin/ban', { data: { id: userId } });
+    unbanUser: async (userId: number) => {
+      const { data } = await axios.delete('/api/admin/ban', { data: { user_id: userId } });
       return data;
     },
     deleteUser: async (userId: string) => {

@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, FormEvent, useRef, KeyboardEvent } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import Navbar from "./Navbar";
 import Footer from "./footer";
 import { GuaranteedSpot, Toast } from "../../types/user";
@@ -17,6 +18,8 @@ const Home: React.FC = () => {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [nameError, setNameError] = useState("");
   const [intraError, setIntraError] = useState("");
+  const [showRemoveDialog, setShowRemoveDialog] = useState(false);
+  const [removeReason, setRemoveReason] = useState("");
 
   // Refs for form navigation
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -27,8 +30,14 @@ const Home: React.FC = () => {
   const { data: registeredUsers = [], isLoading: loading, error: usersError } = useUsers();
   const { data: allowedData } = useAllowedStatus();
   const registerUserMutation = useRegisterUser();
+  const { data: session } = useSession();
 
   const isSubmissionAllowed = allowedData?.isAllowed ?? false;
+
+  // Check if current user is registered
+  const userRegistration = registeredUsers.find(
+    (user) => user.intra === intra || (session?.user?.id && user.user_id === parseInt(session.user.id))
+  );
 
   // Timer effects
   useEffect(() => {
@@ -147,8 +156,57 @@ const Home: React.FC = () => {
     }
   };
 
+  const handleSelfRemove = async (intra: string, isAdminRemoval: boolean = false) => {
+    // Validate TIG reason is selected
+    if (!removeReason) {
+      showToast("Please select a reason for removal", 'error');
+      return;
+    }
+
+    try {
+      const axios = (await import('axios')).default;
+
+      if (isAdminRemoval && session?.user?.isAdmin) {
+        // Admin removing another player - use admin endpoint
+        const response = await axios.post("/api/admin/remove-player", {
+          intra,
+          reason: removeReason
+        });
+        showToast(response.data.message || "Player removed and banned successfully", 'success');
+      } else {
+        // Self-removal
+        const response = await axios.post("/api/self-remove", {
+          intra,
+          reason: removeReason
+        });
+        showToast(response.data.message, 'success');
+      }
+
+      setShowRemoveDialog(false);
+      setRemoveReason("");
+    } catch (error: any) {
+      showToast(error.response?.data?.error || "Failed to remove registration", 'error');
+    }
+  };
+
+  const initiateRemoval = (intra: string) => {
+    const player = registeredUsers.find(u => u.intra === intra);
+
+    // Store the intra for the dialog
+    setIntra(intra);
+
+    // Always show TIG dialog for both admin and self-removal
+    setShowRemoveDialog(true);
+  };
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+
+    // Check authentication
+    if (!session) {
+      showToast("Please sign in to register", 'error');
+      return;
+    }
 
     // Handle admin reset
     if (name.toLowerCase().endsWith("mangoose")) {
@@ -200,16 +258,18 @@ const Home: React.FC = () => {
         },
         onError: (error: unknown) => {
           if (typeof error === 'object' && error !== null && 'response' in error) {
-            const response = (error as { response: { status: number } }).response;
-            const { status } = response;
-            if (status === 403) {
-              showToast("Players limit reached. Better luck next time!", 'error');
+            const response = (error as { response: { status: number, data?: any } }).response;
+            const { status, data } = response;
+            if (status === 401) {
+              showToast(data?.error || "Please sign in to register", 'error');
+            } else if (status === 403) {
+              showToast(data?.error || "Players limit reached. Better luck next time!", 'error');
             } else if (status === 409) {
               showToast(`A user with the Intra-login ${intra} already exists.`, 'error');
             } else if (status === 404) {
               showToast(`User with Intra-login ${intra} not found. Please enter name also`, 'error');
             } else {
-              showToast("Registration failed. Please try again.", 'error');
+              showToast(data?.error || "Registration failed. Please try again.", 'error');
             }
           } else {
             showToast("Registration failed. Please try again.", 'error');
@@ -233,6 +293,18 @@ const Home: React.FC = () => {
 			<p className=" text-center text-m"> Registration opens: 12 noon - Sundays and Wednesdays</p>
 			<p className=" text-center text-m mb-6"> Location: Outdoor Pitch 2 - Active Al Maria</p>
 
+
+        {/* Authentication Notice */}
+        {!session && (
+          <div className="max-w-md mx-auto mb-6 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+            <p className="text-center text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
+              🔐 Please <Link href="/auth/signin" className="underline font-bold hover:text-ft-primary transition-colors">sign in</Link> to register for matches
+            </p>
+            <p className="text-center text-xs" style={{ color: 'var(--text-secondary)' }}>
+              New here? An account will be created automatically when you sign in
+            </p>
+          </div>
+        )}
 
         {/* Registration Form */}
         <form
@@ -441,36 +513,58 @@ const Home: React.FC = () => {
                 Dare to be First
               </div>
             ) : (
-              registeredUsers.map((user, index) => (
-                <div
-                  key={user.intra}
-                  className={`p-4 rounded-lg border-l-4 flex items-center justify-between transition-all duration-200 ${
-                    index < GuaranteedSpot ? 'hover:scale-[1.02]' : ''
-                  }`}
-                  style={{
-                    backgroundColor: index < GuaranteedSpot ? 'var(--paid-bg)' : 'var(--unpaid-bg)',
-                    borderLeftColor: index < GuaranteedSpot ? '#16a34a' : 'var(--ft-accent)',
-                    color: index < GuaranteedSpot ? 'var(--registered-txt)' : 'var(--waitlist-txt)'
-                  }}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="font-bold text-lg min-w-[2rem]">
-                      {index + 1}
-                    </span>
-                    <div className="flex flex-col">
-                      <span className="font-semibold">{user.name}</span>
-                      <span className="text-sm opacity-80">{user.intra}</span>
+              registeredUsers.map((user, index) => {
+                // User can remove their own registration OR admin can remove anyone
+                const isOwnRegistration = session && user.user_id && user.user_id === parseInt(session.user.id);
+                const isAdmin = session?.user?.isAdmin;
+                const canRemove = isOwnRegistration || isAdmin;
+
+                return (
+                  <div
+                    key={user.intra}
+                    className={`p-4 rounded-lg border-l-4 flex items-center justify-between transition-all duration-200 ${
+                      index < GuaranteedSpot ? 'hover:scale-[1.02]' : ''
+                    }`}
+                    style={{
+                      backgroundColor: index < GuaranteedSpot ? 'var(--paid-bg)' : 'var(--unpaid-bg)',
+                      borderLeftColor: index < GuaranteedSpot ? '#16a34a' : 'var(--ft-accent)',
+                      color: index < GuaranteedSpot ? 'var(--registered-txt)' : 'var(--waitlist-txt)'
+                    }}
+                  >
+                    <div className="flex items-center gap-3 flex-1">
+                      <span className="font-bold text-lg min-w-[2rem]">
+                        {index + 1}
+                      </span>
+                      <div className="flex flex-col flex-1">
+                        <span className="font-semibold">{user.name}</span>
+                        <span className="text-sm opacity-80">{user.intra}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="text-xl">
+                        {user.verified ? (
+                          "✅"
+                        ) : (
+                          <span className="text-red-600 text-sm font-medium">Invalid Intra</span>
+                        )}
+                      </div>
+                      {canRemove && (
+                        <button
+                          onClick={() => initiateRemoval(user.intra)}
+                          className="ml-2 w-8 h-8 flex items-center justify-center rounded-full
+                                     bg-red-600 hover:bg-red-700 text-white transition-all duration-200
+                                     hover:scale-110 active:scale-95"
+                          title={isAdmin && !isOwnRegistration
+                            ? "Remove player and apply TIG ban (Admin)"
+                            : "Remove my registration"}
+                        >
+                          ×
+                        </button>
+                      )}
                     </div>
                   </div>
-                  <div className="text-xl">
-                    {user.verified ? (
-                      "✅"
-                    ) : (
-                      <span className="text-red-600 text-sm font-medium">Invalid Intra</span>
-                    )}
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
@@ -536,6 +630,151 @@ const Home: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* TIG Removal Dialog */}
+      {showRemoveDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-[1000] flex items-center justify-center p-4">
+          <div className="rounded-lg shadow-2xl p-8 max-w-md w-full" style={{ backgroundColor: 'var(--bg-card)' }}>
+            <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
+              {session?.user?.isAdmin && userRegistration?.user_id !== parseInt(session.user.id)
+                ? "Remove Player & Apply TIG Ban"
+                : "Remove Registration"}
+            </h2>
+            <p className="mb-6" style={{ color: 'var(--text-secondary)' }}>
+              {session?.user?.isAdmin && userRegistration?.user_id !== parseInt(session.user.id)
+                ? "Select the TIG reason to ban this player:"
+                : "Removing your registration will result in a ban according to the TIG (Late/Cancellation) rules. Please select the reason:"}
+            </p>
+
+            <div className="space-y-3 mb-6">
+              <label className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                     style={{ borderColor: 'var(--border-color)' }}>
+                <input
+                  type="radio"
+                  name="removeReason"
+                  value="NOT_READY"
+                  checked={removeReason === "NOT_READY"}
+                  onChange={(e) => setRemoveReason(e.target.value)}
+                  className="mt-1"
+                />
+                <div className="flex-1">
+                  <div className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                    Not ready when booking time starts
+                  </div>
+                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    Ban: Half a week (3.5 days)
+                  </div>
+                </div>
+              </label>
+
+              <label className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                     style={{ borderColor: 'var(--border-color)' }}>
+                <input
+                  type="radio"
+                  name="removeReason"
+                  value="CANCEL"
+                  checked={removeReason === "CANCEL"}
+                  onChange={(e) => setRemoveReason(e.target.value)}
+                  className="mt-1"
+                />
+                <div className="flex-1">
+                  <div className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                    Cancel reservation
+                  </div>
+                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    Ban: One week (7 days)
+                  </div>
+                </div>
+              </label>
+
+              <label className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                     style={{ borderColor: 'var(--border-color)' }}>
+                <input
+                  type="radio"
+                  name="removeReason"
+                  value="LATE"
+                  checked={removeReason === "LATE"}
+                  onChange={(e) => setRemoveReason(e.target.value)}
+                  className="mt-1"
+                />
+                <div className="flex-1">
+                  <div className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                    Late &gt; 15 minutes
+                  </div>
+                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    Ban: One week (7 days)
+                  </div>
+                </div>
+              </label>
+
+              <label className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                     style={{ borderColor: 'var(--border-color)' }}>
+                <input
+                  type="radio"
+                  name="removeReason"
+                  value="CANCEL_GAME_DAY"
+                  checked={removeReason === "CANCEL_GAME_DAY"}
+                  onChange={(e) => setRemoveReason(e.target.value)}
+                  className="mt-1"
+                />
+                <div className="flex-1">
+                  <div className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                    Cancel on game day after 5 PM
+                  </div>
+                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    Ban: Two weeks (14 days)
+                  </div>
+                </div>
+              </label>
+
+              <label className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                     style={{ borderColor: 'var(--border-color)' }}>
+                <input
+                  type="radio"
+                  name="removeReason"
+                  value="NO_SHOW"
+                  checked={removeReason === "NO_SHOW"}
+                  onChange={(e) => setRemoveReason(e.target.value)}
+                  className="mt-1"
+                />
+                <div className="flex-1">
+                  <div className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                    No Show without notice
+                  </div>
+                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    Ban: Four weeks (28 days)
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowRemoveDialog(false);
+                  setRemoveReason("");
+                }}
+                className="flex-1 px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white
+                           font-medium rounded-lg transition-all duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  const targetIntra = intra || userRegistration?.intra || '';
+                  const isAdminAction = session?.user?.isAdmin &&
+                    registeredUsers.find(u => u.intra === targetIntra)?.user_id !== parseInt(session.user.id);
+                  handleSelfRemove(targetIntra, isAdminAction);
+                }}
+                className="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white
+                           font-medium rounded-lg transition-all duration-200"
+              >
+                Confirm Remove & Ban
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

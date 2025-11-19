@@ -1,59 +1,32 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '../../../../lib/utils/db';
+import { auth } from '../../../../auth';
 
-const ADMIN_USERS = ['MahdyZ7']; // Add Replit usernames of admins here
+async function getAuthenticatedAdmin(req: NextRequest): Promise<{ userId: number; userName: string } | null> {
+  const session = await auth();
 
-async function getAuthenticatedUser(req: NextRequest): Promise<string | null> {
-  // Check for Replit authentication headers first (more reliable)
-  let adminUser = req.headers.get('x-replit-user-name');
-
-  // If no server headers, try client-side approach
-  if (!adminUser) {
-    try {
-      const protocol = req.headers.get('x-forwarded-proto') || 'https';
-      const host = req.headers.get('host');
-      const authUrl = `${protocol}://${host}/__replauthuser`;
-
-      const userInfoResponse = await fetch(authUrl, {
-        headers: {
-          'Cookie': req.headers.get('cookie') || '',
-          'User-Agent': req.headers.get('user-agent') || 'NextJS-Admin',
-          'Referer': req.headers.get('referer') || `${protocol}://${host}/admin`
-        }
-      });
-
-      if (!userInfoResponse.ok) {
-        console.error('Auth request failed:', userInfoResponse.status);
-        return null;
-      }
-
-      const userData = await userInfoResponse.json();
-      adminUser = userData.name;
-    } catch (fetchError) {
-      console.error('Error fetching user info:', fetchError);
-      return null;
-    }
+  if (!session?.user || !session.user.isAdmin) {
+    return null;
   }
 
-  return adminUser;
+  return {
+    userId: parseInt(session.user.id),
+    userName: session.user.name || session.user.email || 'Admin'
+  };
 }
 
 export async function GET(req: NextRequest) {
-  const adminUser = await getAuthenticatedUser(req);
+  const admin = await getAuthenticatedAdmin(req);
 
-  if (!adminUser) {
-    return NextResponse.json({ error: 'Unauthorized - Not logged in' }, { status: 401 });
-  }
-
-  if (!ADMIN_USERS.includes(adminUser)) {
-    return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 });
+  if (!admin) {
+    return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 });
   }
 
   try {
     const client = await pool.connect();
     const { rows } = await client.query(`
-      SELECT id, name, reason, banned_at, banned_until
+      SELECT id AS intra, name, reason, banned_at, banned_until, user_id
       FROM banned_users
       ORDER BY banned_at DESC
     `);

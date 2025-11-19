@@ -5,7 +5,7 @@ import { User } from "../../../types/user";
 export async function GET() {
 	const client = await pool.connect();
 	try {
-		const { rows } = await client.query("SELECT name, intra, verified, created_at FROM players ORDER BY created_at ASC");
+		const { rows } = await client.query("SELECT name, intra, verified, created_at, user_id FROM players ORDER BY created_at ASC");
 
 		const players = rows.map(row => ({
 			name: row.name,
@@ -13,6 +13,7 @@ export async function GET() {
 			verified: row.verified,
 			created_at: row.created_at,
 			email: row.email,
+			user_id: row.user_id,
 		} satisfies User));
 
 		return NextResponse.json(players);
