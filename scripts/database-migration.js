@@ -5,6 +5,8 @@ const { Pool } = require('pg');
 const fs = require('fs').promises;
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const path = require('path');
+// load environment variables from .env file
+require('dotenv').config();
 
 // Database connection
 const pool = new Pool({

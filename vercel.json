@@ -1,0 +1,6 @@
+{
+  "crons": [{
+    "path": "/api/cron/reset-players",
+    "schedule": "0 6 * * 0,3"
+  }]
+}

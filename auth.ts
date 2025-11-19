@@ -3,6 +3,7 @@ import Google from "next-auth/providers/google"
 import GitHub from "next-auth/providers/github"
 import PostgresAdapter  from "@auth/pg-adapter"
 import pool from "./lib/utils/db"
+import { randomUUID } from "crypto"
 
 // Custom 42 School OAuth Provider
 const FortyTwoProvider = {
@@ -30,7 +31,15 @@ const FortyTwoProvider = {
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: PostgresAdapter(pool),
+  adapter: {
+    ...PostgresAdapter(pool),
+    // Override to ensure UUID generation for new users
+    createUser: async (user) => {
+      const adapter = PostgresAdapter(pool);
+      const userWithId = { ...user, id: randomUUID() };
+      return adapter.createUser!(userWithId as any) as any;
+    },
+  },
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -60,7 +69,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return session;
     },
-    async signIn({ user, account }) {
+    async signIn() {
       try {
         // Always allow sign in - the adapter will handle user creation
         // Email consolidation will be handled by the adapter automatically
