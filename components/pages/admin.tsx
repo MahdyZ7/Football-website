@@ -144,7 +144,7 @@ const Admin: React.FC = () => {
     );
   };
 
-  const handleUnban = async (userId: number, userName: string) => {
+  const handleUnban = async (userId: string, userName: string) => {
     setConfirmDialog({
       isOpen: true,
       title: 'Unban User',

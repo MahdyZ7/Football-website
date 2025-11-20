@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import pool from '../../../../lib/utils/db';
 import { auth } from '../../../../auth';
 
-async function getAuthenticatedAdmin(req: NextRequest): Promise<{ userId: number; userName: string } | null> {
+async function getAuthenticatedAdmin(req: NextRequest): Promise<{ userId: string; userName: string } | null> {
   const session = await auth();
 
   if (!session?.user || !session.user.isAdmin) {
@@ -11,7 +11,7 @@ async function getAuthenticatedAdmin(req: NextRequest): Promise<{ userId: number
   }
 
   return {
-    userId: parseInt(session.user.id),
+    userId: session.user.id,
     userName: session.user.name || session.user.email || 'Admin'
   };
 }

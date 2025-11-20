@@ -36,7 +36,7 @@ const Home: React.FC = () => {
 
   // Check if current user is registered
   const userRegistration = registeredUsers.find(
-    (user) => user.intra === intra || (session?.user?.id && user.user_id === parseInt(session.user.id))
+    (user) => user.intra === intra || (session?.user?.id && user.user_id === session.user.id)
   );
 
   // Timer effects
@@ -515,7 +515,7 @@ const Home: React.FC = () => {
             ) : (
               registeredUsers.map((user, index) => {
                 // User can remove their own registration OR admin can remove anyone
-                const isOwnRegistration = session && user.user_id && user.user_id === parseInt(session.user.id);
+                const isOwnRegistration = session && user.user_id && user.user_id === session.user.id;
                 const isAdmin = session?.user?.isAdmin;
                 const canRemove = isOwnRegistration || isAdmin;
 
@@ -636,12 +636,12 @@ const Home: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 z-[1000] flex items-center justify-center p-4">
           <div className="rounded-lg shadow-2xl p-8 max-w-md w-full" style={{ backgroundColor: 'var(--bg-card)' }}>
             <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
-              {session?.user?.isAdmin && userRegistration?.user_id !== parseInt(session.user.id)
+              {session?.user?.isAdmin && userRegistration?.user_id !== session.user.id
                 ? "Remove Player & Apply TIG Ban"
                 : "Remove Registration"}
             </h2>
             <p className="mb-6" style={{ color: 'var(--text-secondary)' }}>
-              {session?.user?.isAdmin && userRegistration?.user_id !== parseInt(session.user.id)
+              {session?.user?.isAdmin && userRegistration?.user_id !== session.user.id
                 ? "Select the TIG reason to ban this player:"
                 : "Removing your registration will result in a ban according to the TIG (Late/Cancellation) rules. Please select the reason:"}
             </p>
@@ -763,7 +763,7 @@ const Home: React.FC = () => {
                 onClick={() => {
                   const targetIntra = intra || userRegistration?.intra || '';
                   const isAdminAction = session?.user?.isAdmin &&
-                    registeredUsers.find(u => u.intra === targetIntra)?.user_id !== parseInt(session.user.id);
+                    registeredUsers.find(u => u.intra === targetIntra)?.user_id !== session.user.id;
                   handleSelfRemove(targetIntra, isAdminAction);
                 }}
                 className="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white

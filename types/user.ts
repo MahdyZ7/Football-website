@@ -8,7 +8,7 @@ export type BannedUser = {
 	reason: string;
 	banned_at: string;
 	banned_until: string;
-	user_id?: number;
+	user_id?: string;
 }
 
 export type User = {
@@ -17,7 +17,7 @@ export type User = {
 	intra:		string;
 	verified:	boolean;
 	created_at:	string;
-	user_id?:	number;
+	user_id?:	string;
 }
 
 export type Toast = {

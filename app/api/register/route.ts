@@ -62,7 +62,7 @@ if (dangerousPattern.test(user.intra) || (user.name && dangerousPattern.test(use
 	return NextResponse.json({ error: "Invalid characters detected in input" }, { status: 400 });
 }
 
-  const result = await registerUser(user, parseInt(session.user.id));
+  const result = await registerUser(user, session.user.id);
 
   if (result.success) {
     return NextResponse.json({ name: user.name, id: user.intra }, { status: 200 });
@@ -100,7 +100,7 @@ async function handleDelete(req: NextRequest) {
     // Log the action
     if (result.success) {
       await logAdminAction(
-        parseInt(serviceAccountUserId),
+        serviceAccountUserId,
         'automated_user_deletion',
         user.intra,
         user.name || 'Unknown',
@@ -116,7 +116,7 @@ async function handleDelete(req: NextRequest) {
     // Log the action
     if (result.success) {
       await logAdminAction(
-        parseInt(serviceAccountUserId),
+        serviceAccountUserId,
         'scheduled_list_reset',
         undefined,
         undefined,
@@ -129,7 +129,7 @@ async function handleDelete(req: NextRequest) {
   }
 }
 
-async function registerUser(user: User, userId: number) {
+async function registerUser(user: User, userId: string) {
   const client = await pool.connect();
 
   try {

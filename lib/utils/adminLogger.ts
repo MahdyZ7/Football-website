@@ -11,7 +11,7 @@ export interface AdminLogEntry {
 
 // New signature that accepts userId
 export async function logAdminAction(
-  performedByUserId: number,
+  performedByUserId: string,
   action: string,
   targetUser?: string,
   targetName?: string,
@@ -23,7 +23,7 @@ export async function logAdminAction(entry: AdminLogEntry): Promise<void>;
 
 // Implementation
 export async function logAdminAction(
-  performedByUserIdOrEntry: number | AdminLogEntry,
+  performedByUserIdOrEntry: string | AdminLogEntry,
   action?: string,
   targetUser?: string,
   targetName?: string,
@@ -33,7 +33,7 @@ export async function logAdminAction(
     const client = await pool.connect();
 
     // Handle both old and new signatures
-    if (typeof performedByUserIdOrEntry === 'number') {
+    if (typeof performedByUserIdOrEntry === 'string') {
       // New signature with userId
       const userId = performedByUserIdOrEntry;
 

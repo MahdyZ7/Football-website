@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       const player = playerCheck.rows[0];
 
       // Allow self-removal only (user removing their own registration)
-      if (player.user_id !== parseInt(session.user.id)) {
+      if (player.user_id !== session.user.id) {
         return NextResponse.json({ error: "You can only remove your own registration" }, { status: 403 });
       }
 
@@ -75,12 +75,12 @@ export async function POST(req: NextRequest) {
            reason = EXCLUDED.reason,
            banned_until = EXCLUDED.banned_until,
            user_id = EXCLUDED.user_id`,
-        [intra, player.name, reasonText, bannedUntil, parseInt(session.user.id)]
+        [intra, player.name, reasonText, bannedUntil, session.user.id]
       );
 
       // Log the action
       await logAdminAction(
-        parseInt(session.user.id),
+        session.user.id,
         'self_remove',
         intra,
         player.name,

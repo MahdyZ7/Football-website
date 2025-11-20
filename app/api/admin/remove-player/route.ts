@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
 
       // Log the admin action
       await logAdminAction(
-        parseInt(session.user.id),
+        session.user.id,
         'player_removed_by_admin',
         player.intra,
         player.name,
