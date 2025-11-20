@@ -7,9 +7,9 @@ export default function allowed_times() {
 	// Sunday is 0 and Wednesday is 3 in getDay()
 	const isAllowed = 
 		(currentDay === 0 && currentHour >= 12) ||
-		(currentDay === 1 && currentHour <= 21) ||
+		(currentDay === 1 && currentHour <= 22) ||
 		(currentDay === 3 && currentHour >= 12) ||
-		(currentDay === 4 && currentHour <= 21);
+		(currentDay === 4 && currentHour <= 22);
 	return isAllowed;
 }
 
