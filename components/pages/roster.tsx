@@ -1,6 +1,6 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect, Suspense } from "react";
 import { motion } from "framer-motion";
-import { Users, Trophy, Star, Download, Share2, Copy, FileImage, FileText, Clipboard } from "lucide-react";
+import { Users, Trophy, Star, Download, Share2, Copy, FileImage, FileText, Clipboard, ArrowLeft } from "lucide-react";
 import redPlayer from "../../assets/soccer_player_in_red_kit.png";
 import bluePlayer from "../../assets/soccer_player_in_blue_kit.png";
 import whitePlayer from "../../assets/soccer_player_in_white_kit.png";
@@ -8,6 +8,8 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import Image from "next/image";
 import { StaticImageData } from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 import {
   DropdownMenu,
@@ -111,9 +113,44 @@ var TEAMS: Team[] = [
   },
 ];
 
-export default function Roster() {
+function RosterContent() {
   const rosterRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [teams, setTeams] = useState<Team[]>(TEAMS);
+
+  // Load team data from URL params
+  useEffect(() => {
+    const teamsData = searchParams.get('teams');
+    if (teamsData) {
+      try {
+        const parsedTeams = JSON.parse(decodeURIComponent(teamsData));
+
+        // Map the incoming teams to the roster format
+        const updatedTeams = TEAMS.slice(0, parsedTeams.length).map((defaultTeam: Team, index: number) => {
+          const incomingTeam = parsedTeams[index];
+
+          // Create player objects with intra as position
+          const players = incomingTeam.players.map((player: any, playerIndex: number) => ({
+            number: playerIndex + 1,
+            name: player.name.toUpperCase(),
+            position: player.intra.toUpperCase()
+          }));
+
+          return {
+            ...defaultTeam,
+            players: players
+            // Keep the original team name from TEAMS, not from incoming data
+          };
+        });
+
+        setTeams(updatedTeams);
+      } catch (error) {
+        console.error("Failed to parse teams data:", error);
+      }
+    }
+  }, [searchParams]);
 
   const handleExport = async (format: 'png' | 'jpeg' | 'pdf' | 'clipboard') => {
     if (!rosterRef.current) return;
@@ -173,6 +210,19 @@ export default function Roster() {
 
   return (
     <div className="relative">
+      {/* Back to Teams Link */}
+      <div className="absolute top-4 left-4 z-50">
+        <Link href="/teams">
+          <Button
+            variant="outline"
+            className="bg-black/50 backdrop-blur-md border-white/20 text-white hover:bg-white/10 hover:text-white transition-all"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Teams
+          </Button>
+        </Link>
+      </div>
+
       {/* Export Controls */}
       <div className="absolute top-4 right-4 z-50">
         <DropdownMenu>
@@ -218,7 +268,7 @@ export default function Roster() {
 
       {/* Main Content Area to Capture */}
       <div ref={rosterRef} className="h-screen w-full bg-neutral-950 flex flex-col md:flex-row overflow-hidden">
-        {TEAMS.map((team, index) => (
+        {teams.map((team, index) => (
           <TeamColumn key={team.id} team={team} index={index} />
         ))}
       </div>
@@ -226,7 +276,7 @@ export default function Roster() {
   );
 }
 
-function TeamColumn({ team, index }: { team: typeof TEAMS[0]; index: number }) {
+function TeamColumn({ team, index }: { team: Team; index: number }) {
   const isWhite = team.id === "white";
 
   return (
@@ -295,7 +345,7 @@ function TeamColumn({ team, index }: { team: typeof TEAMS[0]; index: number }) {
   );
 }
 
-function PlayerRow({ player, team, index }: { player: any; team: typeof TEAMS[0]; index: number }) {
+function PlayerRow({ player, team, index }: { player: any; team: Team; index: number }) {
   const isWhite = team.id === "white";
   
   return (
@@ -347,5 +397,13 @@ function PlayerRow({ player, team, index }: { player: any; team: typeof TEAMS[0]
         stroke={team.colors.accent}
       />
     </motion.div>
+  );
+}
+
+export default function Roster() {
+  return (
+    <Suspense fallback={<div className="h-screen w-full bg-neutral-950 flex items-center justify-center text-white">Loading...</div>}>
+      <RosterContent />
+    </Suspense>
   );
 }

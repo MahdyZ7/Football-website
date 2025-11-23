@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Navbar from "./Navbar";
 import Footer from "./footer";
 import LoadingSpinner from "../LoadingSpinner";
 import { GuaranteedSpot } from "../../types/user";
-import TeamExporter from "../TeamExporter";
 import { useUsers } from "../../hooks/useQueries";
 
 type User = {
@@ -23,6 +23,7 @@ type Team = {
 };
 
 const TeamsImproved: React.FC = () => {
+  const router = useRouter();
   const [teamMode, setTeamMode] = useState<2 | 3>(3);
   const [availablePlayers, setAvailablePlayers] = useState<User[]>([]);
   const [waitingListPlayers, setWaitingListPlayers] = useState<User[]>([]);
@@ -212,6 +213,17 @@ const TeamsImproved: React.FC = () => {
     return { avgRating, count: team.players.length };
   };
 
+  const navigateToRoster = () => {
+    // Prepare teams data for the roster page
+    const teamsToExport = teamMode === 3
+      ? [team1, team2, team3].filter(team => team.players.length > 0)
+      : [team1, team2].filter(team => team.players.length > 0);
+
+    // Encode teams data as URL parameter
+    const teamsData = encodeURIComponent(JSON.stringify(teamsToExport));
+    router.push(`/roster?teams=${teamsData}`);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--bg-primary)' }}>
@@ -329,7 +341,13 @@ const TeamsImproved: React.FC = () => {
               >
                 🗑️ Clear All
               </button>
-              <TeamExporter team1={team1} team2={team2} team3={team3} />
+              <button
+                onClick={navigateToRoster}
+                className="px-6 py-3 bg-ft-primary hover:bg-ft-secondary text-white font-medium rounded
+                           transition-all duration-200 transform hover:scale-105"
+              >
+                📋 View Roster
+              </button>
             </div>
           </div>
 

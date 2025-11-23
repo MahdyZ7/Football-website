@@ -4,6 +4,8 @@ import Navbar from './Navbar';
 import Footer from './footer';
 import LoadingSpinner from '../LoadingSpinner';
 import ConfirmDialog from '../ConfirmDialog';
+import { TIG_BAN_DURATIONS } from '../../lib/utils/TIG_list';
+
 import {
   useAdminAuth,
   useUsers,
@@ -55,11 +57,11 @@ const Admin: React.FC = () => {
   // Predefined ban reasons with durations
   const banReasons = [
     { label: 'Select a reason...', value: '', duration: 7 },
-    { label: 'Not ready when booking time starts', value: 'Not ready when booking time starts', duration: 3.5 },
-    { label: 'Cancel reservation', value: 'Cancel reservation', duration: 7 },
-    { label: 'Late > 15 minutes', value: 'Late > 15 minutes', duration: 7 },
-    { label: 'Cancel reservation on game day after 5 PM', value: 'Cancel reservation on game day after 5 PM', duration: 14 },
-    { label: 'No Show without notice', value: 'No Show without notice', duration: 28 },
+    { label: 'Not ready when booking time starts', value: 'Not ready when booking time starts', duration: TIG_BAN_DURATIONS.NOT_READY },
+    { label: 'Cancel reservation', value: 'Cancel reservation', duration: TIG_BAN_DURATIONS.CANCEL},
+    { label: 'Late > 15 minutes', value: 'Late > 15 minutes', duration:  TIG_BAN_DURATIONS.LATE},
+    { label: 'Cancel reservation on game day after 5 PM', value: 'Cancel reservation on game day after 5 PM', duration: TIG_BAN_DURATIONS.CANCEL_GAME_DAY },
+    { label: 'No Show without notice', value: 'No Show without notice', duration: TIG_BAN_DURATIONS.NO_SHOW },
     { label: 'Custom reason', value: 'custom', duration: 7 }
   ];
 
