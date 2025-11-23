@@ -157,27 +157,27 @@ const Home: React.FC = () => {
   };
 
   const handleSelfRemove = async (intra: string, isAdminRemoval: boolean = false) => {
-    // Validate TIG reason is selected
-    if (!removeReason) {
-      showToast("Please select a reason for removal", 'error');
-      return;
-    }
-
     try {
       const axios = (await import('axios')).default;
 
       if (isAdminRemoval && session?.user?.isAdmin) {
         // Admin removing another player - use admin endpoint
+        // Admin must select a reason
+        if (!removeReason) {
+          showToast("Please select a reason for removal", 'error');
+          return;
+        }
+
         const response = await axios.post("/api/admin/remove-player", {
           intra,
           reason: removeReason
         });
-        showToast(response.data.message || "Player removed and banned successfully", 'success');
+        showToast(response.data.message || "Player removed successfully", 'success');
       } else {
-        // Self-removal
+        // Self-removal - reason is optional if within 15-minute grace period
         const response = await axios.post("/api/self-remove", {
           intra,
-          reason: removeReason
+          reason: removeReason || undefined
         });
         showToast(response.data.message, 'success');
       }
@@ -438,6 +438,14 @@ const Home: React.FC = () => {
               <tbody>
                 <tr className="border-b" style={{ borderColor: 'var(--border-color)' }}>
                   <td className="px-4 py-3 font-medium" style={{ color: 'var(--text-primary)' }}>
+                    Cancel reservation
+                  </td>
+                  <td className="px-4 py-3" style={{ color: 'var(--text-primary)' }}>
+                    One week (or Two weeks if on game day after 5 PM)
+                  </td>
+                </tr>
+                <tr className="border-b" style={{ borderColor: 'var(--border-color)' }}>
+                  <td className="px-4 py-3 font-medium" style={{ color: 'var(--text-primary)' }}>
                     Not ready when booking time starts
                   </td>
                   <td className="px-4 py-3" style={{ color: 'var(--text-primary)' }}>
@@ -446,26 +454,10 @@ const Home: React.FC = () => {
                 </tr>
                 <tr className="border-b" style={{ borderColor: 'var(--border-color)' }}>
                   <td className="px-4 py-3 font-medium" style={{ color: 'var(--text-primary)' }}>
-                    Cancel reservation
-                  </td>
-                  <td className="px-4 py-3" style={{ color: 'var(--text-primary)' }}>
-                    One week
-                  </td>
-                </tr>
-                <tr className="border-b" style={{ borderColor: 'var(--border-color)' }}>
-                  <td className="px-4 py-3 font-medium" style={{ color: 'var(--text-primary)' }}>
                     Late {">"} 15 minutes
                   </td>
                   <td className="px-4 py-3" style={{ color: 'var(--text-primary)' }}>
                     One week
-                  </td>
-                </tr>
-                <tr className="border-b" style={{ borderColor: 'var(--border-color)' }}>
-                  <td className="px-4 py-3 font-medium" style={{ color: 'var(--text-primary)' }}>
-                    Cancel reservation on game day after 5 PM
-                  </td>
-                  <td className="px-4 py-3" style={{ color: 'var(--text-primary)' }}>
-                    Two weeks
                   </td>
                 </tr>
                 <tr>
@@ -478,6 +470,11 @@ const Home: React.FC = () => {
                 </tr>
               </tbody>
             </table>
+          </div>
+          <div className="px-6 py-4 bg-blue-50 dark:bg-blue-900/20 border-t" style={{ borderColor: 'var(--border-color)' }}>
+            <p className="text-sm text-center" style={{ color: 'var(--text-secondary)' }}>
+              <strong>Note:</strong> You can remove your registration without a ban within 15 minutes of registering.
+            </p>
           </div>
         </div>
 
@@ -632,149 +629,231 @@ const Home: React.FC = () => {
       </div>
 
       {/* TIG Removal Dialog */}
-      {showRemoveDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-[1000] flex items-center justify-center p-4">
-          <div className="rounded-lg shadow-2xl p-8 max-w-md w-full" style={{ backgroundColor: 'var(--bg-card)' }}>
-            <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
-              {session?.user?.isAdmin && userRegistration?.user_id !== session.user.id
-                ? "Remove Player & Apply TIG Ban"
-                : "Remove Registration"}
-            </h2>
-            <p className="mb-6" style={{ color: 'var(--text-secondary)' }}>
-              {session?.user?.isAdmin && userRegistration?.user_id !== session.user.id
-                ? "Select the TIG reason to ban this player:"
-                : "Removing your registration will result in a ban according to the TIG (Late/Cancellation) rules. Please select the reason:"}
-            </p>
+      {showRemoveDialog && (() => {
+        const targetIntra = intra || userRegistration?.intra || '';
+        const targetUser = registeredUsers.find(u => u.intra === targetIntra);
+        const isAdminAction = session?.user?.isAdmin && targetUser?.user_id !== session.user.id;
 
-            <div className="space-y-3 mb-6">
-              <label className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
-                     style={{ borderColor: 'var(--border-color)' }}>
-                <input
-                  type="radio"
-                  name="removeReason"
-                  value="NOT_READY"
-                  checked={removeReason === "NOT_READY"}
-                  onChange={(e) => setRemoveReason(e.target.value)}
-                  className="mt-1"
-                />
-                <div className="flex-1">
-                  <div className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                    Not ready when booking time starts
-                  </div>
-                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                    Ban: Half a week (3.5 days)
-                  </div>
-                </div>
-              </label>
+        // Check if within 15-minute grace period for self-removal
+        const registrationTime = targetUser?.created_at ? new Date(targetUser.created_at) : null;
+        const now = new Date();
+        const minutesSinceRegistration = registrationTime
+          ? (now.getTime() - registrationTime.getTime()) / (1000 * 60)
+          : Infinity;
+        const withinGracePeriod = !isAdminAction && minutesSinceRegistration <= 15;
 
-              <label className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
-                     style={{ borderColor: 'var(--border-color)' }}>
-                <input
-                  type="radio"
-                  name="removeReason"
-                  value="CANCEL"
-                  checked={removeReason === "CANCEL"}
-                  onChange={(e) => setRemoveReason(e.target.value)}
-                  className="mt-1"
-                />
-                <div className="flex-1">
-                  <div className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                    Cancel reservation
-                  </div>
-                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                    Ban: One week (7 days)
-                  </div>
-                </div>
-              </label>
+        return (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-[1000] flex items-center justify-center p-4">
+            <div className="rounded-lg shadow-2xl p-8 max-w-md w-full" style={{ backgroundColor: 'var(--bg-card)' }}>
+              <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
+                {isAdminAction ? "Remove Player (Admin)" : "Remove Registration"}
+              </h2>
+              <p className="mb-6" style={{ color: 'var(--text-secondary)' }}>
+                {isAdminAction
+                  ? "Select the reason for removing this player:"
+                  : withinGracePeriod
+                  ? "You can remove your registration without a ban (within 15-minute grace period) or select a cancellation reason:"
+                  : "Select the reason for cancelling your registration:"}
+              </p>
 
-              <label className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
-                     style={{ borderColor: 'var(--border-color)' }}>
-                <input
-                  type="radio"
-                  name="removeReason"
-                  value="LATE"
-                  checked={removeReason === "LATE"}
-                  onChange={(e) => setRemoveReason(e.target.value)}
-                  className="mt-1"
-                />
-                <div className="flex-1">
-                  <div className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                    Late &gt; 15 minutes
-                  </div>
-                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                    Ban: One week (7 days)
-                  </div>
-                </div>
-              </label>
+              <div className="space-y-3 mb-6">
+                {/* Grace period option for users within 15 minutes */}
+                {!isAdminAction && withinGracePeriod && (
+                  <label className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 border-green-500"
+                         style={{ borderColor: 'var(--border-color)', borderWidth: '2px' }}>
+                    <input
+                      type="radio"
+                      name="removeReason"
+                      value=""
+                      checked={removeReason === ""}
+                      onChange={() => setRemoveReason("")}
+                      className="mt-1"
+                    />
+                    <div className="flex-1">
+                      <div className="font-medium text-green-600">
+                        Remove without ban (Grace Period)
+                      </div>
+                      <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                        No ban - Within 15 minutes of registration
+                      </div>
+                    </div>
+                  </label>
+                )}
 
-              <label className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
-                     style={{ borderColor: 'var(--border-color)' }}>
-                <input
-                  type="radio"
-                  name="removeReason"
-                  value="CANCEL_GAME_DAY"
-                  checked={removeReason === "CANCEL_GAME_DAY"}
-                  onChange={(e) => setRemoveReason(e.target.value)}
-                  className="mt-1"
-                />
-                <div className="flex-1">
-                  <div className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                    Cancel on game day after 5 PM
-                  </div>
-                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                    Ban: Two weeks (14 days)
-                  </div>
-                </div>
-              </label>
+                {/* Cancel reservation - for users only */}
+                {!isAdminAction && (
+                  <label className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                         style={{ borderColor: 'var(--border-color)' }}>
+                    <input
+                      type="radio"
+                      name="removeReason"
+                      value="CANCEL"
+                      checked={removeReason === "CANCEL"}
+                      onChange={(e) => setRemoveReason(e.target.value)}
+                      className="mt-1"
+                    />
+                    <div className="flex-1">
+                      <div className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                        Cancel reservation
+                      </div>
+                      <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                        Ban: 1 week (or 2 weeks if game day after 5 PM)
+                      </div>
+                    </div>
+                  </label>
+                )}
 
-              <label className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
-                     style={{ borderColor: 'var(--border-color)' }}>
-                <input
-                  type="radio"
-                  name="removeReason"
-                  value="NO_SHOW"
-                  checked={removeReason === "NO_SHOW"}
-                  onChange={(e) => setRemoveReason(e.target.value)}
-                  className="mt-1"
-                />
-                <div className="flex-1">
-                  <div className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                    No Show without notice
-                  </div>
-                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                    Ban: Four weeks (28 days)
-                  </div>
-                </div>
-              </label>
-            </div>
+                {/* Admin-only options */}
+                {isAdminAction && (
+                  <>
+                    <label className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                           style={{ borderColor: 'var(--border-color)' }}>
+                      <input
+                        type="radio"
+                        name="removeReason"
+                        value="NO_BAN"
+                        checked={removeReason === "NO_BAN"}
+                        onChange={(e) => setRemoveReason(e.target.value)}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                          Remove without ban
+                        </div>
+                        <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                          No ban applied
+                        </div>
+                      </div>
+                    </label>
 
-            <div className="flex gap-3">
-              <button
-                onClick={() => {
-                  setShowRemoveDialog(false);
-                  setRemoveReason("");
-                }}
-                className="flex-1 px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white
-                           font-medium rounded-lg transition-all duration-200"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  const targetIntra = intra || userRegistration?.intra || '';
-                  const isAdminAction = session?.user?.isAdmin &&
-                    registeredUsers.find(u => u.intra === targetIntra)?.user_id !== session.user.id;
-                  handleSelfRemove(targetIntra, isAdminAction);
-                }}
-                className="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white
-                           font-medium rounded-lg transition-all duration-200"
-              >
-                Confirm Remove & Ban
-              </button>
+                    <label className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                           style={{ borderColor: 'var(--border-color)' }}>
+                      <input
+                        type="radio"
+                        name="removeReason"
+                        value="CANCEL"
+                        checked={removeReason === "CANCEL"}
+                        onChange={(e) => setRemoveReason(e.target.value)}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                          Cancel reservation
+                        </div>
+                        <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                          Ban: One week (7 days)
+                        </div>
+                      </div>
+                    </label>
+
+                    <label className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                           style={{ borderColor: 'var(--border-color)' }}>
+                      <input
+                        type="radio"
+                        name="removeReason"
+                        value="CANCEL_GAME_DAY"
+                        checked={removeReason === "CANCEL_GAME_DAY"}
+                        onChange={(e) => setRemoveReason(e.target.value)}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                          Cancel on game day after 5 PM
+                        </div>
+                        <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                          Ban: Two weeks (14 days)
+                        </div>
+                      </div>
+                    </label>
+
+                    <label className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                           style={{ borderColor: 'var(--border-color)' }}>
+                      <input
+                        type="radio"
+                        name="removeReason"
+                        value="NOT_READY"
+                        checked={removeReason === "NOT_READY"}
+                        onChange={(e) => setRemoveReason(e.target.value)}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                          Not ready when booking time starts
+                        </div>
+                        <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                          Ban: Half a week (3.5 days)
+                        </div>
+                      </div>
+                    </label>
+
+                    <label className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                           style={{ borderColor: 'var(--border-color)' }}>
+                      <input
+                        type="radio"
+                        name="removeReason"
+                        value="LATE"
+                        checked={removeReason === "LATE"}
+                        onChange={(e) => setRemoveReason(e.target.value)}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                          Late &gt; 15 minutes
+                        </div>
+                        <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                          Ban: One week (7 days)
+                        </div>
+                      </div>
+                    </label>
+
+                    <label className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                           style={{ borderColor: 'var(--border-color)' }}>
+                      <input
+                        type="radio"
+                        name="removeReason"
+                        value="NO_SHOW"
+                        checked={removeReason === "NO_SHOW"}
+                        onChange={(e) => setRemoveReason(e.target.value)}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                          No Show without notice
+                        </div>
+                        <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                          Ban: Four weeks (28 days)
+                        </div>
+                      </div>
+                    </label>
+                  </>
+                )}
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowRemoveDialog(false);
+                    setRemoveReason("");
+                  }}
+                  className="flex-1 px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white
+                             font-medium rounded-lg transition-all duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    handleSelfRemove(targetIntra, isAdminAction);
+                  }}
+                  className="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white
+                             font-medium rounded-lg transition-all duration-200"
+                >
+                  {isAdminAction ? "Remove Player" : "Confirm"}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 };

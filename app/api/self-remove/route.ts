@@ -2,15 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import pool from "../../../lib/utils/db";
 import { auth } from "../../../auth";
 import { logAdminAction } from "../../../lib/utils/adminLogger";
-
-// TIG Ban durations in days based on the rules from home.tsx
-const TIG_BAN_DURATIONS = {
-  NOT_READY: 3.5, // Half a week
-  CANCEL: 7, // One week
-  LATE: 7, // One week (late > 15 minutes)
-  CANCEL_GAME_DAY: 14, // Two weeks (cancel on game day after 5 PM)
-  NO_SHOW: 28, // Four weeks
-};
+import { TIG_BAN_DURATIONS } from "../../../lib/utils/TIG_list";
+import { calculateCancelBanDuration } from "../../../lib/utils/TIG_list";
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,17 +15,12 @@ export async function POST(req: NextRequest) {
     const json = await req.json();
     const { reason, intra } = json;
 
-    // Validate reason
-    if (!reason || !Object.keys(TIG_BAN_DURATIONS).includes(reason)) {
-      return NextResponse.json({ error: "Invalid removal reason" }, { status: 400 });
-    }
-
     const client = await pool.connect();
 
     try {
       // Check if the player exists and belongs to the current user
       const playerCheck = await client.query(
-        "SELECT name, intra, user_id FROM players WHERE intra = $1",
+        "SELECT name, intra, user_id, created_at FROM players WHERE intra = $1",
         [intra]
       );
 
@@ -47,21 +35,49 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "You can only remove your own registration" }, { status: 403 });
       }
 
-      // Calculate ban duration
-      const banDurationDays = TIG_BAN_DURATIONS[reason as keyof typeof TIG_BAN_DURATIONS];
+      // Check if within 15-minute grace period for no-ban removal
+      const registrationTime = new Date(player.created_at);
+      const now = new Date();
+      const minutesSinceRegistration = (now.getTime() - registrationTime.getTime()) / (1000 * 60);
+
+      if (!reason && minutesSinceRegistration <= 15) {
+        // No-ban removal within 15 minutes
+        await client.query("DELETE FROM players WHERE intra = $1", [intra]);
+
+        await logAdminAction(
+          session.user.id,
+          'self_remove_no_ban',
+          intra,
+          player.name,
+          `Self-removed within 15-minute grace period (no ban applied)`
+        );
+
+        return NextResponse.json({
+          success: true,
+          message: `Registration removed successfully (no ban applied - within 15-minute grace period)`,
+        }, { status: 200 });
+      }
+
+      // Validate reason is provided for ban removal
+      if (!reason) {
+        return NextResponse.json({ error: "Removal reason is required after 15-minute grace period" }, { status: 400 });
+      }
+
+      // Validate reason
+      const validReasons = ['CANCEL'];
+      if (!validReasons.includes(reason)) {
+        return NextResponse.json({ error: "Invalid removal reason for self-removal" }, { status: 400 });
+      }
+
+      // Calculate ban duration based on timing
+      const banDurationDays = calculateCancelBanDuration();
       const bannedUntil = new Date();
       bannedUntil.setDate(bannedUntil.getDate() + banDurationDays);
 
-      // Get reason text
-      const reasonKey = reason as keyof typeof TIG_BAN_DURATIONS;
-      const reasonTextMap: Record<keyof typeof TIG_BAN_DURATIONS, string> = {
-        NOT_READY: "Not ready when booking time starts",
-        CANCEL: "Cancel reservation",
-        LATE: "Late > 15 minutes",
-        CANCEL_GAME_DAY: "Cancel reservation on game day after 5 PM",
-        NO_SHOW: "No Show without notice"
-      };
-      const reasonText = reasonTextMap[reasonKey];
+      // Determine reason text based on when cancellation happened
+      const reasonText = banDurationDays === TIG_BAN_DURATIONS.CANCEL_GAME_DAY
+        ? "Cancel reservation on game day after 5 PM"
+        : "Cancel reservation";
 
       // Remove player from registered list
       await client.query("DELETE FROM players WHERE intra = $1", [intra]);

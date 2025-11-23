@@ -34,3 +34,9 @@ export function getNextRegistration() {
   nextDate.setHours(12, 0, 0, 0); // Set to noon UTC
   return nextDate;
 }
+
+export function isGameDay(): boolean {
+  const now = new Date();
+  const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 4 = Thursday
+  return dayOfWeek === 1 || dayOfWeek === 4; // Monday or Thursday
+}

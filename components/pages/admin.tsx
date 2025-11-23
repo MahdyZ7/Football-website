@@ -194,9 +194,6 @@ const Admin: React.FC = () => {
               <p className="mb-4" style={{ color: 'var(--text-primary)' }}>
                 Please log in with your Replit account to access the admin panel.
               </p>
-              <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
-                Only authorized users (MahdyZ7) can access admin features.
-              </p>
               <button
                 onClick={() => {
                   window.addEventListener("message", (e) => {
@@ -516,15 +513,6 @@ const Admin: React.FC = () => {
                   <p className="font-medium">Failed to load banned users. Please try again.</p>
                 </div>
               )}
-
-              {/* Admin Info */}
-              <div className="rounded-lg p-4 mb-6 text-sm" style={{
-                backgroundColor: 'var(--bg-card)',
-                color: 'var(--text-secondary)'
-              }}>
-                <strong>Admin Access:</strong> Currently only &apos;MahdyZ7&apos; has admin privileges.
-                To add more admins, update the ADMIN_USERS array in /app/api/admin/auth/route.ts
-              </div>
 
               <div className="rounded-lg shadow-md overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
                 <div className="overflow-x-auto">

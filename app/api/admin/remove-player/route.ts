@@ -2,15 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import pool from '../../../../lib/utils/db';
 import { logAdminAction } from '../../../../lib/utils/adminLogger';
 import { auth } from '../../../../auth';
-
-// TIG Ban durations in days
-const TIG_BAN_DURATIONS = {
-  NOT_READY: 3.5,
-  CANCEL: 7,
-  LATE: 7,
-  CANCEL_GAME_DAY: 14,
-  NO_SHOW: 28,
-};
+import { TIG_BAN_DURATIONS } from '../../../../lib/utils/TIG_list';
 
 export async function POST(req: NextRequest) {
   try {
@@ -45,7 +37,26 @@ export async function POST(req: NextRequest) {
 
       const player = playerResult.rows[0];
 
-      // Calculate ban duration
+      // Delete the player
+      await client.query('DELETE FROM players WHERE intra = $1', [intra]);
+
+      // If NO_BAN, just remove without banning
+      if (reason === 'NO_BAN') {
+        await logAdminAction(
+          session.user.id,
+          'player_removed_by_admin_no_ban',
+          player.intra,
+          player.name,
+          `Admin removed player without ban`
+        );
+
+        return NextResponse.json({
+          success: true,
+          message: `Player ${player.name} removed successfully (no ban applied)`
+        }, { status: 200 });
+      }
+
+      // Calculate ban duration for admin-only reasons
       const banDurationDays = TIG_BAN_DURATIONS[reason as keyof typeof TIG_BAN_DURATIONS];
       const bannedUntil = new Date();
       bannedUntil.setDate(bannedUntil.getDate() + banDurationDays);
@@ -55,14 +66,12 @@ export async function POST(req: NextRequest) {
       const reasonTextMap: Record<keyof typeof TIG_BAN_DURATIONS, string> = {
         NOT_READY: "Not ready when booking time starts",
         CANCEL: "Cancel reservation",
-        LATE: "Late > 15 minutes",
         CANCEL_GAME_DAY: "Cancel reservation on game day after 5 PM",
-        NO_SHOW: "No Show without notice"
+        LATE: "Late > 15 minutes",
+        NO_SHOW: "No Show without notice",
+        NO_BAN: "Removed without ban"
       };
       const reasonText = reasonTextMap[reasonKey];
-
-      // Delete the player
-      await client.query('DELETE FROM players WHERE intra = $1', [intra]);
 
       // Add to banned users
       await client.query(
