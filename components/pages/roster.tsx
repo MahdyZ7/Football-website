@@ -44,7 +44,7 @@ type Team = {
 var TEAMS: Team[] = [
   {
     id: "red",
-    name: "THE CRIMSONS",
+    name: "Merseyside",
     founded: "EST. 1892",
     colors: {
       primary: "#C8102E", // Red
@@ -90,7 +90,7 @@ var TEAMS: Team[] = [
   },
   {
     id: "white",
-    name: "LILYWHITES",
+    name: "Tyneside",
     founded: "EST. 1882",
     colors: {
       primary: "#FFFFFF", // White
@@ -159,46 +159,53 @@ function RosterContent() {
     const toastId = toast.loading("Generating export...");
 
     try {
-      // Small delay to allow UI to update if needed
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      const canvas = await html2canvas(rosterRef.current, {
-        scale: 2, // Better quality
-        useCORS: true,
-        backgroundColor: "#0a0a0a", // Match neutral-950
-        logging: false,
-      });
-
       if (format === 'clipboard') {
-        canvas.toBlob(async (blob) => {
-          if (blob) {
-            try {
-              await navigator.clipboard.write([
-                new ClipboardItem({ 'image/png': blob })
-              ]);
-              toast.success("Copied to clipboard!", { id: toastId });
-            } catch (err) {
-              console.error(err);
-              toast.error("Failed to copy to clipboard", { id: toastId });
-            }
-          }
-        });
-      } else if (format === 'pdf') {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF({
-          orientation: 'landscape',
-          unit: 'px',
-          format: [canvas.width, canvas.height]
-        });
-        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-        pdf.save('team-rosters.pdf');
-        toast.success("PDF downloaded!", { id: toastId });
+        // Generate text list of player names for each team
+        const textContent = teams
+          .map((team) => {
+            const teamHeader = team.name;
+            const playerList = team.players
+              .map((player) => `${player.number}. ${player.name}`)
+              .join('\n');
+            return `${teamHeader}\n${playerList}`;
+          })
+          .join('\n\n');
+
+        try {
+          await navigator.clipboard.writeText(textContent);
+          toast.success("Player list copied to clipboard!", { id: toastId });
+        } catch (err) {
+          console.error("Clipboard error:", err);
+          toast.error("Failed to copy to clipboard. Please check browser permissions.", { id: toastId });
+        }
       } else {
-        const link = document.createElement('a');
-        link.download = `team-rosters.${format}`;
-        link.href = canvas.toDataURL(`image/${format}`);
-        link.click();
-        toast.success(`${format.toUpperCase()} downloaded!`, { id: toastId });
+        // Small delay to allow UI to update if needed
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        const canvas = await html2canvas(rosterRef.current, {
+          scale: 2, // Better quality
+          useCORS: true,
+          backgroundColor: "#0a0a0a", // Match neutral-950
+          logging: false,
+        });
+
+        if (format === 'pdf') {
+          const imgData = canvas.toDataURL('image/png');
+          const pdf = new jsPDF({
+            orientation: 'landscape',
+            unit: 'px',
+            format: [canvas.width, canvas.height]
+          });
+          pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+          pdf.save('team-rosters.pdf');
+          toast.success("PDF downloaded!", { id: toastId });
+        } else {
+          const link = document.createElement('a');
+          link.download = `team-rosters.${format}`;
+          link.href = canvas.toDataURL(`image/${format}`);
+          link.click();
+          toast.success(`${format.toUpperCase()} downloaded!`, { id: toastId });
+        }
       }
     } catch (error) {
       console.error("Export failed:", error);
@@ -210,66 +217,63 @@ function RosterContent() {
 
   return (
     <div className="relative">
-      {/* Back to Teams Link */}
-      <div className="absolute top-4 left-4 z-50">
-        <Link href="/teams">
-          <Button
-            variant="outline"
-            className="bg-black/50 backdrop-blur-md border-white/20 text-white hover:bg-white/10 hover:text-white transition-all"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Teams
-          </Button>
-        </Link>
-      </div>
-
-      {/* Export Controls */}
-      <div className="absolute top-4 right-4 z-50">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button 
-              variant="outline" 
+      {/* Back to Teams Link - Only render when not exporting */}
+      {!isExporting && (
+        <div className="absolute top-4 left-4 z-50">
+          <Link href="/teams">
+            <Button
+              variant="outline"
               className="bg-black/50 backdrop-blur-md border-white/20 text-white hover:bg-white/10 hover:text-white transition-all"
-              disabled={isExporting}
             >
-              {isExporting ? (
-                <span className="animate-pulse">Exporting...</span>
-              ) : (
-                <>
-                  <Share2 className="w-4 h-4 mr-2" />
-                  Export
-                </>
-              )}
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Teams
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48 bg-black/90 border-white/10 text-white backdrop-blur-xl">
-            <DropdownMenuLabel>Export Roster</DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-white/10" />
-            <DropdownMenuItem onClick={() => handleExport('png')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white">
-              <FileImage className="w-4 h-4 mr-2 text-blue-400" />
-              <span>Download PNG</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleExport('jpeg')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white">
-              <FileImage className="w-4 h-4 mr-2 text-orange-400" />
-              <span>Download JPEG</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleExport('pdf')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white">
-              <FileText className="w-4 h-4 mr-2 text-red-400" />
-              <span>Download PDF</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-white/10" />
-            <DropdownMenuItem onClick={() => handleExport('clipboard')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white">
-              <Clipboard className="w-4 h-4 mr-2 text-green-400" />
-              <span>Copy to Clipboard</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+          </Link>
+        </div>
+      )}
+
+      {/* Export Controls - Only render when not exporting */}
+      {!isExporting && (
+        <div className="absolute top-4 right-4 z-50">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="bg-black/50 backdrop-blur-md border-white/20 text-white hover:bg-white/10 hover:text-white transition-all"
+              >
+                <Share2 className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48 bg-black/90 border-white/10 text-white backdrop-blur-xl">
+              <DropdownMenuLabel>Export Roster</DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-white/10" />
+              <DropdownMenuItem onClick={() => handleExport('png')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white">
+                <FileImage className="w-4 h-4 mr-2 text-blue-400" />
+                <span>Download PNG</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport('jpeg')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white">
+                <FileImage className="w-4 h-4 mr-2 text-orange-400" />
+                <span>Download JPEG</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport('pdf')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white">
+                <FileText className="w-4 h-4 mr-2 text-red-400" />
+                <span>Download PDF</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-white/10" />
+              <DropdownMenuItem onClick={() => handleExport('clipboard')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white">
+                <Clipboard className="w-4 h-4 mr-2 text-green-400" />
+                <span>Copy to Clipboard</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
 
       {/* Main Content Area to Capture */}
       <div
         ref={rosterRef}
-        className="roster-container h-screen w-full bg-neutral-950 flex scroll-smooth"
+        className="roster-container h-screen w-full bg-[#0a0a0a] flex scroll-smooth"
       >
         {teams.map((team, index) => (
           <TeamColumn key={team.id} team={team} index={index} />
@@ -343,7 +347,14 @@ function TeamColumn({ team, index }: { team: Team; index: number }) {
             `}
             style={{ objectPosition: "top center" }}
           />
-          <div className={`absolute inset-0 bg-gradient-to-b ${isWhite ? 'from-white/80 via-white/90 to-white' : 'from-black/20 via-black/60 to-black/90'}`}></div>
+          <div 
+            className="absolute inset-0"
+            style={{
+              background: isWhite 
+                ? 'linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.9), #ffffff)' 
+                : 'linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.9))'
+            }}
+          ></div>
       </div>
 
       {/* Team Header - Compact */}
