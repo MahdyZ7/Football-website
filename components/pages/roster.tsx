@@ -267,11 +267,41 @@ function RosterContent() {
       </div>
 
       {/* Main Content Area to Capture */}
-      <div ref={rosterRef} className="h-screen w-full bg-neutral-950 flex flex-col md:flex-row overflow-hidden">
+      <div
+        ref={rosterRef}
+        className="roster-container h-screen w-full bg-neutral-950 flex scroll-smooth"
+      >
         {teams.map((team, index) => (
           <TeamColumn key={team.id} team={team} index={index} />
         ))}
       </div>
+
+      {/* Responsive styles */}
+      <style jsx>{`
+        .roster-container {
+          /* Default: landscape mode */
+          flex-direction: row;
+          overflow-x: auto;
+          overflow-y: hidden;
+          scroll-snap-type: x mandatory;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+
+        .roster-container::-webkit-scrollbar {
+          display: none;
+        }
+
+        /* Portrait mode */
+        @media (orientation: portrait) {
+          .roster-container {
+            flex-direction: column;
+            overflow-x: hidden;
+            overflow-y: auto;
+            scroll-snap-type: y mandatory;
+          }
+        }
+      `}</style>
     </div>
   );
 }
@@ -285,15 +315,17 @@ function TeamColumn({ team, index }: { team: Team; index: number }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.2, duration: 0.8, ease: "easeOut" }}
       className={`
-        relative flex-1 flex flex-col h-full
+        team-column
+        relative flex flex-col
         ${isWhite ? "bg-white" : ""}
         group
-        border-b md:border-b-0 md:border-r border-white/10 last:border-r-0 last:border-b-0
       `}
       style={{
         backgroundColor: isWhite ? "#FFFFFF" : team.colors.primary,
         fontFamily: team.font,
         color: team.colors.text,
+        scrollSnapAlign: 'start',
+        scrollSnapStop: 'always',
       }}
     >
       {/* Background Texture & Hero Image Blend */}
@@ -400,10 +432,96 @@ function PlayerRow({ player, team, index }: { player: any; team: Team; index: nu
   );
 }
 
+// Add global styles for team columns
+const TeamColumnStyles = () => (
+  <style jsx global>{`
+    .team-column {
+      /* Default: landscape mode */
+      flex: 1;
+      min-width: 0;
+      height: 100%;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .team-column:last-child {
+      border-right: 0;
+    }
+
+    /* Landscape mode on small screens - reduce font sizes */
+    @media (orientation: landscape) and (max-height: 600px) {
+      /* Team header */
+      .team-column h2 {
+        font-size: 1.25rem !important; /* Reduced from 3xl */
+        margin-bottom: 0.5rem !important;
+      }
+
+      .team-column .pt-6 {
+        padding-top: 0.75rem !important;
+      }
+
+      .team-column .mb-4 {
+        margin-bottom: 0.5rem !important;
+      }
+
+      /* Player rows - make more compact */
+      .team-column .group\\/row {
+        padding-top: 0.25rem !important;
+        padding-bottom: 0.25rem !important;
+        gap: 0.5rem !important;
+      }
+
+      /* Player number */
+      .team-column .group\\/row > div:first-of-type {
+        font-size: 0.875rem !important; /* Smaller number */
+        width: 1.5rem !important;
+      }
+
+      /* Player name */
+      .team-column .group\\/row .text-lg {
+        font-size: 0.875rem !important; /* sm */
+      }
+
+      /* Player position */
+      .team-column .group\\/row .text-\\[10px\\] {
+        font-size: 0.625rem !important; /* Even smaller */
+      }
+
+      /* Reduce padding in player list container */
+      .team-column .px-4 {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+      }
+
+      .team-column .pb-8 {
+        padding-bottom: 1rem !important;
+      }
+    }
+
+    /* Portrait mode */
+    @media (orientation: portrait) {
+      .team-column {
+        min-height: 100vh;
+        width: 100%;
+        flex-shrink: 0;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .team-column:last-child {
+        border-bottom: 0;
+      }
+    }
+  `}</style>
+);
+
 export default function Roster() {
   return (
-    <Suspense fallback={<div className="h-screen w-full bg-neutral-950 flex items-center justify-center text-white">Loading...</div>}>
-      <RosterContent />
-    </Suspense>
+    <>
+      <TeamColumnStyles />
+      <Suspense fallback={<div className="h-screen w-full bg-neutral-950 flex items-center justify-center text-white">Loading...</div>}>
+        <RosterContent />
+      </Suspense>
+    </>
   );
 }
