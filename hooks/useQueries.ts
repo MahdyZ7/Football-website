@@ -80,6 +80,51 @@ const api = {
       return data;
     },
   },
+  feedback: {
+    getAll: async (type?: string) => {
+      const url = type ? `/api/feedback?type=${type}` : '/api/feedback';
+      const { data } = await axios.get(url);
+      return data;
+    },
+    submit: async (feedbackData: { type: string; title: string; description: string }) => {
+      const { data } = await axios.post('/api/feedback', feedbackData);
+      return data;
+    },
+    vote: async (voteData: { feedbackId: number; voteType: string }) => {
+      const { data } = await axios.post('/api/feedback/vote', voteData);
+      return data;
+    },
+    removeVote: async (feedbackId: number) => {
+      const { data } = await axios.delete(`/api/feedback/vote?feedbackId=${feedbackId}`);
+      return data;
+    },
+    getUserVotes: async () => {
+      const { data } = await axios.get('/api/feedback/vote');
+      return data;
+    },
+    admin: {
+      getAll: async (filters?: { status?: string; type?: string }) => {
+        const params = new URLSearchParams();
+        if (filters?.status) params.append('status', filters.status);
+        if (filters?.type) params.append('type', filters.type);
+        const url = params.toString() ? `/api/admin/feedback?${params}` : '/api/admin/feedback';
+        const { data } = await axios.get(url);
+        return data;
+      },
+      approve: async (approveData: { feedbackId: number; action: string }) => {
+        const { data } = await axios.post('/api/admin/feedback/approve', approveData);
+        return data;
+      },
+      updateStatus: async (statusData: { feedbackId: number; status: string }) => {
+        const { data } = await axios.patch('/api/admin/feedback/status', statusData);
+        return data;
+      },
+      delete: async (feedbackId: number) => {
+        const { data } = await axios.delete(`/api/admin/feedback?id=${feedbackId}`);
+        return data;
+      },
+    },
+  },
 };
 
 // Query keys
@@ -92,6 +137,9 @@ export const queryKeys = {
   adminAuth: ['adminAuth'] as const,
   adminLogs: ['adminLogs'] as const,
   adminBanned: ['adminBanned'] as const,
+  feedback: ['feedback'] as const,
+  userVotes: ['userVotes'] as const,
+  adminFeedback: ['adminFeedback'] as const,
 };
 
 // Custom hooks
@@ -242,6 +290,108 @@ export const useEditName = () => {
     mutationFn: api.editName.update,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.users });
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminLogs });
+    },
+  });
+};
+
+// Feedback hooks
+export const useFeedback = (type?: string) => {
+  return useQuery({
+    queryKey: type ? [...queryKeys.feedback, type] : queryKeys.feedback,
+    queryFn: () => api.feedback.getAll(type),
+    staleTime: 1000 * 30, // 30 seconds
+  });
+};
+
+export const useUserVotes = () => {
+  return useQuery({
+    queryKey: queryKeys.userVotes,
+    queryFn: api.feedback.getUserVotes,
+    staleTime: 1000 * 60, // 1 minute
+  });
+};
+
+export const useAdminFeedback = (filters?: { status?: string; type?: string }) => {
+  return useQuery({
+    queryKey: filters ? [...queryKeys.adminFeedback, filters] : queryKeys.adminFeedback,
+    queryFn: () => api.feedback.admin.getAll(filters),
+    staleTime: 1000 * 30, // 30 seconds
+  });
+};
+
+export const useSubmitFeedback = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: api.feedback.submit,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.feedback });
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminFeedback });
+    },
+  });
+};
+
+export const useVoteFeedback = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: api.feedback.vote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.feedback });
+      queryClient.invalidateQueries({ queryKey: queryKeys.userVotes });
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminFeedback });
+    },
+  });
+};
+
+export const useRemoveVote = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: api.feedback.removeVote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.feedback });
+      queryClient.invalidateQueries({ queryKey: queryKeys.userVotes });
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminFeedback });
+    },
+  });
+};
+
+export const useApproveFeedback = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: api.feedback.admin.approve,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.feedback });
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminFeedback });
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminLogs });
+    },
+  });
+};
+
+export const useUpdateFeedbackStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: api.feedback.admin.updateStatus,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.feedback });
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminFeedback });
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminLogs });
+    },
+  });
+};
+
+export const useDeleteFeedback = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: api.feedback.admin.delete,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.feedback });
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminFeedback });
       queryClient.invalidateQueries({ queryKey: queryKeys.adminLogs });
     },
   });

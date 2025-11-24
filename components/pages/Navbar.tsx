@@ -75,10 +75,18 @@ export default function Navbar() {
             <NavLink href="/admin-logs" isActive={currentRoute === "/admin-logs"}>
               Admin Logs
             </NavLink>
+            <NavLink href="/feedback" isActive={currentRoute === "/feedback"}>
+              Feedback
+            </NavLink>
             {session?.user?.isAdmin && (
-              <NavLink href="/admin" isActive={currentRoute === "/admin"}>
-                Admin
-              </NavLink>
+              <>
+                <NavLink href="/admin" isActive={currentRoute === "/admin"}>
+                  Admin
+                </NavLink>
+                <NavLink href="/admin/feedback" isActive={currentRoute === "/admin/feedback"}>
+                  Manage Feedback
+                </NavLink>
+              </>
             )}
             <NavLink href="https://maps.app.goo.gl/Xem3GbnvzNjhheD37" isActive={false} external>
               Location
@@ -193,10 +201,18 @@ export default function Navbar() {
         <NavLink href="/admin-logs" isActive={currentRoute === "/admin-logs"} onClick={closeMenu}>
           Admin Logs
         </NavLink>
+        <NavLink href="/feedback" isActive={currentRoute === "/feedback"} onClick={closeMenu}>
+          Feedback
+        </NavLink>
         {session?.user?.isAdmin && (
-          <NavLink href="/admin" isActive={currentRoute === "/admin"} onClick={closeMenu}>
-            Admin
-          </NavLink>
+          <>
+            <NavLink href="/admin" isActive={currentRoute === "/admin"} onClick={closeMenu}>
+              Admin
+            </NavLink>
+            <NavLink href="/admin/feedback" isActive={currentRoute === "/admin/feedback"} onClick={closeMenu}>
+              Manage Feedback
+            </NavLink>
+          </>
         )}
         <NavLink href="https://maps.app.goo.gl/Xem3GbnvzNjhheD37" isActive={false} external onClick={closeMenu}>
           Location

@@ -12,6 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run db:setup` - Automated database setup (creates all required tables)
 - `npm run db:migrate` - Manual database migration
 - `npm run db:migrate:auth` - Run authentication system migration
+- `npm run db:migrate:feedback` - Run feedback system migration
 - `npm run db:backup` - Create database backup
 - `npm run db:restore <backup-file>` - Restore from backup
 - `npm run db:status` - Check database status
@@ -29,6 +30,8 @@ This is a Next.js 15 football club registration website using **App Router** arc
 - `app/teams/page.tsx` - Team selection interface with drag-and-drop functionality
 - `app/admin-logs/page.tsx` - Admin action logging interface
 - `app/banned-players/page.tsx` - View and manage banned users
+- `app/feedback/page.tsx` - Public feedback submission and voting interface
+- `app/admin/feedback/page.tsx` - Admin feedback management and approval
 
 ### API Routes (App Router)
 All API routes use Next.js 13+ App Router format with NextRequest/NextResponse:
@@ -39,12 +42,17 @@ All API routes use Next.js 13+ App Router format with NextRequest/NextResponse:
 - `app/api/moneyDb/route.ts` - Financial tracking data
 - `app/api/banned-users/route.ts` - Public banned users list
 - `app/api/admin-logs/route.ts` - Admin action logs
+- `app/api/feedback/route.ts` - Public feedback submission and retrieval (approved only)
+- `app/api/feedback/vote/route.ts` - Vote on feedback submissions (upvote/downvote)
 - `app/api/admin/` - Protected admin endpoints:
   - `auth/route.ts` - Admin authentication via Replit
   - `ban/route.ts` - Ban/unban users with logging
   - `banned/route.ts` - Admin-only banned users management
   - `users/route.ts` - Admin delete users
   - `users/verify/route.ts` - Toggle user verification status
+  - `feedback/route.ts` - Admin feedback management (all submissions with user details)
+  - `feedback/approve/route.ts` - Approve/reject feedback submissions
+  - `feedback/status/route.ts` - Update feedback status (in_progress, completed)
 
 ### React Query Data Management
 - **Provider Setup**: `providers/QueryProvider.tsx` with optimized caching and retry logic
@@ -64,6 +72,9 @@ Located in `hooks/useQueries.ts`:
 - `useAdminAuth()` - Admin authentication (no retry on failure)
 - `useAdminLogs()` - Admin action logs with 30s cache
 - `useAdminBanned()` - Admin banned users management
+- `useFeedback(type?)` - Public approved feedback with optional type filter
+- `useUserVotes()` - Current user's votes on feedback
+- `useAdminFeedback(filters?)` - Admin view of all feedback with filters
 
 ### Mutation Hooks
 All mutations automatically invalidate related queries:
@@ -72,6 +83,12 @@ All mutations automatically invalidate related queries:
 - `useUnbanUser()` - Unban user with logging
 - `useAdminDeleteUser()` - Admin delete with logging
 - `useVerifyUser()` - Toggle verification status
+- `useSubmitFeedback()` - Submit new feedback (requires authentication)
+- `useVoteFeedback()` - Vote on feedback (upvote/downvote)
+- `useRemoveVote()` - Remove vote from feedback
+- `useApproveFeedback()` - Admin approve/reject feedback
+- `useUpdateFeedbackStatus()` - Admin update status (in_progress, completed)
+- `useDeleteFeedback()` - Admin delete feedback submission
 
 ### Component Architecture
 - `components/pages/` - Page components with React Query integration
@@ -274,10 +291,18 @@ PostgreSQL database with tables:
 - `sessions` - Active user sessions with expiration tracking
 - `verification_tokens` - Email verification tokens
 
+**Feedback System Tables:**
+- `feedback_submissions` - Feature requests, bug reports, and user feedback (type, title, description, status, is_approved, user_id, approved_by_user_id, timestamps)
+- `feedback_votes` - User votes on approved feedback (feedback_id, user_id, vote_type)
+
 **Database Relationships:**
 - `players.user_id` → `users.id` (links football registrations to authenticated accounts)
 - `banned_users.user_id` → `users.id` (links bans to user accounts)
 - `admin_logs.performed_by_user_id` → `users.id` (tracks which admin performed actions)
+- `feedback_submissions.user_id` → `users.id` (links feedback to submitters)
+- `feedback_submissions.approved_by_user_id` → `users.id` (tracks which admin approved)
+- `feedback_votes.user_id` → `users.id` (tracks who voted)
+- `feedback_votes.feedback_id` → `feedback_submissions.id` (links votes to feedback)
 
 ### Key Features
 - **Time-based Registration**: Only allowed Sunday/Wednesday 12 PM - 8 PM next day
@@ -289,6 +314,42 @@ PostgreSQL database with tables:
 - **Toast Notifications**: Consistent user feedback across all operations
 - **PDF Export**: Generate team sheets and player lists
 - **Responsive Design**: Mobile-first approach with light/dark themes
+- **Feedback System**: User feedback submission with admin approval workflow and voting
+
+### Feedback System
+
+The feedback system allows authenticated users to submit feature requests, bug reports, and general feedback. All submissions require admin approval before becoming publicly visible, and approved submissions can be voted on by other users.
+
+**Key Features:**
+- **Three Submission Types**: Feature requests, bug reports, and general feedback
+- **Admin Approval Workflow**: All submissions start in "pending" status and require admin approval
+- **Privacy Controls**: Submitter name and email are only visible to admins
+- **Voting System**: Users can upvote or downvote approved submissions (one vote per user)
+- **Status Tracking**: Admins can mark submissions as pending, approved, rejected, in_progress, or completed
+- **Vote Scoring**: Submissions are ranked by vote score (upvotes - downvotes)
+
+**User Workflow:**
+1. Navigate to `/feedback` page
+2. Click "Submit Feedback" (requires authentication)
+3. Select type (feature/bug/feedback), enter title and description
+4. Submit for admin review
+5. Vote on approved submissions (upvote/downvote)
+6. View submissions filtered by type
+
+**Admin Workflow:**
+1. Navigate to `/admin/feedback` page (admin only)
+2. Review pending submissions with full user details
+3. Approve or reject submissions
+4. Update status for approved items (in_progress, completed)
+5. Delete inappropriate submissions
+6. All actions are logged to `admin_logs` table
+
+**Database Migration:**
+```bash
+npm run db:migrate:feedback
+```
+
+This creates the `feedback_submissions` and `feedback_votes` tables with proper foreign key relationships to the `users` table.
 
 ### Authentication & Authorization
 - **NextAuth.js Integration**: Full OAuth2 authentication system supporting 42 Intra provider

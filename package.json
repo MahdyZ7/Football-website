@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "db:migrate": "node scripts/database-migration.js migrate",
     "db:migrate:auth": "tsx scripts/migrate_auth.ts",
+    "db:migrate:feedback": "tsx scripts/migrate_feedback.ts",
     "db:backup": "node scripts/database-migration.js backup",
     "db:restore": "node scripts/database-migration.js restore",
     "db:status": "node scripts/database-migration.js status",
