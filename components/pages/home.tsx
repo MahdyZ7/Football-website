@@ -6,7 +6,7 @@ import Navbar from "./Navbar";
 import Footer from "./footer";
 import { GuaranteedSpot, Toast } from "../../types/user";
 import { getNextRegistration } from "../../lib/utils/allowed_times";
-import { useUsers, useAllowedStatus, useRegisterUser } from "../../hooks/useQueries";
+import { useUsers, useAllowedStatus, useRegisterUser, useEditName } from "../../hooks/useQueries";
 
 
 const Home: React.FC = () => {
@@ -20,6 +20,9 @@ const Home: React.FC = () => {
   const [intraError, setIntraError] = useState("");
   const [showRemoveDialog, setShowRemoveDialog] = useState(false);
   const [removeReason, setRemoveReason] = useState("");
+  const [showEditNameDialog, setShowEditNameDialog] = useState(false);
+  const [editNameValue, setEditNameValue] = useState("");
+  const [editNameIntra, setEditNameIntra] = useState("");
 
   // Refs for form navigation
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -30,6 +33,7 @@ const Home: React.FC = () => {
   const { data: registeredUsers = [], isLoading: loading, error: usersError } = useUsers();
   const { data: allowedData } = useAllowedStatus();
   const registerUserMutation = useRegisterUser();
+  const editNameMutation = useEditName();
   const { data: session } = useSession();
 
   const isSubmissionAllowed = allowedData?.isAllowed ?? false;
@@ -197,6 +201,34 @@ const Home: React.FC = () => {
 
     // Always show TIG dialog for both admin and self-removal
     setShowRemoveDialog(true);
+  };
+
+  const initiateEditName = (intra: string, currentName: string) => {
+    setEditNameIntra(intra);
+    setEditNameValue(currentName);
+    setShowEditNameDialog(true);
+  };
+
+  const handleEditName = async () => {
+    if (!editNameValue.trim()) {
+      showToast("Name cannot be empty", 'error');
+      return;
+    }
+
+    try {
+      await editNameMutation.mutateAsync({
+        intra: editNameIntra,
+        newName: editNameValue
+      });
+
+      showToast('Name updated successfully!', 'success');
+      setShowEditNameDialog(false);
+      setEditNameValue("");
+      setEditNameIntra("");
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || "Failed to update name";
+      showToast(errorMessage, 'error');
+    }
   };
 
   const handleSubmit = async (event: FormEvent) => {
@@ -516,6 +548,14 @@ const Home: React.FC = () => {
                 const isAdmin = session?.user?.isAdmin;
                 const canRemove = isOwnRegistration || isAdmin;
 
+                // Check if within 15-minute grace period for name editing (own registration only)
+                const registrationTime = user.created_at ? new Date(user.created_at) : null;
+                const now = new Date();
+                const minutesSinceRegistration = registrationTime
+                  ? (now.getTime() - registrationTime.getTime()) / (1000 * 60)
+                  : Infinity;
+                const withinGracePeriod = isOwnRegistration && !user.verified && minutesSinceRegistration <= 15;
+
                 return (
                   <div
                     key={user.intra}
@@ -545,6 +585,17 @@ const Home: React.FC = () => {
                           <span className="text-red-600 text-sm font-medium">Invalid Intra</span>
                         )}
                       </div>
+                      {withinGracePeriod && (
+                        <button
+                          onClick={() => initiateEditName(user.intra, user.name)}
+                          className="w-8 h-8 flex items-center justify-center rounded-full
+                                     bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200
+                                     hover:scale-110 active:scale-95"
+                          title="Edit name (within 15-minute grace period)"
+                        >
+                          ✏️
+                        </button>
+                      )}
                       {canRemove && (
                         <button
                           onClick={() => initiateRemoval(user.intra)}
@@ -854,6 +905,74 @@ const Home: React.FC = () => {
           </div>
         );
       })()}
+
+      {/* Edit Name Dialog */}
+      {showEditNameDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-[1000] flex items-center justify-center p-4">
+          <div className="rounded-lg shadow-2xl p-8 max-w-md w-full" style={{ backgroundColor: 'var(--bg-card)' }}>
+            <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
+              Edit Name
+            </h2>
+            <p className="mb-6 text-sm" style={{ color: 'var(--text-secondary)' }}>
+              You can edit your name within 15 minutes of registration. This option is only available for unverified accounts.
+            </p>
+
+            <div className="mb-6">
+              <label htmlFor="editName" className="block mb-2 font-medium" style={{ color: 'var(--text-primary)' }}>
+                New Name:
+              </label>
+              <input
+                id="editName"
+                type="text"
+                value={editNameValue}
+                onChange={(e) => setEditNameValue(e.target.value)}
+                className="w-full px-4 py-3 rounded border transition-all duration-200
+                           focus:ring-2 focus:ring-ft-primary focus:outline-none"
+                style={{
+                  backgroundColor: 'var(--input-bg)',
+                  borderColor: 'var(--border-color)',
+                  color: 'var(--text-primary)'
+                }}
+                placeholder="Enter new name"
+                autoFocus
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowEditNameDialog(false);
+                  setEditNameValue("");
+                  setEditNameIntra("");
+                }}
+                className="flex-1 px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white
+                           font-medium rounded-lg transition-all duration-200"
+                disabled={editNameMutation.isPending}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleEditName}
+                className="flex-1 px-6 py-3 bg-ft-primary hover:bg-ft-secondary text-white
+                           font-medium rounded-lg transition-all duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                disabled={editNameMutation.isPending || !editNameValue.trim()}
+              >
+                {editNameMutation.isPending ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Updating...
+                  </span>
+                ) : (
+                  'Update Name'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

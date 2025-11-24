@@ -74,6 +74,12 @@ const api = {
       return data;
     },
   },
+  editName: {
+    update: async (editData: { intra: string; newName: string }) => {
+      const { data } = await axios.patch('/api/edit-name', editData);
+      return data;
+    },
+  },
 };
 
 // Query keys
@@ -222,6 +228,18 @@ export const useVerifyUser = () => {
 
   return useMutation({
     mutationFn: api.admin.verifyUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.users });
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminLogs });
+    },
+  });
+};
+
+export const useEditName = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: api.editName.update,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.users });
       queryClient.invalidateQueries({ queryKey: queryKeys.adminLogs });
