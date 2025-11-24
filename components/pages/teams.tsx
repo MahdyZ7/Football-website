@@ -33,16 +33,60 @@ const TeamsImproved: React.FC = () => {
   const [team3, setTeam3] = useState<Team>({ name: "Team 3", players: [] });
 
   const { data: registeredUsers = [], isLoading: loading, error: usersError } = useUsers();
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Load saved state from sessionStorage on mount
+  useEffect(() => {
+    const savedState = sessionStorage.getItem('teamSelectionState');
+    if (savedState) {
+      try {
+        const { team1: savedTeam1, team2: savedTeam2, team3: savedTeam3, availablePlayers: savedAvailable, discardedPlayers: savedDiscarded, teamMode: savedMode } = JSON.parse(savedState);
+        setTeam1(savedTeam1);
+        setTeam2(savedTeam2);
+        setTeam3(savedTeam3);
+        setAvailablePlayers(savedAvailable);
+        setDiscardedPlayers(savedDiscarded);
+        setTeamMode(savedMode);
+        setIsInitialized(true);
+      } catch (error) {
+        console.error("Failed to restore team state:", error);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (registeredUsers.length > 0) {
-      const eligiblePlayers = registeredUsers.slice(0, GuaranteedSpot).map(user => ({ ...user, rating: 1 }));
-      const waitingPlayers = registeredUsers.slice(GuaranteedSpot);
+      // Only initialize if no saved state exists
+      const savedState = sessionStorage.getItem('teamSelectionState');
+      if (!savedState) {
+        const eligiblePlayers = registeredUsers.slice(0, GuaranteedSpot).map(user => ({ ...user, rating: 1 }));
+        const waitingPlayers = registeredUsers.slice(GuaranteedSpot);
 
-      setAvailablePlayers(eligiblePlayers);
-      setWaitingListPlayers(waitingPlayers);
+        setAvailablePlayers(eligiblePlayers);
+        setWaitingListPlayers(waitingPlayers);
+        setIsInitialized(true);
+      } else {
+        // Update waiting list even with saved state
+        const waitingPlayers = registeredUsers.slice(GuaranteedSpot);
+        setWaitingListPlayers(waitingPlayers);
+      }
     }
   }, [registeredUsers]);
+
+  // Save state to sessionStorage whenever teams change (only after initialization)
+  useEffect(() => {
+    if (!isInitialized) return; // Don't save until data is loaded
+
+    const stateToSave = {
+      team1,
+      team2,
+      team3,
+      availablePlayers,
+      discardedPlayers,
+      teamMode
+    };
+    sessionStorage.setItem('teamSelectionState', JSON.stringify(stateToSave));
+  }, [team1, team2, team3, availablePlayers, discardedPlayers, teamMode, isInitialized]);
 
   const updatePlayerRating = (playerId: string, rating: number) => {
     const updateInList = (players: User[]) =>
@@ -183,6 +227,9 @@ const TeamsImproved: React.FC = () => {
     setTeam2({ name: "Team 2", players: [] });
     setTeam3({ name: "Team 3", players: [] });
     setDiscardedPlayers([]);
+
+    // Clear saved state
+    sessionStorage.removeItem('teamSelectionState');
   };
 
   const updateTeamName = (teamNumber: 1 | 2 | 3, newName: string) => {
