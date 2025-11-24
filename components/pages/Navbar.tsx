@@ -149,7 +149,7 @@ export default function Navbar() {
   const isAdminRouteActive = currentRoute === "/admin" || currentRoute === "/admin/feedback";
 
   // Check if any info route is active
-  const isInfoRouteActive = currentRoute === "/banned-players" || currentRoute === "/feedback" || currentRoute === "/admin-logs";
+  const isInfoRouteActive = currentRoute === "/banned-players" || currentRoute === "/feedback" || currentRoute === "/admin-logs" || currentRoute === "/rules";
 
   return (
     <div className="relative">
@@ -167,6 +167,9 @@ export default function Navbar() {
 
             {/* Info Dropdown */}
             <Dropdown label="Info" isActive={isInfoRouteActive}>
+              <DropdownLink href="/rules" isActive={currentRoute === "/rules"}>
+                Game Rules
+              </DropdownLink>
               <DropdownLink href="/banned-players" isActive={currentRoute === "/banned-players"}>
                 Banned Players
               </DropdownLink>
@@ -305,6 +308,9 @@ export default function Navbar() {
         <div className="text-xs font-semibold mt-2 mb-1 px-4" style={{ color: 'var(--text-secondary)' }}>
           INFO
         </div>
+        <NavLink href="/rules" isActive={currentRoute === "/rules"} onClick={closeMenu}>
+          Game Rules
+        </NavLink>
         <NavLink href="/banned-players" isActive={currentRoute === "/banned-players"} onClick={closeMenu}>
           Banned Players
         </NavLink>
