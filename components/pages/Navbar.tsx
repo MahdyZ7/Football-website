@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import ThemeToggle from "../ThemeToggle";
-import { Menu, X, LogOut, User } from "lucide-react";
+import { Menu, X, LogOut, User, ChevronDown } from "lucide-react";
 
 interface NavLinkProps {
   href: string;
@@ -44,6 +44,95 @@ const NavLink: React.FC<NavLinkProps> = ({ href, isActive, children, external = 
   );
 };
 
+interface DropdownProps {
+  label: string;
+  isActive: boolean;
+  children: React.ReactNode;
+}
+
+const Dropdown: React.FC<DropdownProps> = ({ label, isActive, children }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`px-4 py-3 rounded-xl transition-all duration-200 font-medium text-center flex items-center gap-1 ${
+          isActive ? 'bg-ft-primary text-white' : 'hover:bg-ft-secondary'
+        }`}
+        style={!isActive ? { color: 'var(--text-primary)' } : undefined}
+      >
+        {label}
+        <ChevronDown size={16} className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div
+          className="absolute top-full left-0 mt-1 rounded-lg shadow-lg py-2 min-w-[180px] z-50"
+          style={{ backgroundColor: 'var(--nav-bg)' }}
+        >
+          {children}
+        </div>
+      )}
+    </div>
+  );
+};
+
+interface DropdownLinkProps {
+  href: string;
+  isActive: boolean;
+  children: React.ReactNode;
+  external?: boolean;
+  onClick?: () => void;
+}
+
+const DropdownLink: React.FC<DropdownLinkProps> = ({ href, isActive, children, external = false, onClick }) => {
+  const baseClasses = "block px-4 py-2 transition-all duration-200 font-medium";
+  const activeClasses = isActive
+    ? "bg-ft-primary text-white"
+    : "hover:bg-gray-100 dark:hover:bg-gray-700";
+
+  const combinedClasses = `${baseClasses} ${activeClasses}`;
+
+  if (external) {
+    return (
+      <Link
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={combinedClasses}
+        onClick={onClick}
+        style={!isActive ? { color: 'var(--text-primary)' } : undefined}
+      >
+        {children}
+      </Link>
+    );
+  }
+
+  return (
+    <Link
+      href={href}
+      className={combinedClasses}
+      onClick={onClick}
+      style={!isActive ? { color: 'var(--text-primary)' } : undefined}
+    >
+      {children}
+    </Link>
+  );
+};
+
 export default function Navbar() {
   const currentRoute = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -56,44 +145,60 @@ export default function Navbar() {
     await signOut({ callbackUrl: '/' });
   };
 
+  // Check if any admin route is active
+  const isAdminRouteActive = currentRoute === "/admin" || currentRoute === "/admin/feedback";
+
+  // Check if any info route is active
+  const isInfoRouteActive = currentRoute === "/banned-players" || currentRoute === "/feedback" || currentRoute === "/admin-logs";
+
   return (
     <div className="relative">
       {/* Desktop Navigation - Fixed Header */}
       <div className="fixed top-0 left-0 right-0 z-50 py-3 px-4 md:px-8 shadow-md"
            style={{ backgroundColor: 'var(--nav-bg)' }}>
         <div className="flex justify-between items-center max-w-7xl mx-auto">
-          <nav className="hidden md:flex gap-2">
+          <nav className="hidden md:flex gap-2 items-center">
             <NavLink href="/" isActive={currentRoute === "/"}>
               Home
-            </NavLink>
-            <NavLink href="/banned-players" isActive={currentRoute === "/banned-players"}>
-              Banned Players
             </NavLink>
             <NavLink href="/teams" isActive={currentRoute === "/teams"}>
               Teams
             </NavLink>
-            <NavLink href="/admin-logs" isActive={currentRoute === "/admin-logs"}>
-              Admin Logs
-            </NavLink>
-            <NavLink href="/feedback" isActive={currentRoute === "/feedback"}>
-              Feedback
-            </NavLink>
+
+            {/* Info Dropdown */}
+            <Dropdown label="Info" isActive={isInfoRouteActive}>
+              <DropdownLink href="/banned-players" isActive={currentRoute === "/banned-players"}>
+                Banned Players
+              </DropdownLink>
+              <DropdownLink href="/feedback" isActive={currentRoute === "/feedback"}>
+                Feedback
+              </DropdownLink>
+              <DropdownLink href="/admin-logs" isActive={currentRoute === "/admin-logs"}>
+                Admin Logs
+              </DropdownLink>
+            </Dropdown>
+
+            {/* Location Dropdown */}
+            <Dropdown label="Location" isActive={false}>
+              <DropdownLink href="https://maps.app.goo.gl/Xem3GbnvzNjhheD37" isActive={false} external>
+                View Map
+              </DropdownLink>
+              <DropdownLink href="https://maps.app.goo.gl/iEZR2Fia2xf4cdQ87" isActive={false} external>
+                Get Directions
+              </DropdownLink>
+            </Dropdown>
+
+            {/* Admin Dropdown */}
             {session?.user?.isAdmin && (
-              <>
-                <NavLink href="/admin" isActive={currentRoute === "/admin"}>
-                  Admin
-                </NavLink>
-                <NavLink href="/admin/feedback" isActive={currentRoute === "/admin/feedback"}>
+              <Dropdown label="Admin" isActive={isAdminRouteActive}>
+                <DropdownLink href="/admin" isActive={currentRoute === "/admin"}>
+                  User Management
+                </DropdownLink>
+                <DropdownLink href="/admin/feedback" isActive={currentRoute === "/admin/feedback"}>
                   Manage Feedback
-                </NavLink>
-              </>
+                </DropdownLink>
+              </Dropdown>
             )}
-            <NavLink href="https://maps.app.goo.gl/Xem3GbnvzNjhheD37" isActive={false} external>
-              Location
-            </NavLink>
-            <NavLink href="https://maps.app.goo.gl/iEZR2Fia2xf4cdQ87" isActive={false} external>
-              Directions
-            </NavLink>
           </nav>
 
           {/* User Session Display - Desktop */}
@@ -192,34 +297,49 @@ export default function Navbar() {
         <NavLink href="/" isActive={currentRoute === "/"} onClick={closeMenu}>
           Home
         </NavLink>
-        <NavLink href="/banned-players" isActive={currentRoute === "/banned-players"} onClick={closeMenu}>
-          Banned Players
-        </NavLink>
         <NavLink href="/teams" isActive={currentRoute === "/teams"} onClick={closeMenu}>
           Teams
         </NavLink>
-        <NavLink href="/admin-logs" isActive={currentRoute === "/admin-logs"} onClick={closeMenu}>
-          Admin Logs
+
+        {/* Info Section */}
+        <div className="text-xs font-semibold mt-2 mb-1 px-4" style={{ color: 'var(--text-secondary)' }}>
+          INFO
+        </div>
+        <NavLink href="/banned-players" isActive={currentRoute === "/banned-players"} onClick={closeMenu}>
+          Banned Players
         </NavLink>
         <NavLink href="/feedback" isActive={currentRoute === "/feedback"} onClick={closeMenu}>
           Feedback
         </NavLink>
+        <NavLink href="/admin-logs" isActive={currentRoute === "/admin-logs"} onClick={closeMenu}>
+          Admin Logs
+        </NavLink>
+
+        {/* Location Section */}
+        <div className="text-xs font-semibold mt-2 mb-1 px-4" style={{ color: 'var(--text-secondary)' }}>
+          LOCATION
+        </div>
+        <NavLink href="https://maps.app.goo.gl/Xem3GbnvzNjhheD37" isActive={false} external onClick={closeMenu}>
+          View Map
+        </NavLink>
+        <NavLink href="https://maps.app.goo.gl/iEZR2Fia2xf4cdQ87" isActive={false} external onClick={closeMenu}>
+          Get Directions
+        </NavLink>
+
+        {/* Admin Section */}
         {session?.user?.isAdmin && (
           <>
+            <div className="text-xs font-semibold mt-2 mb-1 px-4" style={{ color: 'var(--text-secondary)' }}>
+              ADMIN
+            </div>
             <NavLink href="/admin" isActive={currentRoute === "/admin"} onClick={closeMenu}>
-              Admin
+              User Management
             </NavLink>
             <NavLink href="/admin/feedback" isActive={currentRoute === "/admin/feedback"} onClick={closeMenu}>
               Manage Feedback
             </NavLink>
           </>
         )}
-        <NavLink href="https://maps.app.goo.gl/Xem3GbnvzNjhheD37" isActive={false} external onClick={closeMenu}>
-          Location
-        </NavLink>
-        <NavLink href="https://maps.app.goo.gl/iEZR2Fia2xf4cdQ87" isActive={false} external onClick={closeMenu}>
-          Directions
-        </NavLink>
 
         {/* Sign In/Out - Mobile */}
         <div className="mt-auto pt-4 border-t" style={{ borderColor: 'var(--border-color)' }}>
