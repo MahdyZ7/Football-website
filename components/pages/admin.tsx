@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Navbar from './Navbar';
 import Footer from './footer';
-import LoadingSpinner from '../LoadingSpinner';
+import { Skeleton, TableRowSkeleton } from '../Skeleton';
 import ConfirmDialog from '../ConfirmDialog';
 import { TIG_BAN_DURATIONS } from '../../lib/utils/TIG_list';
 
@@ -173,7 +173,11 @@ const Admin: React.FC = () => {
         <main className="flex-1 pt-24 pb-8 px-4 md:px-8">
           <div className="max-w-6xl mx-auto">
             <div className="rounded-lg shadow-md p-8" style={{ backgroundColor: 'var(--bg-card)' }}>
-              <LoadingSpinner message="Checking authentication..." />
+              <div className="space-y-4">
+                <Skeleton width="60%" height={32} />
+                <Skeleton width="100%" height={48} />
+                <Skeleton width="80%" height={24} />
+              </div>
             </div>
           </div>
         </main>
@@ -288,8 +292,23 @@ const Admin: React.FC = () => {
 
               {/* Show loading/error states */}
               {usersLoading && (
-                <div className="rounded-lg shadow-md p-8 mb-8" style={{ backgroundColor: 'var(--bg-card)' }}>
-                  <LoadingSpinner message="Loading users..." />
+                <div className="rounded-lg shadow-md overflow-hidden mb-8" style={{ backgroundColor: 'var(--bg-card)' }}>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                        <tr>
+                          <th className="px-4 py-3 text-left"><Skeleton width="60%" height={20} /></th>
+                          <th className="px-4 py-3 text-left"><Skeleton width="60%" height={20} /></th>
+                          <th className="px-4 py-3 text-left"><Skeleton width="60%" height={20} /></th>
+                          <th className="px-4 py-3 text-left"><Skeleton width="60%" height={20} /></th>
+                          <th className="px-4 py-3 text-left"><Skeleton width="60%" height={20} /></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <TableRowSkeleton columns={5} rows={8} />
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
               {usersError && (
@@ -506,8 +525,25 @@ const Admin: React.FC = () => {
 
               {/* Show loading/error states */}
               {bannedLoading && (
-                <div className="rounded-lg shadow-md p-8 mb-8" style={{ backgroundColor: 'var(--bg-card)' }}>
-                  <LoadingSpinner message="Loading banned users..." />
+                <div className="rounded-lg shadow-md overflow-hidden mb-8" style={{ backgroundColor: 'var(--bg-card)' }}>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                        <tr>
+                          <th className="px-4 py-3 text-left"><Skeleton width="60%" height={20} /></th>
+                          <th className="px-4 py-3 text-left"><Skeleton width="60%" height={20} /></th>
+                          <th className="px-4 py-3 text-left"><Skeleton width="60%" height={20} /></th>
+                          <th className="px-4 py-3 text-left"><Skeleton width="60%" height={20} /></th>
+                          <th className="px-4 py-3 text-left"><Skeleton width="60%" height={20} /></th>
+                          <th className="px-4 py-3 text-left"><Skeleton width="60%" height={20} /></th>
+                          <th className="px-4 py-3 text-left"><Skeleton width="60%" height={20} /></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <TableRowSkeleton columns={7} rows={5} />
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
               {bannedError && (

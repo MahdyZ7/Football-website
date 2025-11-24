@@ -7,6 +7,7 @@ import Footer from "./footer";
 import { GuaranteedSpot, Toast } from "../../types/user";
 import { getNextRegistration } from "../../lib/utils/allowed_times";
 import { useUsers, useAllowedStatus, useRegisterUser, useEditName } from "../../hooks/useQueries";
+import { PlayerListSkeleton } from "../Skeleton";
 
 
 const Home: React.FC = () => {
@@ -528,20 +529,19 @@ const Home: React.FC = () => {
                 />
               </div>
 			</div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {loading ? (
-              <div className="col-span-full text-center py-8" style={{ color: 'var(--text-secondary)' }}>
-                Loading players...
-              </div>
-            ) : usersError ? (
-              <div className="col-span-full text-center py-8 text-red-600 font-medium">
-                Error loading players. Please refresh the page.
-              </div>
-            ) : registeredUsers.length === 0 ? (
-              <div className="col-span-full text-center py-12 text-red-600 font-bold text-xl">
-                Dare to be First
-              </div>
-            ) : (
+          {loading ? (
+            <PlayerListSkeleton count={21} />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {usersError ? (
+                <div className="col-span-full text-center py-8 text-red-600 font-medium">
+                  Error loading players. Please refresh the page.
+                </div>
+              ) : registeredUsers.length === 0 ? (
+                <div className="col-span-full text-center py-12 text-red-600 font-bold text-xl">
+                  Dare to be First
+                </div>
+              ) : (
               registeredUsers.map((user, index) => {
                 // User can remove their own registration OR admin can remove anyone
                 const isOwnRegistration = session && user.user_id && user.user_id === session.user.id;
@@ -613,8 +613,9 @@ const Home: React.FC = () => {
                   </div>
                 );
               })
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Banned Players Card */}

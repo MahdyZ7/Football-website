@@ -92,7 +92,7 @@ All mutations automatically invalidate related queries:
 
 ### Component Architecture
 - `components/pages/` - Page components with React Query integration
-- `components/` - Reusable components (ErrorBoundary, LoadingSpinner, TeamExporter, ThemeToggle)
+- `components/` - Reusable components (ErrorBoundary, Skeleton, TeamExporter, ThemeToggle)
 - `contexts/ThemeContext.tsx` - Light/dark theme management (client-side)
 - `providers/QueryProvider.tsx` - React Query configuration and DevTools
 
@@ -223,16 +223,31 @@ style={{ backgroundColor: 'var(--bg-card)' }}
 />
 ```
 
-**Loading States**:
+**Loading States with Skeleton Screens**:
 ```tsx
-import LoadingSpinner from '../LoadingSpinner';
+import { Skeleton, TableRowSkeleton, FeedbackCardSkeleton, TeamCardSkeleton, PlayerListSkeleton } from '../Skeleton';
 
-// Use this instead of custom loading text
+// Use skeleton screens for table loading
 {isLoading && (
-  <div className="rounded-lg shadow-md p-8" style={{ backgroundColor: 'var(--bg-card)' }}>
-    <LoadingSpinner message="Loading data..." />
+  <div className="rounded-lg shadow-md overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
+    <table className="w-full">
+      <thead style={{ backgroundColor: 'var(--bg-secondary)' }}>
+        <tr>
+          <th className="px-4 py-3"><Skeleton width="60%" height={20} /></th>
+          <th className="px-4 py-3"><Skeleton width="60%" height={20} /></th>
+        </tr>
+      </thead>
+      <tbody>
+        <TableRowSkeleton columns={5} rows={8} />
+      </tbody>
+    </table>
   </div>
 )}
+
+// Use specialized skeletons for different content types
+{isLoading && <FeedbackCardSkeleton count={4} />}
+{isLoading && <TeamCardSkeleton count={3} />}
+{isLoading && <PlayerListSkeleton count={21} />}
 ```
 
 **Mobile Navigation**:
@@ -262,7 +277,7 @@ import LoadingSpinner from '../LoadingSpinner';
 2. **Use Tailwind utilities** for spacing, sizing, and layout
 3. **Use inline styles with CSS variables** for theme-specific colors
 4. **Follow the button patterns** for consistency across all pages
-5. **Use LoadingSpinner component** instead of custom loading states
+5. **Use Skeleton components** for loading states instead of spinners
 6. **Keep the layout structure** (min-h-screen, flex, flex-col, pt-24)
 7. **Make all tables responsive** with overflow-x-auto wrapper
 

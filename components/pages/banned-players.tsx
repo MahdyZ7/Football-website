@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Navbar from './Navbar';
 import Footer from './footer';
 import { useBannedUsers } from '../../hooks/useQueries';
-import LoadingSpinner from '../LoadingSpinner';
+import { TableRowSkeleton } from '../Skeleton';
 
 
 const BannedPlayersPage: React.FC = () => {
@@ -50,8 +50,23 @@ const BannedPlayersPage: React.FC = () => {
           </div>
 
           {loading ? (
-            <div className="rounded-lg shadow-md p-8" style={{ backgroundColor: 'var(--bg-card)' }}>
-              <LoadingSpinner message="Loading banned players..." />
+            <div className="rounded-lg shadow-md overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                    <tr>
+                      <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>Player</th>
+                      <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>ID</th>
+                      <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>Reason</th>
+                      <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>Banned Date</th>
+                      <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>Ban Expires</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <TableRowSkeleton columns={5} rows={6} />
+                  </tbody>
+                </table>
+              </div>
             </div>
           ) : error ? (
             <div className="rounded-lg shadow-md p-8 text-center" style={{ backgroundColor: 'var(--bg-card)' }}>

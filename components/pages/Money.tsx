@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import Link from "next/link";
 import Navbar from "./Navbar";
 import Footer from "./footer";
-import LoadingSpinner from "../LoadingSpinner";
+import { TableRowSkeleton } from "../Skeleton";
 import { useMoney } from "../../hooks/useQueries";
 import { MoneyRecord } from "../../types/user";
 
@@ -40,8 +40,23 @@ const Money = () => {
 					</div>
 
 					{isLoading ? (
-						<div className="rounded-lg shadow-md p-8" style={{ backgroundColor: 'var(--bg-card)' }}>
-							<LoadingSpinner message="Loading money data..." />
+						<div className="rounded-lg shadow-md overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
+							<div className="overflow-x-auto">
+								<table className="w-full">
+									<thead className="sticky top-0" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+										<tr>
+											<th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>Date</th>
+											<th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>Name</th>
+											<th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>Intra Login</th>
+											<th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>Amount</th>
+											<th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>Status</th>
+										</tr>
+									</thead>
+									<tbody>
+										<TableRowSkeleton columns={5} rows={8} />
+									</tbody>
+								</table>
+							</div>
 						</div>
 					) : error ? (
 						<div className="rounded-lg shadow-md p-6 text-center bg-red-500 text-white">

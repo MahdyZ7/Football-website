@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import Navbar from './Navbar';
 import Footer from './footer';
-import LoadingSpinner from '../LoadingSpinner';
+import { TableRowSkeleton } from '../Skeleton';
 import { useAdminLogs } from '../../hooks/useQueries';
 import { AdminLog } from '../../types/user';
 
@@ -57,8 +57,23 @@ const AdminLogs: React.FC = () => {
           </div>
 
           {loading ? (
-            <div className="rounded-lg shadow-md p-8" style={{ backgroundColor: 'var(--bg-card)' }}>
-              <LoadingSpinner message="Loading admin logs..." />
+            <div className="rounded-lg shadow-md overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                    <tr>
+                      <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>Timestamp</th>
+                      <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>Admin</th>
+                      <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>Action</th>
+                      <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>Target User</th>
+                      <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>Details</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <TableRowSkeleton columns={5} rows={10} />
+                  </tbody>
+                </table>
+              </div>
             </div>
           ) : error ? (
             <div className="rounded-lg shadow-md p-6 text-center bg-red-500 text-white mb-8">

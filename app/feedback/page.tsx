@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useFeedback, useUserVotes, useSubmitFeedback, useVoteFeedback, useRemoveVote } from '../../hooks/useQueries';
 import { toast } from 'sonner';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import { FeedbackCardSkeleton } from '../../components/Skeleton';
 import Navbar from '../../components/pages/Navbar';
 import Footer from '../../components/pages/footer';
 import { FiThumbsUp, FiThumbsDown, FiPlus, FiX } from 'react-icons/fi';
@@ -262,9 +262,7 @@ export default function FeedbackPage() {
 
           {/* Submissions List */}
           {feedbackLoading ? (
-            <div className="rounded-lg shadow-md p-8" style={{ backgroundColor: 'var(--bg-card)' }}>
-              <LoadingSpinner message="Loading feedback..." />
-            </div>
+            <FeedbackCardSkeleton count={4} />
           ) : submissions.length === 0 ? (
             <div className="rounded-lg shadow-md p-8 text-center" style={{ backgroundColor: 'var(--bg-card)' }}>
               <p className="text-lg" style={{ color: 'var(--text-secondary)' }}>

@@ -10,7 +10,7 @@ import {
   useDeleteFeedback,
 } from '../../../hooks/useQueries';
 import { toast } from 'sonner';
-import LoadingSpinner from '../../../components/LoadingSpinner';
+import { Skeleton, FeedbackCardSkeleton } from '../../../components/Skeleton';
 import Navbar from '../../../components/pages/Navbar';
 import Footer from '../../../components/pages/footer';
 import { FiCheck, FiX, FiTrash2, FiEye } from 'react-icons/fi';
@@ -57,7 +57,11 @@ export default function AdminFeedbackPage() {
   if (sessionStatus === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)' }}>
-        <LoadingSpinner message="Loading..." />
+        <div className="max-w-md w-full space-y-4 p-8">
+          <Skeleton width="60%" height={32} className="mx-auto" />
+          <Skeleton width="100%" height={48} />
+          <Skeleton width="80%" height={24} className="mx-auto" />
+        </div>
       </div>
     );
   }
@@ -208,9 +212,7 @@ export default function AdminFeedbackPage() {
 
           {/* Submissions List */}
           {feedbackLoading ? (
-            <div className="rounded-lg shadow-md p-8" style={{ backgroundColor: 'var(--bg-card)' }}>
-              <LoadingSpinner message="Loading feedback submissions..." />
-            </div>
+            <FeedbackCardSkeleton count={5} />
           ) : submissions.length === 0 ? (
             <div className="rounded-lg shadow-md p-8 text-center" style={{ backgroundColor: 'var(--bg-card)' }}>
               <p className="text-lg" style={{ color: 'var(--text-secondary)' }}>

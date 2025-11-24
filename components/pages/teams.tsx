@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Navbar from "./Navbar";
 import Footer from "./footer";
-import LoadingSpinner from "../LoadingSpinner";
+import { TeamCardSkeleton } from "../Skeleton";
 import { GuaranteedSpot } from "../../types/user";
 import { useUsers } from "../../hooks/useQueries";
 
@@ -233,9 +233,7 @@ const TeamsImproved: React.FC = () => {
             <h1 className="text-3xl md:text-4xl font-bold text-center mb-8" style={{ color: 'var(--text-primary)' }}>
               Team Selection
             </h1>
-            <div className="rounded-lg shadow-md p-8" style={{ backgroundColor: 'var(--bg-card)' }}>
-              <LoadingSpinner message="Loading players..." />
-            </div>
+            <TeamCardSkeleton count={3} />
           </div>
         </main>
         <Footer />
