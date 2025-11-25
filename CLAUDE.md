@@ -4,11 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
+### Application Commands
 - `npm ci` - Install dependencies (preferred over npm install)
 - `npm run dev` - Start development server on port 3000
 - `npm run build` - Build for production
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
+
+### Database Commands (Production/Development)
 - `npm run db:setup` - Automated database setup (creates all required tables)
 - `npm run db:migrate` - Manual database migration
 - `npm run db:migrate:auth` - Run authentication system migration
@@ -16,8 +19,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run db:backup` - Create database backup
 - `npm run db:restore <backup-file>` - Restore from backup
 - `npm run db:status` - Check database status
+
+### Testing Commands
+- `npm test` - Run all tests (uses TEST_DATABASE_URL from .env.test)
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Run tests with coverage report
+- `npm run test:ci` - Run tests in CI mode
+- `npm run test:db:setup` - Initialize test database schema
+- `npm run test:db:seed` - Seed test database with sample data
+- `npm run test:db:teardown` - Clean up test database
+
+### Admin & Service Commands
 - `npm run admin:manage` - Interactive admin role management tool
 - `npm run service:setup` - Create service account for automated tasks (cron jobs)
+
+**IMPORTANT:** See [docs/DATABASE_SEPARATION.md](docs/DATABASE_SEPARATION.md) for critical information about test/production database separation and safety mechanisms.
 
 ## Project Architecture
 
