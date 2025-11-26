@@ -24,7 +24,8 @@
     "db:setup": "chmod +x scripts/setup-database.sh && ./scripts/setup-database.sh",
     "admin:manage": "tsx scripts/manage_admins.ts",
     "service:setup": "tsx scripts/setup_service_account.ts",
-    "db:migrate:uuid": "tsx scripts/migrate_to_uuid_ids.ts"
+    "db:migrate:uuid": "tsx scripts/migrate_to_uuid_ids.ts",
+    "test:cron": "tsx scripts/test-cron.ts"
   },
   "dependencies": {
     "@auth/pg-adapter": "^1.11.1",
