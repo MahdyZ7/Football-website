@@ -1,14 +1,11 @@
-import { useRef, useState, useEffect, Suspense } from "react";
+import { useRef, Suspense } from "react";
 import { motion } from "framer-motion";
-import { Users, Trophy, Star, Download, Share2, Copy, FileImage, FileText, Clipboard, ArrowLeft } from "lucide-react";
+import { Star, FileImage, FileText, Clipboard, ArrowLeft, Share2 } from "lucide-react";
 import redPlayer from "../../assets/soccer_player_in_red_kit.png";
 import bluePlayer from "../../assets/soccer_player_in_blue_kit.png";
 import whitePlayer from "../../assets/soccer_player_in_white_kit.png";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 import Image from "next/image";
 import { StaticImageData } from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 import {
@@ -19,8 +16,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { Button } from "../ui/button";
-import { toast } from "sonner"; // Assuming sonner is used based on file list, or I can use useToast
+import { Button } from "../ui/Button";
+import { useRosterExport } from "../../hooks/useRosterExport";
+import { useTeamsFromUrl } from "../../hooks/useTeamsFromUrl";
 
 type Team = {
   id: string;
@@ -41,7 +39,7 @@ type Team = {
 
 
 // Team Data
-var TEAMS: Team[] = [
+const TEAMS: Team[] = [
   {
     id: "red",
     name: "Merseyside",
@@ -113,107 +111,20 @@ var TEAMS: Team[] = [
   },
 ];
 
+/**
+ * RosterContent Component
+ * Single Responsibility: Orchestrate roster display and export controls
+ *
+ * Business logic extracted to custom hooks:
+ * - useTeamsFromUrl: Load and parse team data from URL
+ * - useRosterExport: Handle export functionality
+ */
 function RosterContent() {
   const rosterRef = useRef<HTMLDivElement>(null);
-  const [isExporting, setIsExporting] = useState(false);
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const [teams, setTeams] = useState<Team[]>(TEAMS);
 
-  // Load team data from URL params
-  useEffect(() => {
-    const teamsData = searchParams.get('teams');
-    if (teamsData) {
-      try {
-        const parsedTeams = JSON.parse(decodeURIComponent(teamsData));
-
-        // Map the incoming teams to the roster format
-        const updatedTeams = TEAMS.slice(0, parsedTeams.length).map((defaultTeam: Team, index: number) => {
-          const incomingTeam = parsedTeams[index];
-
-          // Create player objects with intra as position
-          const players = incomingTeam.players.map((player: any, playerIndex: number) => ({
-            number: playerIndex + 1,
-            name: player.name.toUpperCase(),
-            position: player.intra.toUpperCase()
-          }));
-
-          return {
-            ...defaultTeam,
-            players: players
-            // Keep the original team name from TEAMS, not from incoming data
-          };
-        });
-
-        setTeams(updatedTeams);
-      } catch (error) {
-        console.error("Failed to parse teams data:", error);
-      }
-    }
-  }, [searchParams]);
-
-  const handleExport = async (format: 'png' | 'jpeg' | 'pdf' | 'clipboard') => {
-    if (!rosterRef.current) return;
-
-    setIsExporting(true);
-    const toastId = toast.loading("Generating export...");
-
-    try {
-      if (format === 'clipboard') {
-        // Generate text list of player names for each team
-        const textContent = teams
-          .map((team) => {
-            const teamHeader = team.name;
-            const playerList = team.players
-              .map((player) => `${player.number}. ${player.name}`)
-              .join('\n');
-            return `${teamHeader}\n${playerList}`;
-          })
-          .join('\n\n');
-
-        try {
-          await navigator.clipboard.writeText(textContent);
-          toast.success("Player list copied to clipboard!", { id: toastId });
-        } catch (err) {
-          console.error("Clipboard error:", err);
-          toast.error("Failed to copy to clipboard. Please check browser permissions.", { id: toastId });
-        }
-      } else {
-        // Small delay to allow UI to update if needed
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        const canvas = await html2canvas(rosterRef.current, {
-          scale: 2, // Better quality
-          useCORS: true,
-          backgroundColor: "#0a0a0a", // Match neutral-950
-          logging: false,
-        });
-
-        if (format === 'pdf') {
-          const imgData = canvas.toDataURL('image/png');
-          const pdf = new jsPDF({
-            orientation: 'landscape',
-            unit: 'px',
-            format: [canvas.width, canvas.height]
-          });
-          pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-          pdf.save('team-rosters.pdf');
-          toast.success("PDF downloaded!", { id: toastId });
-        } else {
-          const link = document.createElement('a');
-          link.download = `team-rosters.${format}`;
-          link.href = canvas.toDataURL(`image/${format}`);
-          link.click();
-          toast.success(`${format.toUpperCase()} downloaded!`, { id: toastId });
-        }
-      }
-    } catch (error) {
-      console.error("Export failed:", error);
-      toast.error("Export failed. Please try again.", { id: toastId });
-    } finally {
-      setIsExporting(false);
-    }
-  };
+  // Custom hooks for business logic
+  const teams = useTeamsFromUrl(TEAMS);
+  const { isExporting, handleExport } = useRosterExport(teams);
 
   return (
     <div className="relative">
@@ -224,6 +135,7 @@ function RosterContent() {
             <Button
               variant="outline"
               className="bg-black/50 backdrop-blur-md border-white/20 text-white hover:bg-white/10 hover:text-white transition-all"
+              aria-label="Navigate back to teams selection page"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Teams
@@ -239,7 +151,8 @@ function RosterContent() {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="bg-black/50 backdrop-blur-md border-white/20 text-white hover:bg-white/10 hover:text-white transition-all"
+                className="bg-black/50 backdrop-blur-md border-white/20 text-white hover:bg-white/10 hover:text-black transition-all"
+                aria-label="Open export options menu"
               >
                 <Share2 className="w-4 h-4 mr-2" />
                 Export
@@ -248,20 +161,36 @@ function RosterContent() {
             <DropdownMenuContent align="end" className="w-48 bg-black/90 border-white/10 text-white backdrop-blur-xl">
               <DropdownMenuLabel>Export Roster</DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-white/10" />
-              <DropdownMenuItem onClick={() => handleExport('png')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white">
+              <DropdownMenuItem
+                onClick={() => handleExport('png', rosterRef)}
+                className="cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white"
+                aria-label="Export roster as PNG image"
+              >
                 <FileImage className="w-4 h-4 mr-2 text-blue-400" />
                 <span>Download PNG</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleExport('jpeg')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white">
+              <DropdownMenuItem
+                onClick={() => handleExport('jpeg', rosterRef)}
+                className="cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white"
+                aria-label="Export roster as JPEG image"
+              >
                 <FileImage className="w-4 h-4 mr-2 text-orange-400" />
                 <span>Download JPEG</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleExport('pdf')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white">
+              <DropdownMenuItem
+                onClick={() => handleExport('pdf', rosterRef)}
+                className="cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white"
+                aria-label="Export roster as PDF document"
+              >
                 <FileText className="w-4 h-4 mr-2 text-red-400" />
                 <span>Download PDF</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-white/10" />
-              <DropdownMenuItem onClick={() => handleExport('clipboard')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white">
+              <DropdownMenuItem
+                onClick={() => handleExport('clipboard', rosterRef)}
+                className="cursor-pointer hover:bg-white/10 focus:bg-white/10 focus:text-white"
+                aria-label="Copy roster image to clipboard"
+              >
                 <Clipboard className="w-4 h-4 mr-2 text-green-400" />
                 <span>Copy to Clipboard</span>
               </DropdownMenuItem>
@@ -378,7 +307,11 @@ function TeamColumn({ team, index }: { team: Team; index: number }) {
 
       {/* Players List - Compact Table Style */}
       <div className="relative z-10 flex-1 flex flex-col justify-center px-4 md:px-8 pb-8 min-h-0">
-        <div className="flex flex-col gap-1 md:gap-2 w-full max-w-md mx-auto">
+        <div
+          className="flex flex-col gap-1 md:gap-2 w-full max-w-md mx-auto"
+          role="list"
+          aria-label={`${team.name} roster with ${team.players.length} players`}
+        >
           {team.players.map((player, i) => (
             <PlayerRow key={i} player={player} team={team} index={i} />
           ))}
@@ -388,7 +321,7 @@ function TeamColumn({ team, index }: { team: Team; index: number }) {
   );
 }
 
-function PlayerRow({ player, team, index }: { player: any; team: Team; index: number }) {
+function PlayerRow({ player, team, index }: { player: { number: number; name: string; position: string }; team: Team; index: number }) {
   const isWhite = team.id === "white";
   
   return (
@@ -397,7 +330,9 @@ function PlayerRow({ player, team, index }: { player: any; team: Team; index: nu
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.5 + (index * 0.05) }}
       whileHover={{ x: 10, scale: 1.02 }}
-      className="group/row relative flex items-center gap-4 py-2 md:py-3 px-3 md:px-4 rounded cursor-pointer transition-colors duration-200"
+      className="group/row relative flex items-center gap-4 py-2 md:py-3 px-3 md:px-4 rounded transition-colors duration-200"
+      role="listitem"
+      aria-label={`Player ${player.number}: ${player.name}, ${player.position}`}
     >
       {/* Hover Background */}
       <div 

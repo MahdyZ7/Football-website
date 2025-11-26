@@ -3,29 +3,21 @@ import React from 'react';
 import Link from 'next/link';
 import Navbar from './Navbar';
 import Footer from './footer';
+import { Button } from '../ui/Button';
 import { useBannedUsers } from '../../hooks/useQueries';
+import { useBannedPlayersFilter } from '../../hooks/useBannedPlayersFilter';
 import { TableRowSkeleton } from '../Skeleton';
 
-
+/**
+ * BannedPlayersPage Component
+ * Single Responsibility: Display public list of banned players
+ *
+ * Business logic extracted to custom hooks:
+ * - useBannedPlayersFilter: Filter and format banned users data
+ */
 const BannedPlayersPage: React.FC = () => {
   const { data: bannedUsers = [], isLoading: loading, error } = useBannedUsers();
-
-  const isExpired = (bannedUntil: string) => {
-    return new Date(bannedUntil) < new Date();
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const activeBans = bannedUsers.filter(user => !isExpired(user.banned_until));
-  const expiredBans = bannedUsers.filter(user => isExpired(user.banned_until));
+  const { activeBans, expiredBans, formatDate } = useBannedPlayersFilter(bannedUsers);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--bg-primary)' }}>
@@ -40,12 +32,8 @@ const BannedPlayersPage: React.FC = () => {
 
           {/* Back Link */}
           <div className="mb-8">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-ft-primary hover:bg-ft-secondary
-                         text-white font-medium rounded transition-all duration-200 transform hover:scale-105"
-            >
-              ← Back to Registration
+            <Link href="/">
+              <Button variant="primary">← Back to Registration</Button>
             </Link>
           </div>
 

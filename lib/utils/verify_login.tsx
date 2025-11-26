@@ -1,5 +1,4 @@
 import { ClientCredentials } from 'simple-oauth2';
-import axios from 'axios';
 import { User } from '../../types/user'
 
 const UID = process.env.UID;
@@ -49,15 +48,15 @@ export default async function verifyLogin(intra: string): Promise<User> {
 		const accessToken = await client.getToken(tokenParams);
 
 		// Making the authenticated API request
-		const response = await axios.get('https://api.intra.42.fr/v2/campus/43/users?filter[login]=' + intra, {
+		const response = await fetch('https://api.intra.42.fr/v2/campus/43/users?filter[login]=' + intra, {
 			headers: {
 				Authorization: `Bearer ${accessToken.token.access_token}`,
 			}
 		});
 
-		if (response.status != 200)
+		if (!response.ok)
 			return createEmptyUser();
-		const data = response.data;
+		const data = await response.json();
 		if (data.length === 0)
 			return createEmptyUser();
 		if (response.status === 200 && data.length > 0)

@@ -1,106 +1,96 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
 import { User, BannedUser } from '../types/user';
+
+// lightweight fetch wrapper to replace axios
+const request = async (url: string, options?: RequestInit) => {
+  const res = await fetch(url, {
+    headers: { 'Content-Type': 'application/json', ...(options?.headers as Record<string,string> | undefined) },
+    ...options,
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || res.statusText);
+  }
+  return res.json();
+};
 
 // API functions
 const api = {
   users: {
     getAll: async (): Promise<User[]> => {
-      const { data } = await axios.get('/api/users');
-      return data;
+	  return await request('/api/users');
     },
     register: async (userData: { name: string; intra: string }): Promise<{ name: string; id: string }> => {
-      const { data } = await axios.post('/api/register', userData);
-      return data;
+      return await request('/api/register', { method: 'POST', body: JSON.stringify(userData) });
     },
     delete: async (intra: string) => {
-      const { data } = await axios.delete('/api/register', {
-        data: { intra },
-      });
-      return data;
+      return await request('/api/register', { method: 'DELETE', body: JSON.stringify({ intra }) });
     },
   },
   allowed: {
     check: async (): Promise<{ isAllowed: boolean }> => {
-      const { data } = await axios.get('/api/allowed');
-      return data;
+      return await request('/api/allowed');
     },
   },
   verify: {
     check: async (): Promise<{ isAllowed: boolean }> => {
-      const { data } = await axios.get('/api/verify');
-      return data;
+      return await request('/api/verify');
     },
   },
   bannedUsers: {
     getAll: async (): Promise<BannedUser[]> => {
-      const { data } = await axios.get('/api/banned-users');
-      return data;
+      return await request('/api/banned-users');
     },
   },
   money: {
     getAll: async () => {
-      const { data } = await axios.get('/api/moneyDb');
-      return data;
+      return await request('/api/moneyDb');
     },
   },
   admin: {
     auth: async (): Promise<{ authenticated: boolean; user?: string }> => {
-      const { data } = await axios.get('/api/admin/auth');
-      return data;
+      return await request('/api/admin/auth');
     },
     logs: async () => {
-      const { data } = await axios.get('/api/admin-logs');
-      return data;
+      return await request('/api/admin-logs');
     },
     banned: async (): Promise<BannedUser[]> => {
-      const { data } = await axios.get('/api/admin/banned');
-      return data;
+      return await request('/api/admin/banned');
     },
     banUser: async (banData: { userId: string; reason: string; duration: string }) => {
-      const { data } = await axios.post('/api/admin/ban', banData);
-      return data;
+      return await request('/api/admin/ban', { method: 'POST', body: JSON.stringify(banData) });
     },
     unbanUser: async (userId: string) => {
-      const { data } = await axios.delete('/api/admin/ban', { data: { user_id: userId } });
-      return data;
+      return await request('/api/admin/ban', { method: 'DELETE', body: JSON.stringify({ user_id: userId }) });
     },
     deleteUser: async (userId: string) => {
-      const { data } = await axios.delete('/api/admin/users', { data: { id: userId } });
-      return data;
+      return await request('/api/admin/users', { method: 'DELETE', body: JSON.stringify({ id: userId }) });
     },
     verifyUser: async (verifyData: { id: string; verified: boolean }) => {
-      const { data } = await axios.patch('/api/admin/users/verify', verifyData);
-      return data;
+      return await request('/api/admin/users/verify', { method: 'PATCH', body: JSON.stringify(verifyData) });
     },
   },
   editName: {
     update: async (editData: { intra: string; newName: string }) => {
-      const { data } = await axios.patch('/api/edit-name', editData);
-      return data;
+      return await request('/api/edit-name', { method: 'PATCH', body: JSON.stringify(editData) });
     },
   },
   feedback: {
     getAll: async (type?: string) => {
       const url = type ? `/api/feedback?type=${type}` : '/api/feedback';
-      const { data } = await axios.get(url);
-      return data;
+      return await request(url);
     },
     submit: async (feedbackData: { type: string; title: string; description: string }) => {
-      const { data } = await axios.post('/api/feedback', feedbackData);
-      return data;
+      return await request('/api/feedback', { method: 'POST', body: JSON.stringify(feedbackData) });
     },
     vote: async (voteData: { feedbackId: number; voteType: string }) => {
-      const { data } = await axios.post('/api/feedback/vote', voteData);
-      return data;
+      return await request('/api/feedback/vote', { method: 'POST', body: JSON.stringify(voteData) });
     },
     removeVote: async (feedbackId: number) => {
-      const { data } = await axios.delete(`/api/feedback/vote?feedbackId=${feedbackId}`);
-      return data;
+      return await request(`/api/feedback/vote?feedbackId=${feedbackId}`, { method: 'DELETE' });
     },
     getUserVotes: async () => {
-      const { data } = await axios.get('/api/feedback/vote');
-      return data;
+      return await request('/api/feedback/vote');
     },
     admin: {
       getAll: async (filters?: { status?: string; type?: string }) => {
@@ -108,20 +98,16 @@ const api = {
         if (filters?.status) params.append('status', filters.status);
         if (filters?.type) params.append('type', filters.type);
         const url = params.toString() ? `/api/admin/feedback?${params}` : '/api/admin/feedback';
-        const { data } = await axios.get(url);
-        return data;
+        return await request(url);
       },
       approve: async (approveData: { feedbackId: number; action: string }) => {
-        const { data } = await axios.post('/api/admin/feedback/approve', approveData);
-        return data;
+        return await request('/api/admin/feedback/approve', { method: 'POST', body: JSON.stringify(approveData) });
       },
       updateStatus: async (statusData: { feedbackId: number; status: string }) => {
-        const { data } = await axios.patch('/api/admin/feedback/status', statusData);
-        return data;
+        return await request('/api/admin/feedback/status', { method: 'PATCH', body: JSON.stringify(statusData) });
       },
       delete: async (feedbackId: number) => {
-        const { data } = await axios.delete(`/api/admin/feedback?id=${feedbackId}`);
-        return data;
+        return await request(`/api/admin/feedback?id=${feedbackId}`, { method: 'DELETE' });
       },
     },
   },

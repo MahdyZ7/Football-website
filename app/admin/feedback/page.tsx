@@ -3,14 +3,12 @@
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import {
-  useAdminFeedback,
-  useApproveFeedback,
-  useUpdateFeedbackStatus,
-  useDeleteFeedback,
-} from '../../../hooks/useQueries';
-import { toast } from 'sonner';
+import { useAdminFeedback } from '../../../hooks/useQueries';
+import { useAdminFeedbackHandlers } from '../../../hooks/useAdminFeedbackHandlers';
+import { useFeedbackColors } from '../../../hooks/useFeedbackColors';
 import { Skeleton, FeedbackCardSkeleton } from '../../../components/Skeleton';
+import { Button, IconButton } from '../../../components/ui/Button';
+import { Select } from '../../../components/ui/Input';
 import Navbar from '../../../components/pages/Navbar';
 import Footer from '../../../components/pages/footer';
 import { FiCheck, FiX, FiTrash2, FiEye } from 'react-icons/fi';
@@ -34,6 +32,14 @@ interface AdminFeedbackSubmission {
   vote_score: number;
 }
 
+/**
+ * AdminFeedbackPage Component
+ * Single Responsibility: Orchestrate admin feedback management UI
+ *
+ * Business logic extracted to custom hooks:
+ * - useAdminFeedbackHandlers: Handle approve, status update, delete actions
+ * - useFeedbackColors: Provide color utilities for badges
+ */
 export default function AdminFeedbackPage() {
   const { data: session, status: sessionStatus } = useSession();
   const router = useRouter();
@@ -41,16 +47,16 @@ export default function AdminFeedbackPage() {
   const [selectedType, setSelectedType] = useState<string>('all');
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
+  // Custom hooks for business logic
+  const { handleApprove, handleStatusUpdate, handleDelete, approvePending, updatePending, deletePending } = useAdminFeedbackHandlers();
+  const { getTypeColor, getStatusColor, formatStatus } = useFeedbackColors();
+
   const filters = {
     status: selectedStatus === 'all' ? undefined : selectedStatus,
     type: selectedType === 'all' ? undefined : selectedType,
   };
 
   const { data: feedbackData, isLoading: feedbackLoading } = useAdminFeedback(filters);
-  const approveMutation = useApproveFeedback();
-  const updateStatusMutation = useUpdateFeedbackStatus();
-  const deleteMutation = useDeleteFeedback();
-
   const submissions: AdminFeedbackSubmission[] = feedbackData?.submissions || [];
 
   // Redirect if not admin
@@ -70,60 +76,6 @@ export default function AdminFeedbackPage() {
     router.push('/');
     return null;
   }
-
-  const handleApprove = async (feedbackId: number, action: 'approve' | 'reject') => {
-    try {
-      await approveMutation.mutateAsync({ feedbackId, action });
-      toast.success(`Feedback ${action}d successfully`);
-    } catch (error: unknown) {
-      const err = error as { response?: { data?: { error?: string } } };
-      toast.error(err?.response?.data?.error || `Failed to ${action} feedback`);
-    }
-  };
-
-  const handleStatusUpdate = async (feedbackId: number, status: string) => {
-    try {
-      await updateStatusMutation.mutateAsync({ feedbackId, status });
-      toast.success('Status updated successfully');
-    } catch (error: unknown) {
-      const err = error as { response?: { data?: { error?: string } } };
-      toast.error(err?.response?.data?.error || 'Failed to update status');
-    }
-  };
-
-  const handleDelete = async (feedbackId: number) => {
-    if (!confirm('Are you sure you want to delete this feedback? This action cannot be undone.')) {
-      return;
-    }
-
-    try {
-      await deleteMutation.mutateAsync(feedbackId);
-      toast.success('Feedback deleted successfully');
-    } catch (error: unknown) {
-      const err = error as { response?: { data?: { error?: string } } };
-      toast.error(err?.response?.data?.error || 'Failed to delete feedback');
-    }
-  };
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'feature': return 'bg-blue-600';
-      case 'bug': return 'bg-red-600';
-      case 'feedback': return 'bg-green-600';
-      default: return 'bg-gray-600';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending': return 'bg-yellow-600';
-      case 'approved': return 'bg-green-600';
-      case 'rejected': return 'bg-red-600';
-      case 'in_progress': return 'bg-orange-500';
-      case 'completed': return 'bg-blue-600';
-      default: return 'bg-gray-500';
-    }
-  };
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--bg-primary)' }}>
@@ -162,51 +114,31 @@ export default function AdminFeedbackPage() {
           {/* Filters */}
           <div className="mb-6 rounded-lg shadow-md p-4" style={{ backgroundColor: 'var(--bg-card)' }}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block mb-2 font-medium" style={{ color: 'var(--text-primary)' }}>
-                  Filter by Status
-                </label>
-                <select
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="w-full px-4 py-2 rounded border transition-all duration-200
-                             focus:ring-2 focus:ring-ft-primary focus:outline-none"
-                  style={{
-                    backgroundColor: 'var(--input-bg)',
-                    borderColor: 'var(--border-color)',
-                    color: 'var(--text-primary)'
-                  }}
-                >
-                  <option value="all">All Statuses</option>
-                  <option value="pending">Pending</option>
-                  <option value="approved">Approved</option>
-                  <option value="rejected">Rejected</option>
-                  <option value="in_progress">In Progress</option>
-                  <option value="completed">Completed</option>
-                </select>
-              </div>
+              <Select
+                label="Filter by Status"
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                fullWidth
+              >
+                <option value="all">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+              </Select>
 
-              <div>
-                <label className="block mb-2 font-medium" style={{ color: 'var(--text-primary)' }}>
-                  Filter by Type
-                </label>
-                <select
-                  value={selectedType}
-                  onChange={(e) => setSelectedType(e.target.value)}
-                  className="w-full px-4 py-2 rounded border transition-all duration-200
-                             focus:ring-2 focus:ring-ft-primary focus:outline-none"
-                  style={{
-                    backgroundColor: 'var(--input-bg)',
-                    borderColor: 'var(--border-color)',
-                    color: 'var(--text-primary)'
-                  }}
-                >
-                  <option value="all">All Types</option>
-                  <option value="feature">Feature Requests</option>
-                  <option value="bug">Bug Reports</option>
-                  <option value="feedback">General Feedback</option>
-                </select>
-              </div>
+              <Select
+                label="Filter by Type"
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+                fullWidth
+              >
+                <option value="all">All Types</option>
+                <option value="feature">Feature Requests</option>
+                <option value="bug">Bug Reports</option>
+                <option value="feedback">General Feedback</option>
+              </Select>
             </div>
           </div>
 
@@ -235,7 +167,7 @@ export default function AdminFeedbackPage() {
                             {submission.type}
                           </span>
                           <span className={`px-3 py-1 rounded text-white text-sm font-medium ${getStatusColor(submission.status)}`}>
-                            {submission.status.replace('_', ' ')}
+                            {formatStatus(submission.status)}
                           </span>
                           <span className="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 text-sm font-medium"
                                 style={{ color: 'var(--text-primary)' }}>
@@ -247,12 +179,15 @@ export default function AdminFeedbackPage() {
                         </h3>
                       </div>
 
-                      <button
+                      <IconButton
                         onClick={() => setExpandedId(expandedId === submission.id ? null : submission.id)}
-                        className="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                      >
-                        <FiEye size={20} style={{ color: 'var(--text-primary)' }} />
-                      </button>
+                        variant="ghost"
+                        size="md"
+                        icon={<FiEye size={20} />}
+                        label={expandedId === submission.id ? "Collapse details" : "Expand details"}
+                        aria-label={`${expandedId === submission.id ? 'Collapse' : 'Expand'} details for "${submission.title}"`}
+                        aria-expanded={expandedId === submission.id}
+                      />
                     </div>
 
                     {/* Expanded Details */}
@@ -275,55 +210,50 @@ export default function AdminFeedbackPage() {
                     <div className="flex flex-wrap gap-3">
                       {submission.status === 'pending' && (
                         <>
-                          <button
+                          <Button
                             onClick={() => handleApprove(submission.id, 'approve')}
-                            disabled={approveMutation.isPending}
-                            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded
-                                       transition-all duration-200 flex items-center gap-2 disabled:opacity-50"
+                            disabled={approvePending}
+                            variant="success"
+                            size="sm"
+                            icon={<FiCheck size={16} />}
                           >
-                            <FiCheck size={16} />
                             Approve
-                          </button>
-                          <button
+                          </Button>
+                          <Button
                             onClick={() => handleApprove(submission.id, 'reject')}
-                            disabled={approveMutation.isPending}
-                            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded
-                                       transition-all duration-200 flex items-center gap-2 disabled:opacity-50"
+                            disabled={approvePending}
+                            variant="danger"
+                            size="sm"
+                            icon={<FiX size={16} />}
                           >
-                            <FiX size={16} />
                             Reject
-                          </button>
+                          </Button>
                         </>
                       )}
 
                       {submission.is_approved && (
-                        <select
+                        <Select
                           value={submission.status}
                           onChange={(e) => handleStatusUpdate(submission.id, e.target.value)}
-                          disabled={updateStatusMutation.isPending}
-                          className="px-4 py-2 rounded border transition-all duration-200
-                                     focus:ring-2 focus:ring-ft-primary focus:outline-none text-sm"
-                          style={{
-                            backgroundColor: 'var(--input-bg)',
-                            borderColor: 'var(--border-color)',
-                            color: 'var(--text-primary)'
-                          }}
+                          disabled={updatePending}
+                          className="text-sm"
                         >
                           <option value="approved">Approved</option>
                           <option value="in_progress">In Progress</option>
                           <option value="completed">Completed</option>
-                        </select>
+                        </Select>
                       )}
 
-                      <button
+                      <Button
                         onClick={() => handleDelete(submission.id)}
-                        disabled={deleteMutation.isPending}
-                        className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded
-                                   transition-all duration-200 flex items-center gap-2 disabled:opacity-50 ml-auto"
+                        disabled={deletePending}
+                        variant="danger"
+                        size="sm"
+                        icon={<FiTrash2 size={16} />}
+                        className="ml-auto"
                       >
-                        <FiTrash2 size={16} />
                         Delete
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </div>

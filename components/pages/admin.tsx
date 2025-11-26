@@ -4,35 +4,37 @@ import Navbar from './Navbar';
 import Footer from './footer';
 import { Skeleton, TableRowSkeleton } from '../Skeleton';
 import ConfirmDialog from '../ConfirmDialog';
-import { TIG_BAN_DURATIONS } from '../../lib/utils/TIG_list';
+import { Button } from '../ui/Button';
+import { Input, Select } from '../ui/Input';
 
 import {
   useAdminAuth,
   useUsers,
   useAdminBanned,
-  useBanUser,
   useUnbanUser,
   useAdminDeleteUser,
   useVerifyUser
 } from '../../hooks/useQueries';
-import { Toast } from '../../types/user';
+import { useToastNotifications } from '../../hooks/useToastNotifications';
+import { useAdminBanForm } from '../../hooks/useAdminBanForm';
+import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 
+/**
+ * Admin Component
+ * Single Responsibility: Orchestrate admin dashboard UI
+ *
+ * Business logic extracted to custom hooks:
+ * - useToastNotifications: Toast notification management
+ * - useAdminBanForm: Ban form state and submission
+ * - useConfirmDialog: Confirmation dialog management
+ */
 const Admin: React.FC = () => {
-  const [toasts, setToasts] = useState<Toast[]>([]);
   const [activeTab, setActiveTab] = useState<'users' | 'banned'>('users');
-  const [confirmDialog, setConfirmDialog] = useState<{
-    isOpen: boolean;
-    title: string;
-    message: string;
-    onConfirm: () => void;
-    type?: 'danger' | 'warning' | 'info';
-  }>({
-    isOpen: false,
-    title: '',
-    message: '',
-    onConfirm: () => {},
-    type: 'danger'
-  });
+
+  // Custom hooks for business logic
+  const { toasts, showToast, removeToast } = useToastNotifications();
+  const { confirmDialog, showConfirm, closeConfirm } = useConfirmDialog();
+  const banFormHook = useAdminBanForm(showToast);
 
   // React Query hooks
   const { data: authData, isLoading: authLoading, error: authError } = useAdminAuth();
@@ -40,55 +42,15 @@ const Admin: React.FC = () => {
   const { data: bannedUsers = [], isLoading: bannedLoading, error: bannedError } = useAdminBanned();
 
   // Mutation hooks
-  const banUserMutation = useBanUser();
   const unbanUserMutation = useUnbanUser();
   const deleteUserMutation = useAdminDeleteUser();
   const verifyUserMutation = useVerifyUser();
 
   const isAuthenticated = authData?.authenticated || false;
 
-  // Form states
-  const [banForm, setBanForm] = useState({
-    userId: '',
-    reason: '',
-    duration: 7 // days
-  });
-
-  // Predefined ban reasons with durations
-  const banReasons = [
-    { label: 'Select a reason...', value: '', duration: 7 },
-    { label: 'Not ready when booking time starts', value: 'Not ready when booking time starts', duration: TIG_BAN_DURATIONS.NOT_READY },
-    { label: 'Cancel reservation', value: 'Cancel reservation', duration: TIG_BAN_DURATIONS.CANCEL},
-    { label: 'Late > 15 minutes', value: 'Late > 15 minutes', duration:  TIG_BAN_DURATIONS.LATE},
-    { label: 'Cancel reservation on game day after 5 PM', value: 'Cancel reservation on game day after 5 PM', duration: TIG_BAN_DURATIONS.CANCEL_GAME_DAY },
-    { label: 'No Show without notice', value: 'No Show without notice', duration: TIG_BAN_DURATIONS.NO_SHOW },
-    { label: 'Custom reason', value: 'custom', duration: 7 }
-  ];
-
-  const [isCustomReason, setIsCustomReason] = useState(false);
-
-
-  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
-    const newToast: Toast = {
-      id: Date.now(),
-      message,
-      type
-    };
-    setToasts(prev => [...prev, newToast]);
-
-    setTimeout(() => {
-      setToasts(prev => prev.filter(toast => toast.id !== newToast.id));
-    }, 4000);
-  };
-
-  const removeToast = (id: number) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
-  };
-
   const handleDelete = async (intra: string) => {
     const user = users.find(u => u.intra === intra);
-    setConfirmDialog({
-      isOpen: true,
+    showConfirm({
       title: 'Delete User',
       message: `Are you sure you want to delete "${user?.name || 'this user'}"? This action cannot be undone.`,
       type: 'danger',
@@ -119,36 +81,8 @@ const Admin: React.FC = () => {
     );
   };
 
-  const handleBanUser = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!banForm.userId || !banForm.reason || banForm.reason === '') {
-      showToast('Please fill in all required fields', 'error');
-      return;
-    }
-
-    banUserMutation.mutate(
-      {
-        userId: banForm.userId,
-        reason: banForm.reason,
-        duration: banForm.duration.toString()
-      },
-      {
-        onSuccess: () => {
-          setBanForm({ userId: '', reason: '', duration: 7 });
-          setIsCustomReason(false);
-          showToast('User banned successfully', 'success');
-        },
-        onError: () => {
-          showToast('Failed to ban user', 'error');
-        }
-      }
-    );
-  };
-
   const handleUnban = async (userId: string, userName: string) => {
-    setConfirmDialog({
-      isOpen: true,
+    showConfirm({
       title: 'Unban User',
       message: `Are you sure you want to unban "${userName}"? They will be able to register again.`,
       type: 'warning',
@@ -200,7 +134,7 @@ const Admin: React.FC = () => {
               <p className="mb-4" style={{ color: 'var(--text-primary)' }}>
                 Please log in with your Replit account to access the admin panel.
               </p>
-              <button
+              <Button
                 onClick={() => {
                   window.addEventListener("message", (e) => {
                     if (e.data === "auth_complete") {
@@ -216,18 +150,14 @@ const Admin: React.FC = () => {
                     `modal=yes, toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=${w}, height=${h}, top=${top}, left=${left}`
                   );
                 }}
-                className="px-8 py-3 bg-ft-primary hover:bg-ft-secondary text-white font-medium rounded
-                           transition-all duration-200 transform hover:scale-105"
+                variant="primary"
+                size="lg"
               >
                 Login with Replit
-              </button>
+              </Button>
               <div className="mt-6">
-                <Link
-                  href="/"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700
-                             text-white font-medium rounded transition-all duration-200"
-                >
-                  ← Back to Home
+                <Link href="/">
+                  <Button variant="secondary">← Back to Home</Button>
                 </Link>
               </div>
             </div>
@@ -250,12 +180,8 @@ const Admin: React.FC = () => {
 
           {/* Back Link */}
           <div className="mb-8">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-ft-primary hover:bg-ft-secondary
-                         text-white font-medium rounded transition-all duration-200 transform hover:scale-105"
-            >
-              ← Back to Registration
+            <Link href="/">
+              <Button variant="primary">← Back to Registration</Button>
             </Link>
           </div>
 
@@ -322,120 +248,68 @@ const Admin: React.FC = () => {
                 <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
                   Ban User
                 </h3>
-                <form onSubmit={handleBanUser} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
-                      User ID:
-                    </label>
-                    <input
-                      type="text"
-                      value={banForm.userId}
-                      onChange={(e) => setBanForm(prev => ({ ...prev, userId: e.target.value }))}
-                      placeholder="Enter user intra login"
-                      className="w-full px-4 py-2 rounded border transition-all duration-200 focus:ring-2 focus:ring-ft-primary focus:outline-none"
-                      style={{
-                        backgroundColor: 'var(--input-bg)',
-                        borderColor: 'var(--border-color)',
-                        color: 'var(--text-primary)'
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
-                      Reason:
-                    </label>
-                    <select
-                      value={isCustomReason ? 'custom' : banForm.reason}
-                      onChange={(e) => {
-                        const selectedReason = banReasons.find(r => r.value === e.target.value);
-                        if (selectedReason) {
-                          if (selectedReason.value === 'custom') {
-                            setIsCustomReason(true);
-                            setBanForm(prev => ({ ...prev, reason: '', duration: 7 }));
-                          } else {
-                            setIsCustomReason(false);
-                            setBanForm(prev => ({
-                              ...prev,
-                              reason: selectedReason.value,
-                              duration: selectedReason.duration
-                            }));
-                          }
-                        }
-                      }}
-                      className="w-full px-4 py-2 rounded border transition-all duration-200 focus:ring-2 focus:ring-ft-primary focus:outline-none"
-                      style={{
-                        backgroundColor: 'var(--input-bg)',
-                        borderColor: 'var(--border-color)',
-                        color: 'var(--text-primary)'
-                      }}
-                    >
-                      {banReasons.map((reason) => (
-                        <option key={reason.value} value={reason.value}>
-                          {reason.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  {isCustomReason && (
+                <form onSubmit={banFormHook.handleBanUser} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Input
+                    label="User ID"
+                    type="text"
+                    value={banFormHook.banForm.userId}
+                    onChange={(e) => banFormHook.setBanForm(prev => ({ ...prev, userId: e.target.value }))}
+                    placeholder="Enter user intra login"
+                    fullWidth
+                  />
+                  <Select
+                    label="Reason"
+                    value={banFormHook.isCustomReason ? 'custom' : banFormHook.banForm.reason}
+                    onChange={(e) => banFormHook.handleReasonChange(e.target.value)}
+                    fullWidth
+                  >
+                    {banFormHook.banReasons.map((reason) => (
+                      <option key={reason.value} value={reason.value}>
+                        {reason.label}
+                      </option>
+                    ))}
+                  </Select>
+                  {banFormHook.isCustomReason && (
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
-                        Custom Reason:
-                      </label>
-                      <input
+                      <Input
+                        label="Custom Reason"
                         type="text"
-                        value={banForm.reason}
-                        onChange={(e) => setBanForm(prev => ({ ...prev, reason: e.target.value }))}
+                        value={banFormHook.banForm.reason}
+                        onChange={(e) => banFormHook.setBanForm(prev => ({ ...prev, reason: e.target.value }))}
                         placeholder="Enter custom ban reason"
-                        className="w-full px-4 py-2 rounded border transition-all duration-200 focus:ring-2 focus:ring-ft-primary focus:outline-none"
-                        style={{
-                          backgroundColor: 'var(--input-bg)',
-                          borderColor: 'var(--border-color)',
-                          color: 'var(--text-primary)'
-                        }}
+                        fullWidth
                       />
                     </div>
                   )}
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
-                      Duration (days):
-                    </label>
-                    <input
+                    <Input
+                      label="Duration (days)"
                       type="number"
-                      value={banForm.duration}
-                      onChange={(e) => setBanForm(prev => ({ ...prev, duration: parseFloat(e.target.value) }))}
+                      value={banFormHook.banForm.duration.toString()}
+                      onChange={(e) => banFormHook.setBanForm(prev => ({ ...prev, duration: parseFloat(e.target.value) }))}
                       min="0.5"
                       max="365"
                       step="0.5"
-                      disabled={!isCustomReason && banForm.reason !== ''}
-                      className="w-full px-4 py-2 rounded border transition-all duration-200 focus:ring-2 focus:ring-ft-primary focus:outline-none disabled:opacity-50"
-                      style={{
-                        backgroundColor: 'var(--input-bg)',
-                        borderColor: 'var(--border-color)',
-                        color: 'var(--text-primary)'
-                      }}
+                      disabled={!banFormHook.isCustomReason && banFormHook.banForm.reason !== ''}
+                      fullWidth
                     />
-                    {banForm.duration > 0 && (
+                    {banFormHook.banForm.duration > 0 && (
                       <div className="mt-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                        Ban ends: {(() => {
-                          const endDate = new Date();
-                          endDate.setDate(endDate.getDate() + banForm.duration);
-                          return endDate.toLocaleDateString('en-US', {
-                            weekday: 'short',
-                            day: 'numeric',
-                            month: 'short'
-                          });
-                        })()}
+                        Ban ends: {banFormHook.getBanEndDate()}
                       </div>
                     )}
                   </div>
-                  <button
-                    type="submit"
-                    className="md:col-span-2 w-full px-6 py-3 bg-ft-accent hover:bg-orange-600 text-white font-medium rounded
-                               transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={banUserMutation.isPending}
-                  >
-                    {banUserMutation.isPending ? 'Banning...' : 'Ban User'}
-                  </button>
+                  <div className="md:col-span-2">
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      size="lg"
+                      fullWidth
+                      loading={banFormHook.isPending}
+                    >
+                      Ban User
+                    </Button>
+                  </div>
                 </form>
               </div>
 
@@ -471,40 +345,36 @@ const Admin: React.FC = () => {
                             {user.intra}
                           </td>
                           <td className="px-4 py-3">
-                            <button
+                            <Button
                               onClick={() => handleVerifyToggle(user.intra, user.verified)}
                               disabled={verifyUserMutation.isPending}
-                              className={`px-3 py-1 rounded text-sm font-medium transition-all duration-200 disabled:opacity-50
-                                ${user.verified ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-gray-500 hover:bg-gray-600 text-white'}`}
+                              variant={user.verified ? 'success' : 'secondary'}
+                              size="sm"
                             >
                               {user.verified ? '✅ Verified' : '❌ Unverified'}
-                            </button>
+                            </Button>
                           </td>
                           <td className="px-4 py-3 text-sm" style={{ color: 'var(--text-secondary)' }}>
                             {new Date(user.created_at).toLocaleDateString()}
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex flex-wrap gap-2">
-                              <button
+                              <Button
                                 onClick={() => handleDelete(user.intra)}
-                                className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded
-                                           transition-all duration-200 disabled:opacity-50"
-                                disabled={deleteUserMutation.isPending}
+                                variant="danger"
+                                size="sm"
+                                loading={deleteUserMutation.isPending}
                               >
-                                {deleteUserMutation.isPending ? 'Deleting...' : 'Delete'}
-                              </button>
-                              <button
-                                onClick={() => setBanForm(prev => ({
-                                  ...prev,
-                                  userId: user.intra,
-                                  reason: 'Quick ban - 2 days',
-                                  duration: 2
-                                }))}
-                                className="px-3 py-1 bg-ft-accent hover:bg-orange-600 text-white text-sm font-medium rounded
-                                           transition-all duration-200"
+                                Delete
+                              </Button>
+                              <Button
+                                onClick={() => banFormHook.quickBan(user.intra)}
+                                variant="primary"
+                                size="sm"
+                                className="bg-ft-accent hover:bg-orange-600"
                               >
                                 Quick Ban (2d)
-                              </button>
+                              </Button>
                             </div>
                           </td>
                         </tr>
@@ -606,14 +476,15 @@ const Admin: React.FC = () => {
                               </span>
                             </td>
                             <td className="px-4 py-3">
-                              <button
+                              <Button
                                 onClick={() => user.user_id && handleUnban(user.user_id, user.name)}
-                                className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded
-                                           transition-all duration-200 disabled:opacity-50"
-                                disabled={unbanUserMutation.isPending || !user.user_id}
+                                variant="success"
+                                size="sm"
+                                loading={unbanUserMutation.isPending}
+                                disabled={!user.user_id}
                               >
-                                {unbanUserMutation.isPending ? 'Unbanning...' : 'Unban'}
-                              </button>
+                                Unban
+                              </Button>
                             </td>
                           </tr>
                         );
@@ -651,7 +522,7 @@ const Admin: React.FC = () => {
         title={confirmDialog.title}
         message={confirmDialog.message}
         onConfirm={confirmDialog.onConfirm}
-        onCancel={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+        onCancel={closeConfirm}
         type={confirmDialog.type}
         confirmText="Confirm"
         cancelText="Cancel"

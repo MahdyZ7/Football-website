@@ -53,6 +53,7 @@ interface DropdownProps {
 const Dropdown: React.FC<DropdownProps> = ({ label, isActive, children }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const menuId = `dropdown-${label.toLowerCase().replace(/\s+/g, '-')}`;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -65,14 +66,31 @@ const Dropdown: React.FC<DropdownProps> = ({ label, isActive, children }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      setIsOpen(false);
+    } else if (event.key === 'ArrowDown' && !isOpen) {
+      event.preventDefault();
+      setIsOpen(true);
+    } else if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      setIsOpen(!isOpen);
+    }
+  };
+
   return (
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
+        onKeyDown={handleKeyDown}
         className={`px-4 py-3 rounded-xl transition-all duration-200 font-medium text-center flex items-center gap-1 ${
           isActive ? 'bg-ft-primary text-white' : 'hover:bg-ft-secondary'
         }`}
         style={!isActive ? { color: 'var(--text-primary)' } : undefined}
+        aria-expanded={isOpen}
+        aria-haspopup="true"
+        aria-controls={menuId}
+        aria-label={`${label} menu`}
       >
         {label}
         <ChevronDown size={16} className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
@@ -80,6 +98,9 @@ const Dropdown: React.FC<DropdownProps> = ({ label, isActive, children }) => {
 
       {isOpen && (
         <div
+          id={menuId}
+          role="menu"
+          aria-label={`${label} navigation menu`}
           className="absolute top-full left-0 mt-1 rounded-lg shadow-lg py-2 min-w-[180px] z-50"
           style={{ backgroundColor: 'var(--nav-bg)' }}
         >
@@ -115,6 +136,8 @@ const DropdownLink: React.FC<DropdownLinkProps> = ({ href, isActive, children, e
         className={combinedClasses}
         onClick={onClick}
         style={!isActive ? { color: 'var(--text-primary)' } : undefined}
+        role="menuitem"
+        tabIndex={0}
       >
         {children}
       </Link>
@@ -127,6 +150,8 @@ const DropdownLink: React.FC<DropdownLinkProps> = ({ href, isActive, children, e
       className={combinedClasses}
       onClick={onClick}
       style={!isActive ? { color: 'var(--text-primary)' } : undefined}
+      role="menuitem"
+      tabIndex={0}
     >
       {children}
     </Link>
@@ -137,6 +162,7 @@ export default function Navbar() {
   const currentRoute = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { data: session, status } = useSession();
+  const mobileMenuRef = useRef<HTMLElement>(null);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
@@ -144,6 +170,18 @@ export default function Navbar() {
   const handleSignOut = async () => {
     await signOut({ callbackUrl: '/' });
   };
+
+  // Keyboard navigation for mobile menu
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isMenuOpen) {
+        closeMenu();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isMenuOpen]);
 
   // Check if any admin route is active
   const isAdminRouteActive = currentRoute === "/admin" || currentRoute === "/admin/feedback";
@@ -229,6 +267,7 @@ export default function Navbar() {
                   onClick={handleSignOut}
                   className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700
                              text-white rounded-lg transition-all duration-200 text-sm font-medium"
+                  aria-label="Sign out of your account"
                 >
                   <LogOut size={16} />
                   Sign Out
@@ -252,7 +291,9 @@ export default function Navbar() {
         onClick={toggleMenu}
         className="md:hidden fixed top-5 left-5 z-[1001] p-2 rounded-lg bg-ft-primary text-white
                    shadow-md hover:bg-ft-secondary transition-colors duration-200"
-        aria-label="Toggle menu"
+        aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+        aria-expanded={isMenuOpen}
+        aria-controls="mobile-nav"
       >
         {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
@@ -267,11 +308,15 @@ export default function Navbar() {
 
       {/* Mobile Navigation Drawer */}
       <nav
+        id="mobile-nav"
+        ref={mobileMenuRef}
         className={`md:hidden fixed top-0 left-0 h-full w-64 z-[1000]
                     transform transition-transform duration-300 ease-in-out
                     shadow-2xl flex flex-col gap-2 p-6 pt-20
                     ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
         style={{ backgroundColor: 'var(--nav-bg)' }}
+        aria-label="Mobile navigation"
+        aria-hidden={!isMenuOpen}
       >
         {/* User Session Display - Mobile */}
         {session && (
@@ -357,6 +402,7 @@ export default function Navbar() {
               }}
               className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-600
                          hover:bg-red-700 text-white rounded-lg transition-all duration-200 font-medium"
+              aria-label="Sign out of your account"
             >
               <LogOut size={18} />
               Sign Out

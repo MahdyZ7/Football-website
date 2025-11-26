@@ -3,11 +3,15 @@
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useFeedback, useUserVotes, useSubmitFeedback, useVoteFeedback, useRemoveVote } from '../../hooks/useQueries';
+import { useFeedbackColors } from '../../hooks/useFeedbackColors';
 import { toast } from 'sonner';
 import { FeedbackCardSkeleton } from '../../components/Skeleton';
 import Navbar from '../../components/pages/Navbar';
 import Footer from '../../components/pages/footer';
 import { FiThumbsUp, FiThumbsDown, FiPlus, FiX } from 'react-icons/fi';
+import { Button, IconButton } from '../../components/ui/Button';
+import { Input, Textarea, Select } from '../../components/ui/Input';
+import { Card, CardContent } from '../../components/ui/Card';
 
 interface FeedbackSubmission {
   id: number;
@@ -39,6 +43,9 @@ export default function FeedbackPage() {
 
   const submissions: FeedbackSubmission[] = feedbackData?.submissions || [];
   const userVotes: Record<number, string> = votesData?.votes || {};
+
+  // Use shared color utilities hook (eliminates code duplication)
+  const { getTypeColor, getStatusColor, formatStatus } = useFeedbackColors();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,24 +95,6 @@ export default function FeedbackPage() {
     }
   };
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'feature': return 'bg-blue-600';
-      case 'bug': return 'bg-red-600';
-      case 'feedback': return 'bg-green-600';
-      default: return 'bg-gray-600';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'approved': return 'bg-gray-500';
-      case 'in_progress': return 'bg-orange-500';
-      case 'completed': return 'bg-green-600';
-      default: return 'bg-gray-500';
-    }
-  };
-
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--bg-primary)' }}>
       <Navbar />
@@ -123,14 +112,15 @@ export default function FeedbackPage() {
 
           {/* Submit Button */}
           {session && !showSubmitForm && (
-            <button
+            <Button
               onClick={() => setShowSubmitForm(true)}
-              className="mb-6 px-6 py-3 bg-ft-primary hover:bg-ft-secondary text-white font-medium rounded
-                         transition-all duration-200 transform hover:scale-105 flex items-center gap-2"
+              variant="primary"
+              size="lg"
+              icon={<FiPlus size={20} />}
+              className="mb-6"
             >
-              <FiPlus size={20} />
               Submit Feedback
-            </button>
+            </Button>
           )}
 
           {!session && sessionStatus !== 'loading' && (
@@ -148,95 +138,65 @@ export default function FeedbackPage() {
                 <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
                   Submit New Feedback
                 </h2>
-                <button
+                <IconButton
                   onClick={() => setShowSubmitForm(false)}
-                  className="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                >
-                  <FiX size={24} style={{ color: 'var(--text-primary)' }} />
-                </button>
+                  variant="ghost"
+                  icon={<FiX size={24} />}
+                  label="Close feedback form"
+                  aria-label="Close feedback submission form"
+                />
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block mb-2 font-medium" style={{ color: 'var(--text-primary)' }}>
-                    Type
-                  </label>
-                  <select
-                    value={formData.type}
-                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                    className="w-full px-4 py-3 rounded border transition-all duration-200
-                               focus:ring-2 focus:ring-ft-primary focus:outline-none"
-                    style={{
-                      backgroundColor: 'var(--input-bg)',
-                      borderColor: 'var(--border-color)',
-                      color: 'var(--text-primary)'
-                    }}
-                  >
-                    <option value="feature">Feature Request</option>
-                    <option value="bug">Bug Report</option>
-                    <option value="feedback">General Feedback</option>
-                  </select>
-                </div>
+                <Select
+                  label="Type"
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                  options={[
+                    { value: 'feature', label: 'Feature Request' },
+                    { value: 'bug', label: 'Bug Report' },
+                    { value: 'feedback', label: 'General Feedback' }
+                  ]}
+                  fullWidth
+                />
 
-                <div>
-                  <label className="block mb-2 font-medium" style={{ color: 'var(--text-primary)' }}>
-                    Title
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    maxLength={200}
-                    placeholder="Brief summary of your feedback"
-                    className="w-full px-4 py-3 rounded border transition-all duration-200
-                               focus:ring-2 focus:ring-ft-primary focus:outline-none"
-                    style={{
-                      backgroundColor: 'var(--input-bg)',
-                      borderColor: 'var(--border-color)',
-                      color: 'var(--text-primary)'
-                    }}
-                  />
-                  <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
-                    {formData.title.length}/200 characters
-                  </p>
-                </div>
+                <Input
+                  label="Title"
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  maxLength={200}
+                  placeholder="Brief summary of your feedback"
+                  helperText={`${formData.title.length}/200 characters`}
+                  fullWidth
+                />
 
-                <div>
-                  <label className="block mb-2 font-medium" style={{ color: 'var(--text-primary)' }}>
-                    Description
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={6}
-                    placeholder="Detailed description of your feedback..."
-                    className="w-full px-4 py-3 rounded border transition-all duration-200
-                               focus:ring-2 focus:ring-ft-primary focus:outline-none resize-none"
-                    style={{
-                      backgroundColor: 'var(--input-bg)',
-                      borderColor: 'var(--border-color)',
-                      color: 'var(--text-primary)'
-                    }}
-                  />
-                </div>
+                <Textarea
+                  label="Description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  rows={6}
+                  placeholder="Detailed description of your feedback..."
+                  fullWidth
+                />
 
                 <div className="flex gap-3">
-                  <button
+                  <Button
                     type="submit"
-                    disabled={submitMutation.isPending}
-                    className="px-6 py-3 bg-ft-primary hover:bg-ft-secondary text-white font-medium rounded
-                               transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    variant="primary"
+                    size="lg"
+                    loading={submitMutation.isPending}
                   >
-                    {submitMutation.isPending ? 'Submitting...' : 'Submit Feedback'}
-                  </button>
-                  <button
+                    Submit Feedback
+                  </Button>
+                  <Button
                     type="button"
                     onClick={() => setShowSubmitForm(false)}
-                    className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded
-                               transition-all duration-200"
+                    variant="secondary"
+                    size="lg"
                   >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               </form>
             </div>
@@ -289,10 +249,17 @@ export default function FeedbackPage() {
                             : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                         }`}
                         style={userVotes[submission.id] !== 'upvote' ? { color: 'var(--text-primary)' } : undefined}
+                        aria-label={`${userVotes[submission.id] === 'upvote' ? 'Remove upvote from' : 'Upvote'} "${submission.title}"`}
+                        aria-pressed={userVotes[submission.id] === 'upvote'}
+                        title={userVotes[submission.id] === 'upvote' ? 'Remove upvote' : 'Upvote this feedback'}
                       >
                         <FiThumbsUp size={20} />
                       </button>
-                      <span className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
+                      <span
+                        className="text-lg font-bold"
+                        style={{ color: 'var(--text-primary)' }}
+                        aria-label={`Vote score: ${submission.vote_score}`}
+                      >
                         {submission.vote_score}
                       </span>
                       <button
@@ -304,6 +271,9 @@ export default function FeedbackPage() {
                             : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                         }`}
                         style={userVotes[submission.id] !== 'downvote' ? { color: 'var(--text-primary)' } : undefined}
+                        aria-label={`${userVotes[submission.id] === 'downvote' ? 'Remove downvote from' : 'Downvote'} "${submission.title}"`}
+                        aria-pressed={userVotes[submission.id] === 'downvote'}
+                        title={userVotes[submission.id] === 'downvote' ? 'Remove downvote' : 'Downvote this feedback'}
                       >
                         <FiThumbsDown size={20} />
                       </button>
@@ -317,7 +287,7 @@ export default function FeedbackPage() {
                         </span>
                         {submission.status !== 'approved' && (
                           <span className={`px-3 py-1 rounded text-white text-sm font-medium ${getStatusColor(submission.status)}`}>
-                            {submission.status.replace('_', ' ')}
+                            {formatStatus(submission.status)}
                           </span>
                         )}
                       </div>

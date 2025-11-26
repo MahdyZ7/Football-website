@@ -2,34 +2,22 @@ import React from 'react';
 import Link from 'next/link';
 import Navbar from './Navbar';
 import Footer from './footer';
+import { Button } from '../ui/Button';
 import { TableRowSkeleton } from '../Skeleton';
 import { useAdminLogs } from '../../hooks/useQueries';
+import { useAdminLogsFormatter } from '../../hooks/useAdminLogsFormatter';
 import { AdminLog } from '../../types/user';
 
-
+/**
+ * AdminLogs Component
+ * Single Responsibility: Display public admin action logs
+ *
+ * Business logic extracted to custom hooks:
+ * - useAdminLogsFormatter: Format timestamps and action colors
+ */
 const AdminLogs: React.FC = () => {
   const { data: logs = [], isLoading: loading, error } = useAdminLogs();
-
-  const formatTimestamp = (timestamp: string) => {
-    return new Date(timestamp).toLocaleString();
-  };
-
-  const getActionColorClass = (action: string): string => {
-    switch (action.toLowerCase()) {
-      case 'user_deleted':
-        return 'text-red-500';
-      case 'user_banned':
-        return 'text-orange-500';
-      case 'user_unbanned':
-        return 'text-green-600';
-      case 'user_verified':
-        return 'text-blue-500';
-      case 'user_unverified':
-        return 'text-gray-500';
-      default:
-        return '';
-    }
-  };
+  const { formatTimestamp, getActionColorClass, formatActionName } = useAdminLogsFormatter();
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--bg-primary)' }}>
@@ -47,12 +35,8 @@ const AdminLogs: React.FC = () => {
 
           {/* Back Link */}
           <div className="mb-8">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-ft-primary hover:bg-ft-secondary
-                         text-white font-medium rounded transition-all duration-200 transform hover:scale-105"
-            >
-              ← Back to Registration
+            <Link href="/">
+              <Button variant="primary">← Back to Registration</Button>
             </Link>
           </div>
 
@@ -128,7 +112,7 @@ const AdminLogs: React.FC = () => {
                               </td>
                               <td className="px-4 py-3">
                                 <span className={`font-bold ${getActionColorClass(log.action)}`}>
-                                  {log.action.replace(/_/g, ' ').toUpperCase()}
+                                  {formatActionName(log.action)}
                                 </span>
                               </td>
                               <td className="px-4 py-3">
