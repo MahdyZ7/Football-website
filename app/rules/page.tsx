@@ -47,7 +47,7 @@ export default function RulesPage() {
               </li>
               <li className="flex gap-2">
                 <span className="text-ft-primary font-bold">•</span>
-                <span>Game ends with referee's call.</span>
+                <span>Game ends with referee&apos;s call.</span>
               </li>
             </ul>
           </div>
@@ -219,7 +219,7 @@ export default function RulesPage() {
             </h3>
             <p style={{ color: 'var(--text-secondary)' }}>
               Remember, this is a friendly competition. Respect your opponents, the referee, and the rules.
-              Let's create a positive and enjoyable environment for everyone to play football!
+              Let&apos;s create a positive and enjoyable environment for everyone to play football!
             </p>
           </div>
         </div>

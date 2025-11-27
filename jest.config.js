@@ -13,7 +13,7 @@ const customJestConfig = {
   // Global teardown
   globalTeardown: '<rootDir>/__tests__/global-teardown.ts',
 
-  // Test environment
+  // Test environment (can be overridden per-file using @jest-environment docblock)
   testEnvironment: 'node',
 
   // Module paths

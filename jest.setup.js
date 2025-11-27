@@ -3,6 +3,9 @@
 // Load test environment variables
 require('dotenv').config({ path: '.env.test' })
 
+// Setup testing library matchers
+require('@testing-library/jest-dom')
+
 // Set test environment
 process.env.NODE_ENV = 'test'
 

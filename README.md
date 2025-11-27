@@ -52,11 +52,50 @@ A comprehensive football club management system built with Next.js 15, featuring
 Before you begin, ensure you have the following installed:
 
 - **Node.js** (v18 or higher) - [Download here](https://nodejs.org/)
-- **PostgreSQL** (v14 or higher) - [Download here](https://www.postgresql.org/download/) or use a managed service like [Neon](https://neon.tech), [Supabase](https://supabase.com), or [Railway](https://railway.app)
+- **Docker** (for local PostgreSQL) - [Download here](https://www.docker.com/products/docker-desktop)
+  - OR **PostgreSQL** (v14 or higher) - [Download here](https://www.postgresql.org/download/)
+  - OR use a managed service like [Neon](https://neon.tech), [Supabase](https://supabase.com), or [Railway](https://railway.app)
 - **Git** - [Download here](https://git-scm.com/downloads)
 - **42 API Credentials** (optional but recommended) - Get from [42 Intra Profile](https://profile.intra.42.fr/)
 
 ## Getting Started
+
+### Quick Start (5 Minutes) 🚀
+
+For developers who want to get up and running quickly:
+
+```bash
+# 1. Clone and install
+git clone https://github.com/MahdyZ7/Football-website.git
+cd Football-website
+npm ci
+
+# 2. Start PostgreSQL with Docker
+docker run --name football-postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=football_db \
+  -p 5432:5432 \
+  -d postgres:16-alpine
+
+# 3. Setup environment
+cp .env.example .env
+# Edit .env and set DATABASE_URL=postgresql://postgres:postgres@localhost:5432/football_db
+
+# 4. Initialize database and seed with development data
+npm run db:init
+npm run db:seed:dev
+
+# 5. Start the app
+npm run dev
+```
+
+Your app is now running at [http://localhost:3000](http://localhost:3000)! 🎉
+
+**Default Admin Account**: `admin@42school.com` (login via OAuth, then promote to admin with `npm run admin:manage`)
+
+---
+
+## Detailed Setup Guide
 
 ### 1. Clone the Repository
 
@@ -71,7 +110,65 @@ cd Football-website
 npm ci
 ```
 
-### 3. Set Up Environment Variables
+### 3. Set Up PostgreSQL Database
+
+Choose one of these options:
+
+#### Option A: Docker PostgreSQL (Recommended for Development)
+
+```bash
+# Start PostgreSQL container
+docker run --name football-postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=football_db \
+  -p 5432:5432 \
+  -d postgres:16-alpine
+
+# Verify it's running
+docker ps
+
+# Your DATABASE_URL will be:
+# postgresql://postgres:postgres@localhost:5432/football_db
+```
+
+**Useful Docker Commands:**
+```bash
+# Stop the container
+docker stop football-postgres
+
+# Start the container
+docker start football-postgres
+
+# View logs
+docker logs football-postgres
+
+# Remove the container (destroys all data!)
+docker rm -f football-postgres
+
+# Connect to PostgreSQL shell
+docker exec -it football-postgres psql -U postgres -d football_db
+```
+
+#### Option B: Local PostgreSQL Installation
+
+Install PostgreSQL from [postgresql.org](https://www.postgresql.org/download/) and create a database:
+
+```bash
+# Using psql
+createdb football_db
+
+# Or in PostgreSQL shell
+CREATE DATABASE football_db;
+```
+
+#### Option C: Managed PostgreSQL Service
+
+Use a cloud provider:
+- **Neon** (serverless) - [neon.tech](https://neon.tech) - Free tier available
+- **Supabase** - [supabase.com](https://supabase.com) - Free tier available
+- **Railway** - [railway.app](https://railway.app) - Free tier available
+
+### 4. Set Up Environment Variables
 
 Create a `.env` file in the root directory by copying the example:
 
@@ -84,13 +181,13 @@ Now edit `.env` and configure the following variables:
 #### Database Configuration
 
 ```bash
-# Production database
-DATABASE_URL=postgresql://username:password@host:port/database_name
+# For Docker PostgreSQL (from Quick Start):
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/football_db
 
-# Example for local PostgreSQL:
+# For local PostgreSQL:
 # DATABASE_URL=postgresql://postgres:password@localhost:5432/football_db
 
-# Example for Neon (managed PostgreSQL):
+# For Neon (managed PostgreSQL):
 # DATABASE_URL=postgresql://user:password@ep-xxx.us-east-2.aws.neon.tech/neondb
 ```
 
@@ -165,19 +262,58 @@ SERVICE_API_KEY=auto-generated-by-setup
 TZ=UTC
 ```
 
-### 4. Set Up the Database
+### 5. Initialize the Database
 
-Choose one of the following options:
+#### Option A: Fresh Setup with Development Data (Recommended) 🎯
 
-#### Option A: Automated Setup (Recommended)
+Perfect for new developers who want realistic data to work with:
 
 ```bash
-npm run db:setup
+# 1. Initialize database schema (creates all tables)
+npm run db:init
+
+# 2. Populate with development data
+npm run db:seed:dev
+
+# 3. Check database status
+npm run db:status
 ```
 
-This creates all required tables, indexes, and relationships.
+**What you get:**
+- ✅ 20 users (1 admin, 1 service account, 18 regular users)
+- ✅ 21 player registrations (15 verified, 6 unverified)
+- ✅ 21 payment records (12 paid, 9 unpaid)
+- ✅ 5 expense records
+- ✅ 6 inventory items
+- ✅ 2 banned users with different ban durations
+- ✅ 4 admin log entries
+- ✅ 6 feedback submissions (4 approved, 2 pending)
+- ✅ Realistic feedback votes
 
-#### Option B: Manual Migration
+**Development Accounts:**
+
+| Email | Role | Use Case |
+|-------|------|----------|
+| admin@42school.com | Admin | Testing admin features |
+| jdoe@student.42.fr | User | Regular user testing |
+| jsmith@student.42.fr | User | Regular user testing |
+
+**Note**: After logging in via OAuth, promote your account to admin:
+```bash
+npm run admin:manage
+# Select option 2, then enter the email you logged in with
+```
+
+#### Option B: Empty Database (Production-like)
+
+For a clean start without dummy data:
+
+```bash
+# Initialize schema only
+npm run db:init
+```
+
+#### Option C: Legacy Migration (Upgrading from old version)
 
 ```bash
 # Create core tables
@@ -190,92 +326,178 @@ npm run db:migrate:auth
 npm run db:migrate:feedback
 ```
 
-### 5. Development with Dummy Data
-
-For development, you can populate your database with realistic test data:
-
-#### Create a Test Database
-
-1. Create a separate test database in PostgreSQL:
-
-```bash
-# Using psql
-createdb football_test
-
-# Or in PostgreSQL shell
-CREATE DATABASE football_test;
-```
-
-2. Create a `.env.test` file:
-
-```bash
-cp .env.example .env.test
-```
-
-3. Update `.env.test` with your test database URL:
-
-```bash
-DATABASE_URL=postgresql://username:password@localhost:5432/football_test
-```
-
-#### Populate Test Data
-
-```bash
-# Setup test database schema
-npm run test:db:setup
-
-# Seed with dummy data
-npm run test:db:seed
-```
-
-This creates:
-- **6 test users** (1 admin, 4 regular users, 1 service account)
-- **5 test players** (with various verification statuses)
-- **4 money records** (mix of paid and unpaid)
-- **3 expenses** (field rental, equipment, referee fees)
-- **5 inventory items** (footballs, cones, jerseys, water bottles)
-- **1 banned user** (with ban reason and duration)
-- **3 admin log entries** (ban, verification actions)
-- **4 feedback submissions** (features, bugs, feedback with various statuses)
-- **5 feedback votes** (upvotes and downvotes)
-
-#### Test Users Credentials
-
-After seeding, you can use these test accounts:
-
-| Email | Role | Password |
-|-------|------|----------|
-| admin@test.com | Admin | Use OAuth login |
-| john@test.com | User | Use OAuth login |
-| jane@test.com | User | Use OAuth login |
-| bob@test.com | User | Use OAuth login |
-| alice@test.com | User | Use OAuth login |
-
-**Note**: Since the app uses OAuth, you'll need to sign in via Google/GitHub/42, then promote your account to admin using:
-
-```bash
-npm run admin:manage
-```
-
 ### 6. Run the Development Server
 
 ```bash
 npm run dev
 ```
 
-The application will be available at [http://localhost:3000](http://localhost:3000)
+The application will be available at [http://localhost:3000](http://localhost:3000) 🚀
 
-### 7. Create Your First Admin
+### 7. Create Your First Admin (If Not Using Development Data)
 
-Run the admin management tool to promote your user to admin:
+If you started with an empty database:
+
+1. **Sign in** using Google, GitHub, or 42 OAuth
+2. **Promote yourself to admin**:
+   ```bash
+   npm run admin:manage
+   ```
+3. Follow the prompts to promote your email to admin role
+
+### 8. Optional: Set Up Service Account for Automation
+
+For automated tasks (cron jobs, scheduled resets):
 
 ```bash
-npm run admin:manage
+npm run service:setup
 ```
 
-Follow the interactive prompts to:
-1. List all users
-2. Promote a user to admin by their ID
+This generates a service account and API key. Add the output to your `.env` file.
+
+## Common Development Scenarios
+
+### Starting Fresh After Breaking Changes
+
+```bash
+# Reset everything and start over
+npm run db:reset
+# Answer "yes" to both prompts
+# Answer "yes" to seed with development data
+
+# Restart the app
+npm run dev
+```
+
+### Working with Docker PostgreSQL
+
+```bash
+# Start PostgreSQL (first time)
+docker run --name football-postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=football_db \
+  -p 5432:5432 \
+  -d postgres:16-alpine
+
+# Stop PostgreSQL (keeps data)
+docker stop football-postgres
+
+# Start PostgreSQL (subsequent times)
+docker start football-postgres
+
+# View PostgreSQL logs
+docker logs -f football-postgres
+
+# Connect to database
+docker exec -it football-postgres psql -U postgres -d football_db
+
+# Backup database before experimenting
+npm run db:backup
+
+# Complete reset (removes container and all data)
+docker rm -f football-postgres
+# Then recreate the container and run db:init + db:seed:dev
+```
+
+### Testing Different User Scenarios
+
+After seeding development data, you have 21 players to test with:
+
+```bash
+# 1. Seed the database
+npm run db:seed:dev
+
+# 2. Start the app
+npm run dev
+
+# 3. Test as different users:
+# - admin@42school.com - Admin features
+# - jdoe@student.42.fr - Verified player
+# - jsmith@student.42.fr - Verified player
+# - user19@student.42.fr - Unverified player
+```
+
+### Switching Between Development and Production Data
+
+```bash
+# Development database (with dummy data)
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/football_db
+npm run db:init
+npm run db:seed:dev
+
+# Production-like database (empty)
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/football_prod
+npm run db:init
+# Don't seed - add real data through the app
+```
+
+### Before Making a Pull Request
+
+```bash
+# 1. Reset to clean state
+npm run db:reset
+
+# 2. Run tests
+npm test
+
+# 3. Check for linting issues
+npm run lint
+
+# 4. Test the app manually
+npm run dev
+
+# 5. Create a backup of your test data (if needed)
+npm run db:backup
+```
+
+### Troubleshooting Common Issues
+
+**Issue**: "relation 'users' does not exist"
+```bash
+# Solution: Initialize the database
+npm run db:init
+```
+
+**Issue**: "Connection refused" to PostgreSQL
+```bash
+# Check if Docker container is running
+docker ps
+
+# If not running, start it
+docker start football-postgres
+
+# If container doesn't exist, create it
+docker run --name football-postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=football_db \
+  -p 5432:5432 \
+  -d postgres:16-alpine
+```
+
+**Issue**: "Cannot sign in with OAuth"
+```bash
+# 1. Check your .env file has OAuth credentials
+cat .env | grep -E "(GOOGLE_CLIENT_ID|GITHUB_ID|FT_CLIENT_ID)"
+
+# 2. Verify NEXTAUTH_URL is correct
+cat .env | grep NEXTAUTH_URL
+
+# 3. Generate new NEXTAUTH_SECRET if needed
+openssl rand -base64 32
+```
+
+**Issue**: Database tables exist but empty
+```bash
+# Populate with development data
+npm run db:seed:dev
+```
+
+**Issue**: Made breaking changes and need fresh start
+```bash
+# Nuclear option - complete reset
+npm run db:reset
+# Answer "yes" to all prompts
+```
 
 ## Project Structure
 
@@ -320,13 +542,18 @@ Football-website/
 ├── providers/                # React providers
 │   └── QueryProvider.tsx     # React Query setup
 ├── scripts/                  # Database and admin tools
-│   ├── database-migration.js # Database migrations
+│   ├── init-database.sql     # Complete schema definition
+│   ├── init-database.ts      # Database initialization
+│   ├── seed-dev-data.ts      # Development data seeding
+│   ├── reset-database.ts     # Complete database reset
+│   ├── database-migration.js # Legacy migrations & backups
 │   ├── migrate_auth.ts       # Auth system migration
 │   ├── migrate_feedback.ts   # Feedback system migration
 │   ├── manage_admins.ts      # Admin role management
 │   ├── setup_service_account.ts # Service account setup
 │   ├── test-db-setup.js      # Test database schema
-│   └── test-db-seed.js       # Test data seeding
+│   ├── test-db-seed.js       # Test data seeding
+│   └── README.md             # Database scripts documentation
 ├── styles/                   # Global styles
 │   └── globals.css           # Tailwind + custom CSS
 ├── __tests__/                # Test suite
@@ -377,13 +604,21 @@ npm run lint             # Run ESLint
 ### Database Management
 
 ```bash
-npm run db:setup         # Automated database setup
-npm run db:migrate       # Run migrations
+# Core database commands
+npm run db:init          # Initialize database schema (all tables)
+npm run db:seed:dev      # Populate with development dummy data
+npm run db:reset         # Drop all tables and reinitialize (with confirmation)
+npm run db:status        # Check database status
+
+# Legacy & migration commands
+npm run db:setup         # Automated database setup (legacy)
+npm run db:migrate       # Run basic migrations
 npm run db:migrate:auth  # Migrate authentication system
 npm run db:migrate:feedback # Migrate feedback system
-npm run db:backup        # Create database backup
-npm run db:restore       # Restore from backup
-npm run db:status        # Check database status
+
+# Backup & restore
+npm run db:backup        # Create database backup (JSON)
+npm run db:restore <file> # Restore from backup
 npm run db:list-backups  # List available backups
 ```
 
