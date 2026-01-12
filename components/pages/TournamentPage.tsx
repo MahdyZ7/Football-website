@@ -195,7 +195,7 @@ const TournamentPage: React.FC = () => {
                 }}
                 transition={{ duration: 3, repeat: Infinity }}
               >
-                LEAGUE CUP
+                42 Coallistion Clash
               </motion.h1>
               <Trophy className="w-10 h-10 text-yellow-400" />
             </motion.div>
@@ -206,7 +206,7 @@ const TournamentPage: React.FC = () => {
             >
               <Star className="w-5 h-5 text-yellow-400" />
               <span className="text-xl text-gray-300 font-light tracking-widest uppercase">
-                Season 2025/26
+                Season 2026
               </span>
               <Star className="w-5 h-5 text-yellow-400" />
             </motion.div>
@@ -215,7 +215,7 @@ const TournamentPage: React.FC = () => {
               className="text-gray-400 text-lg max-w-2xl mx-auto mb-8"
               variants={itemVariants}
             >
-              The ultimate showdown between four legendary teams. Only one will claim the glory!
+              The ultimate showdown. Only one house will claim the glory!
             </motion.p>
           </motion.div>
 
