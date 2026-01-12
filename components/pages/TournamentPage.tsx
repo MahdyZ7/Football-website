@@ -12,7 +12,7 @@ const TEAMS = {
 };
 
 const LEAGUE_TABLE = [
-	{ team: "Falcon", won: 1, drawn: 0, lost: 2, gf: 4, ga: 4 },
+	{ team: "Falcon", won: 1, drawn: 0, lost: 2, gf: 5, ga: 4 },
 	{ team: "Leopard", won: 1, drawn: 0, lost: 2, gf: 1, ga: 6 },
 	{ team: "Oryx", won: 1, drawn: 1, lost: 1, gf: 3, ga: 3 },
 	{ team: "Wolves", won: 2, drawn: 1, lost: 0, gf: 5, ga: 1 },
