@@ -5,10 +5,10 @@ import Navbar from "./Navbar";
 import Footer from "./footer";
 
 const TEAMS = {
-  Falcon: { name: "Falcon", color: "#fe6640", emoji: "🦅", gradient: "from-orange-500 to-red-600" },
-  Leopard: { name: "Leopard", color: "#7111f8", emoji: "🐆", gradient: "from-purple-500 to-indigo-700" },
-  Oryx: { name: "Oryx", color: "#01eafa", emoji: "🦌", gradient: "from-cyan-400 to-blue-500" },
-  Wolves: { name: "Wolves", color: "#424242", emoji: "🐺", gradient: "from-gray-600 to-gray-800" },
+  Falcon: { name: "Falcon", color: "#fe6640", logo: "/teams/falcon.png", gradient: "from-orange-500 to-red-600" },
+  Leopard: { name: "Leopard", color: "#7111f8", logo: "/teams/leopard.png", gradient: "from-purple-500 to-indigo-700" },
+  Oryx: { name: "Oryx", color: "#01eafa", logo: "/teams/oryx.png", gradient: "from-cyan-400 to-blue-500" },
+  Wolves: { name: "Wolves", color: "#424242", logo: "/teams/wolves.png", gradient: "from-gray-600 to-gray-800" },
 };
 
 const LEAGUE_TABLE = [
@@ -106,21 +106,25 @@ const TournamentPage: React.FC = () => {
 
   const getTeamBadge = (teamKey: string, size: "sm" | "md" | "lg" = "md") => {
     const sizeClasses = {
-      sm: "w-6 h-6 text-xs",
-      md: "w-10 h-10 text-sm",
-      lg: "w-14 h-14 text-lg",
+      sm: "w-8 h-8",
+      md: "w-12 h-12",
+      lg: "w-16 h-16",
     };
     return (
-      <motion.span
+      <motion.div
         whileHover={{ scale: 1.1, rotate: 5 }}
-        className={`inline-flex items-center justify-center rounded-full font-bold shadow-lg ${sizeClasses[size]}`}
+        className={`inline-flex items-center justify-center rounded-full overflow-hidden shadow-lg ${sizeClasses[size]}`}
         style={{
-          ...getTeamStyle(teamKey),
           boxShadow: `0 0 20px ${TEAMS[teamKey as TeamKey].color}60`,
+          border: `2px solid ${TEAMS[teamKey as TeamKey].color}`,
         }}
       >
-        {TEAMS[teamKey as TeamKey].emoji}
-      </motion.span>
+        <img
+          src={TEAMS[teamKey as TeamKey].logo}
+          alt={`${TEAMS[teamKey as TeamKey].name} logo`}
+          className="w-full h-full object-cover"
+        />
+      </motion.div>
     );
   };
 
@@ -237,8 +241,12 @@ const TournamentPage: React.FC = () => {
                 <motion.div
                   className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity"
                 />
-                <span className="relative z-10 flex items-center gap-2">
-                  <span className="text-2xl">{team.emoji}</span>
+                <span className="relative z-10 flex items-center gap-3">
+                  <img
+                    src={team.logo}
+                    alt={`${team.name} logo`}
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
                   {team.name}
                 </span>
                 {selectedTeam === key && (
@@ -573,11 +581,11 @@ const TournamentPage: React.FC = () => {
             className="mt-12 text-center"
           >
             <motion.p
-              className="text-gray-500 text-sm"
+              className="text-gray-500 text-sm flex items-center justify-center gap-2"
               animate={{ opacity: [0.5, 1, 0.5] }}
               transition={{ duration: 3, repeat: Infinity }}
             >
-              May the best team win! 🏆
+              May the best team win! <Trophy className="w-4 h-4 text-yellow-400" />
             </motion.p>
           </motion.div>
         </motion.div>
