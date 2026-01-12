@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trophy, Star, Flame, Calendar, Users, Award, Zap, Crown } from "lucide-react";
+import { Trophy, Star, Award, Zap } from "lucide-react";
 import Navbar from "./Navbar";
 import Footer from "./footer";
 
@@ -271,14 +271,12 @@ const TournamentPage: React.FC = () => {
               }}
             >
               <div
-                className="px-6 py-5 flex items-center justify-center gap-3"
+                className="px-6 py-5 flex items-center justify-center"
                 style={{
                   background: `linear-gradient(135deg, ${pageAccentColor}dd, ${pageAccentColor}99)`,
                 }}
               >
-                <Crown className="w-6 h-6 text-yellow-300" />
                 <h2 className="text-2xl font-bold text-white">League Standings</h2>
-                <Crown className="w-6 h-6 text-yellow-300" />
               </div>
               <div className="overflow-x-auto p-4">
                 <table className="w-full">
@@ -361,14 +359,12 @@ const TournamentPage: React.FC = () => {
               }}
             >
               <div
-                className="px-6 py-5 flex items-center justify-center gap-3"
+                className="px-6 py-5 flex items-center justify-center"
                 style={{
                   background: `linear-gradient(135deg, ${pageAccentColor}dd, ${pageAccentColor}99)`,
                 }}
               >
-                <Flame className="w-6 h-6 text-orange-300" />
                 <h2 className="text-2xl font-bold text-white">Top Scorers</h2>
-                <Flame className="w-6 h-6 text-orange-300" />
               </div>
               <div className="p-4 space-y-3">
                 {TOP_SCORERS.slice(0, 6).map((scorer, idx) => (
@@ -430,14 +426,12 @@ const TournamentPage: React.FC = () => {
               }}
             >
               <div
-                className="px-6 py-5 flex items-center justify-center gap-3"
+                className="px-6 py-5 flex items-center justify-center"
                 style={{
                   background: `linear-gradient(135deg, ${pageAccentColor}dd, ${pageAccentColor}99)`,
                 }}
               >
-                <Users className="w-6 h-6 text-blue-300" />
                 <h2 className="text-2xl font-bold text-white">Recent Results</h2>
-                <Users className="w-6 h-6 text-blue-300" />
               </div>
               <div className="p-4 space-y-4">
                 {PREVIOUS_RESULTS.map((match, idx) => (
@@ -502,16 +496,14 @@ const TournamentPage: React.FC = () => {
               }}
             >
               <div
-                className="px-6 py-5 flex items-center justify-center gap-3"
+                className="px-6 py-5 flex items-center justify-center"
                 style={{
                   background: `linear-gradient(135deg, ${pageAccentColor}dd, ${pageAccentColor}99)`,
                 }}
               >
-                <Calendar className="w-6 h-6 text-green-300" />
                 <h2 className="text-2xl font-bold text-white">Upcoming Matches</h2>
-                <Calendar className="w-6 h-6 text-green-300" />
               </div>
-              <div className="p-4 space-y-3 max-h-[400px] overflow-y-auto">
+              <div className="p-4 space-y-3">
                 {NEXT_FIXTURES.map((match, idx) => (
                   <motion.div
                     key={idx}
