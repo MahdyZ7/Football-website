@@ -3,42 +3,42 @@ import Navbar from "./Navbar";
 import Footer from "./footer";
 
 const TEAMS = {
-  falcon: { name: "Falcon", color: "#fe6640" },
-  leopard: { name: "Leopard", color: "#7111f8" },
-  oryx: { name: "Oryx", color: "#01eafa" },
-  wolves: { name: "Wolves", color: "#424242" },
+  Falcon: { name: "Falcon", color: "#fe6640" },
+  Leopard: { name: "Leopard", color: "#7111f8" },
+  Oryx: { name: "Oryx", color: "#01eafa" },
+  Wolves: { name: "Wolves", color: "#424242" },
 };
 
 const LEAGUE_TABLE = [
-  { team: "falcon", played: 6, won: 4, drawn: 1, lost: 1, gf: 12, ga: 5, points: 13 },
-  { team: "leopard", played: 6, won: 3, drawn: 2, lost: 1, gf: 10, ga: 6, points: 11 },
-  { team: "oryx", played: 6, won: 2, drawn: 1, lost: 3, gf: 8, ga: 9, points: 7 },
-  { team: "wolves", played: 6, won: 1, drawn: 0, lost: 5, gf: 4, ga: 14, points: 3 },
+  { team: "Wolves", played: 2, won: 1, drawn: 1, lost: 0, gf: 3, ga: 1, points: 4 },
+  { team: "Falcon", played: 2, won: 1, drawn: 0, lost: 1, gf: 4, ga: 2, points: 3 },
+  { team: "Leopard", played: 2, won: 1, drawn: 0, lost: 1, gf: 1, ga: 4, points: 3 },
+  { team: "Oryx", played: 2, won: 0, drawn: 1, lost: 1, gf: 1, ga: 2, points: 1 },
 ];
 
 const PREVIOUS_RESULTS = [
-  { home: "falcon", away: "wolves", homeScore: 3, awayScore: 0, date: "Jan 5, 2026" },
-  { home: "leopard", away: "oryx", homeScore: 2, awayScore: 2, date: "Jan 5, 2026" },
-  { home: "oryx", away: "falcon", homeScore: 1, awayScore: 2, date: "Jan 8, 2026" },
-  { home: "wolves", away: "leopard", homeScore: 1, awayScore: 3, date: "Jan 8, 2026" },
+  { home: "Falcon", away: "Wolves", homeScore: 0, awayScore: 2, date: "Jan 5, 2026" },
+  { home: "Leopard", away: "Oryx", homeScore: 1, awayScore: 0, date: "Jan 5, 2026" },
+  { home: "Oryx", away: "Wolves", homeScore: 1, awayScore: 1, date: "Jan 8, 2026" },
+  { home: "Wolves", away: "Falcon", homeScore: 0, awayScore: 4, date: "Jan 8, 2026" },
 ];
 
 const NEXT_FIXTURES = [
-  { home: "falcon", away: "leopard", date: "Jan 15, 2026", time: "18:00" },
-  { home: "oryx", away: "wolves", date: "Jan 15, 2026", time: "20:00" },
-  { home: "leopard", away: "wolves", date: "Jan 19, 2026", time: "18:00" },
-  { home: "falcon", away: "oryx", date: "Jan 19, 2026", time: "20:00" },
+  { home: "Falcon", away: "Leopard", date: "Jan 15, 2026", time: "18:00" },
+  { home: "Oryx", away: "Wolves", date: "Jan 15, 2026", time: "20:00" },
+  { home: "Leopard", away: "Wolves", date: "Jan 19, 2026", time: "18:00" },
+  { home: "Falcon", away: "Oryx", date: "Jan 19, 2026", time: "20:00" },
 ];
 
 const TOP_SCORERS = [
-  { name: "Ahmed Al-Rashid", team: "falcon", goals: 5 },
-  { name: "Marcus Chen", team: "leopard", goals: 4 },
-  { name: "Yusuf Ibrahim", team: "falcon", goals: 3 },
-  { name: "Daniel Santos", team: "oryx", goals: 3 },
-  { name: "Omar Khalil", team: "leopard", goals: 2 },
-  { name: "Tariq Hassan", team: "oryx", goals: 2 },
-  { name: "James Wilson", team: "wolves", goals: 2 },
-  { name: "Karim Nasser", team: "wolves", goals: 1 },
+  { name: "Zubidullah", team: "Falcon", goals: 2 },
+  { name: "Fisal", team: "Wolves", goals: 1 },
+  { name: "Moh'd Alfaqih", team: "Wolves", goals: 1 },
+  { name: "Akram", team: "Leopard", goals: 1 },
+  { name: "Moh'd Desogi", team: "Wolves", goals: 1 },
+  { name: "Haitham", team: "Oryx", goals: 1 },
+  { name: "Moh'd Eid", team: "Falcon", goals: 1 },
+  { name: "Ranem", team: "Falcon", goals: 1 },
 ];
 
 type TeamKey = keyof typeof TEAMS;
@@ -48,7 +48,7 @@ const TournamentPage: React.FC = () => {
 
   const getTeamStyle = (teamKey: string) => ({
     backgroundColor: TEAMS[teamKey as TeamKey].color,
-    color: teamKey === "oryx" ? "#000" : "#fff",
+    color: teamKey === "Oryx" ? "#000" : "#fff",
   });
 
   const getTeamBadge = (teamKey: string) => (
@@ -88,7 +88,7 @@ const TournamentPage: React.FC = () => {
                 }`}
                 style={{
                   backgroundColor: team.color,
-                  color: key === "oryx" ? "#000" : "#fff",
+                  color: key === "Oryx" ? "#000" : "#fff",
                 }}
               >
                 {team.name}
@@ -196,7 +196,7 @@ const TournamentPage: React.FC = () => {
                       className="font-bold text-lg px-3 py-1 rounded"
                       style={{
                         backgroundColor: TEAMS[scorer.team as TeamKey].color,
-                        color: scorer.team === "oryx" ? "#000" : "#fff",
+                        color: scorer.team === "Oryx" ? "#000" : "#fff",
                       }}
                     >
                       {scorer.goals}
