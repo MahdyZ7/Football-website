@@ -12,39 +12,45 @@ const TEAMS = {
 };
 
 const LEAGUE_TABLE = [
-  { team: "Wolves", played: 2, won: 1, drawn: 1, lost: 0, gf: 3, ga: 1, points: 4 },
-  { team: "Falcon", played: 2, won: 1, drawn: 0, lost: 1, gf: 4, ga: 2, points: 3 },
-  { team: "Leopard", played: 2, won: 1, drawn: 0, lost: 1, gf: 1, ga: 4, points: 3 },
-  { team: "Oryx", played: 2, won: 0, drawn: 1, lost: 1, gf: 1, ga: 2, points: 1 },
+	{ team: "Falcon", won: 1, drawn: 0, lost: 2, gf: 4, ga: 4 },
+	{ team: "Leopard", won: 1, drawn: 0, lost: 2, gf: 1, ga: 6 },
+	{ team: "Oryx", won: 1, drawn: 1, lost: 1, gf: 3, ga: 3 },
+	{ team: "Wolves", won: 2, drawn: 1, lost: 0, gf: 5, ga: 1 },
 ];
+
+const getPoints = (team: { won: number; drawn: number; lost: number }) => {
+  return team.won * 3 + team.drawn;
+}
 
 const PREVIOUS_RESULTS = [
   { home: "Falcon", away: "Wolves", homeScore: 0, awayScore: 2, date: "Jan 5, 2026" },
   { home: "Leopard", away: "Oryx", homeScore: 1, awayScore: 0, date: "Jan 5, 2026" },
   { home: "Oryx", away: "Wolves", homeScore: 1, awayScore: 1, date: "Jan 8, 2026" },
   { home: "Leopard", away: "Falcon", homeScore: 0, awayScore: 4, date: "Jan 8, 2026" },
+  { home: "Leopard", away: "Wolves", homeScore: 0, awayScore: 2, date: "Jan 12, 2026" },
+  { home: "Falcon", away: "Oryx", homeScore: 1, awayScore: 2, date: "Jan 12, 2026" },
 ];
 
 const NEXT_FIXTURES = [
-  { home: "Leopard", away: "Wolves", date: "Jan 12, 2026", time: "21:00" },
-  { home: "Falcon", away: "Oryx", date: "Jan 12, 2026", time: "21:30" },
-  { home: "Wolves", away: "Leopard", date: "Jan 15, 2026", time: "21:00" },
-  { home: "Oryx", away: "Falcon", date: "Jan 15, 2026", time: "22:30" },
-  { home: "Falcon", away: "Leopard", date: "Jan 19, 2026", time: "21:00" },
-  { home: "Wolves", away: "Oryx", date: "Jan 19, 2026", time: "21:30" },
-  { home: "Oryx", away: "Leopard", date: "Jan 22, 2026", time: "21:00" },
-  { home: "Wolves", away: "Falcon", date: "Jan 22, 2026", time: "22:30" },
+  { home: "Oryx", away: "Leopard", date: "Jan 15, 2026", time: "21:00" },
+  { home: "Wolves", away: "Falcon", date: "Jan 15, 2026", time: "21:30" },
+  { home: "Wolves", away: "Leopard", date: "Jan 19, 2026", time: "21:00" },
+  { home: "Oryx", away: "Falcon", date: "Jan 19, 2026", time: "21:30" },
+  { home: "Wolves", away: "Oryx", date: "Jan 22, 2026", time: "21:00" },
+  { home: "Falcon", away: "Leopard", date: "Jan 22, 2026", time: "21:30" },
 ];
 
 const TOP_SCORERS = [
-  { name: "Zubidullah", team: "Falcon", goals: 2 },
-  { name: "Fisal", team: "Wolves", goals: 1 },
-  { name: "Moh'd Alfaqih", team: "Wolves", goals: 1 },
+  { name: "Zubidullah", team: "Falcon", goals: 3 },
+  { name: "Fisal", team: "Wolves", goals: 2 },
+  { name: "Moh'd Alfaqih", team: "Wolves", goals: 2 },
   { name: "Akram", team: "Leopard", goals: 1 },
   { name: "Moh'd Desogi", team: "Wolves", goals: 1 },
   { name: "Haitham", team: "Oryx", goals: 1 },
   { name: "Moh'd Eid", team: "Falcon", goals: 1 },
   { name: "Ranem", team: "Falcon", goals: 1 },
+  { name: "Khalil", team: "Oryx", goals: 1 },
+  { name: "Abdulla Gazi", team: "Oryx", goals: 1 },
 ];
 
 type TeamKey = keyof typeof TEAMS;
@@ -103,6 +109,46 @@ const TournamentPage: React.FC = () => {
     backgroundColor: TEAMS[teamKey as TeamKey].color,
     color: teamKey === "Oryx" ? "#000" : "#fff",
   });
+
+  const sortedLeagueTable = [...LEAGUE_TABLE].sort((a, b) => {
+	const pointsA = getPoints(a);
+	const pointsB = getPoints(b);
+	const gdA = a.gf - a.ga;
+	const gdB = b.gf - b.ga;
+	if (pointsA !== pointsB) 
+		return pointsB - pointsA;
+	if (gdA !== gdB) 
+		return gdB - gdA;
+	if (a.gf !== b.gf) 
+		return b.gf - a.gf;
+	if (PREVIOUS_RESULTS.filter(m => m.home === a.team || m.away === a.team).length > 0 && PREVIOUS_RESULTS.filter(m => m.home === b.team || m.away === b.team).length > 0) {
+		const aPoints = PREVIOUS_RESULTS.reduce((acc, match) => {
+			if (match.home === a.team) {
+				if (match.homeScore > match.awayScore) return acc + 3;
+				if (match.homeScore === match.awayScore) return acc + 1;
+			} else if (match.away === a.team) {
+				if (match.awayScore > match.homeScore) return acc + 3;
+				if (match.awayScore === match.homeScore) return acc + 1;
+			}
+			return acc;
+		}, 0);
+		const bPoints = PREVIOUS_RESULTS.reduce((acc, match) => {
+			if (match.home === b.team) {
+				if (match.homeScore > match.awayScore) return acc + 3;
+				if (match.homeScore === match.awayScore) return acc + 1;
+			} else if (match.away === b.team) {
+				if (match.awayScore > match.homeScore) return acc + 3;
+				if (match.awayScore === match.homeScore) return acc + 1;
+			}
+			return acc;
+		}, 0);
+		if (aPoints !== bPoints) {
+			return bPoints - aPoints;
+		}
+	}
+	return 1;
+  });
+
 
   const getTeamBadge = (teamKey: string, size: "sm" | "md" | "lg" = "md") => {
     const sizeClasses = {
@@ -293,7 +339,7 @@ const TournamentPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {LEAGUE_TABLE.map((row, idx) => (
+                    {sortedLeagueTable.map((row, idx) => (
                       <motion.tr
                         key={row.team}
                         initial={{ opacity: 0, x: -20 }}
@@ -324,7 +370,7 @@ const TournamentPage: React.FC = () => {
                             </span>
                           </div>
                         </td>
-                        <td className="px-3 py-4 text-center text-gray-300">{row.played}</td>
+                        <td className="px-3 py-4 text-center text-gray-300">{row.won + row.drawn + row.lost}</td>
                         <td className="px-3 py-4 text-center text-green-400 font-semibold">{row.won}</td>
                         <td className="px-3 py-4 text-center text-yellow-400">{row.drawn}</td>
                         <td className="px-3 py-4 text-center text-red-400">{row.lost}</td>
@@ -339,7 +385,7 @@ const TournamentPage: React.FC = () => {
                             }}
                             whileHover={{ scale: 1.1 }}
                           >
-                            {row.points}
+                            {row.won * 3 + row.drawn}
                           </motion.span>
                         </td>
                       </motion.tr>
