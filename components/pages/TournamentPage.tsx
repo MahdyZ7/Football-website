@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trophy, Star, Award, Zap } from "lucide-react";
+import { Trophy, Star, Award, Zap, Scale } from "lucide-react";
 import Navbar from "./Navbar";
 import Footer from "./footer";
 
@@ -23,13 +23,30 @@ const getPoints = (team: { won: number; drawn: number; lost: number }) => {
 }
 
 const PREVIOUS_RESULTS = [
-  { home: "Falcon", away: "Wolves", homeScore: 0, awayScore: 2, date: "Jan 5, 2026" },
-  { home: "Leopard", away: "Oryx", homeScore: 1, awayScore: 0, date: "Jan 5, 2026" },
-  { home: "Oryx", away: "Wolves", homeScore: 1, awayScore: 1, date: "Jan 8, 2026" },
-  { home: "Leopard", away: "Falcon", homeScore: 0, awayScore: 4, date: "Jan 8, 2026" },
-  { home: "Leopard", away: "Wolves", homeScore: 0, awayScore: 2, date: "Jan 12, 2026" },
-  { home: "Falcon", away: "Oryx", homeScore: 1, awayScore: 2, date: "Jan 12, 2026" },
+  { home: "Falcon", away: "Wolves", homeScore: 0, awayScore: 2, date: "Jan 5, 2026", highlight: "Wolves crank a surprise double against title favorite Falcon" },
+  { home: "Leopard", away: "Oryx", homeScore: 1, awayScore: 0, date: "Jan 5, 2026", highlight: "Unregistered Akram capitalises on a defensive error to score the only goal" },
+  { home: "Oryx", away: "Wolves", homeScore: 1, awayScore: 1, date: "Jan 8, 2026", highlight: "Oryx shows it's no easy prey, but Wolves hold on for a draw" },
+  { home: "Leopard", away: "Falcon", homeScore: 0, awayScore: 4, date: "Jan 8, 2026", highlight: "Falcons strike hard and fast to show why they are title favorites" },
+  { home: "Leopard", away: "Wolves", homeScore: 0, awayScore: 2, date: "Jan 12, 2026", highlight: "Wolves extend unbeaten run and it looks like they might run away with the title" },
+  { home: "Falcon", away: "Oryx", homeScore: 1, awayScore: 2, date: "Jan 12, 2026", highlight: "Oryx with a quick double turn the table to win their first Game. The start of a comeback ???" },
 ];
+
+// Calculate recent form for a team (returns array of 'W', 'D', 'L' for last N matches)
+const getTeamForm = (teamName: string, maxMatches: number = 5): Array<'W' | 'D' | 'L'> => {
+  const teamMatches = PREVIOUS_RESULTS
+    .filter(m => m.home === teamName || m.away === teamName)
+    .slice(-maxMatches);
+
+  return teamMatches.map(match => {
+    const isHome = match.home === teamName;
+    const teamScore = isHome ? match.homeScore : match.awayScore;
+    const opponentScore = isHome ? match.awayScore : match.homeScore;
+
+    if (teamScore > opponentScore) return 'W';
+    if (teamScore < opponentScore) return 'L';
+    return 'D';
+  });
+}
 
 const NEXT_FIXTURES = [
   { home: "Oryx", away: "Leopard", date: "Jan 15, 2026", time: "21:00" },
@@ -121,32 +138,41 @@ const TournamentPage: React.FC = () => {
 		return gdB - gdA;
 	if (a.gf !== b.gf) 
 		return b.gf - a.gf;
-	if (PREVIOUS_RESULTS.filter(m => m.home === a.team || m.away === a.team).length > 0 && PREVIOUS_RESULTS.filter(m => m.home === b.team || m.away === b.team).length > 0) {
-		const aPoints = PREVIOUS_RESULTS.reduce((acc, match) => {
+	// Head-to-head tiebreaker: only consider direct matches between these two teams
+	const headToHeadMatches = PREVIOUS_RESULTS.filter(
+		m => (m.home === a.team && m.away === b.team) || (m.home === b.team && m.away === a.team)
+	);
+
+	if (headToHeadMatches.length > 0) {
+		let aH2HPoints = 0;
+		let bH2HPoints = 0;
+		let aH2HGf = 0;
+		let bH2HGf = 0;
+
+		for (const match of headToHeadMatches) {
 			if (match.home === a.team) {
-				if (match.homeScore > match.awayScore) return acc + 3;
-				if (match.homeScore === match.awayScore) return acc + 1;
-			} else if (match.away === a.team) {
-				if (match.awayScore > match.homeScore) return acc + 3;
-				if (match.awayScore === match.homeScore) return acc + 1;
+				if (match.homeScore > match.awayScore) aH2HPoints += 3;
+				else if (match.homeScore < match.awayScore) bH2HPoints += 3;
+				else { aH2HPoints += 1; bH2HPoints += 1; }
+				aH2HGf += match.homeScore;
+				bH2HGf += match.awayScore;
+			} else {
+				if (match.homeScore > match.awayScore) bH2HPoints += 3;
+				else if (match.homeScore < match.awayScore) aH2HPoints += 3;
+				else { aH2HPoints += 1; bH2HPoints += 1; }
+				bH2HGf += match.homeScore;
+				aH2HGf += match.awayScore;
 			}
-			return acc;
-		}, 0);
-		const bPoints = PREVIOUS_RESULTS.reduce((acc, match) => {
-			if (match.home === b.team) {
-				if (match.homeScore > match.awayScore) return acc + 3;
-				if (match.homeScore === match.awayScore) return acc + 1;
-			} else if (match.away === b.team) {
-				if (match.awayScore > match.homeScore) return acc + 3;
-				if (match.awayScore === match.homeScore) return acc + 1;
-			}
-			return acc;
-		}, 0);
-		if (aPoints !== bPoints) {
-			return bPoints - aPoints;
+		}
+
+		if (aH2HPoints !== bH2HPoints) {
+			return bH2HPoints - aH2HPoints;
+		}
+		if (aH2HGf !== bH2HGf) {
+			return bH2HGf - aH2HGf;
 		}
 	}
-	return 1;
+	return 0;
   });
 
 
@@ -195,7 +221,7 @@ const TournamentPage: React.FC = () => {
       {mounted && (
         <>
           {teamColors.map((color, i) => (
-            <React.Fragment key={color}>
+            <React.Fragment key={`team-particles-${i}`}>
               {[0, 1, 2].map(j => (
                 <FloatingParticle key={`${i}-${j}`} delay={i * 2 + j} color={color} />
               ))}
@@ -222,13 +248,13 @@ const TournamentPage: React.FC = () => {
             variants={itemVariants}
           >
             <motion.div
-              className="inline-flex items-center gap-3 mb-4"
+              className="inline-flex items-center gap-2 md:gap-3 mb-4"
               animate={{ y: [0, -5, 0] }}
               transition={{ duration: 2, repeat: Infinity }}
             >
-              <Trophy className="w-10 h-10 text-yellow-400" />
+              <Trophy className="w-6 h-6 md:w-10 md:h-10 text-yellow-400" />
               <motion.h1
-                className="text-5xl md:text-7xl font-black tracking-tight"
+                className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tight"
                 style={{
                   background: `linear-gradient(135deg, ${pageAccentColor}, #ffd700, ${pageAccentColor})`,
                   backgroundSize: "200% 200%",
@@ -241,27 +267,27 @@ const TournamentPage: React.FC = () => {
                 }}
                 transition={{ duration: 3, repeat: Infinity }}
               >
-                42 Coallistion Clash
+                42 Coalistion Clash
               </motion.h1>
-              <Trophy className="w-10 h-10 text-yellow-400" />
+              <Trophy className="w-6 h-6 md:w-10 md:h-10 text-yellow-400" />
             </motion.div>
-            
+
             <motion.div
-              className="flex items-center justify-center gap-2 mb-6"
+              className="flex items-center justify-center gap-2 mb-4 md:mb-6"
               variants={itemVariants}
             >
-              <Star className="w-5 h-5 text-yellow-400" />
-              <span className="text-xl text-gray-300 font-light tracking-widest uppercase">
+              <Star className="w-4 h-4 md:w-5 md:h-5 text-yellow-400" />
+              <span className="text-sm md:text-xl text-gray-300 font-light tracking-widest uppercase">
                 Season 2026
               </span>
-              <Star className="w-5 h-5 text-yellow-400" />
+              <Star className="w-4 h-4 md:w-5 md:h-5 text-yellow-400" />
             </motion.div>
 
             <motion.p
-              className="text-gray-400 text-lg max-w-2xl mx-auto mb-8"
+              className="text-gray-400 text-sm md:text-lg max-w-2xl mx-auto mb-6 md:mb-8 px-4"
               variants={itemVariants}
             >
-              The ultimate showdown. Only one house will claim the glory!
+              The ultimate showdown. one house to claim glory!
             </motion.p>
           </motion.div>
 
@@ -275,7 +301,7 @@ const TournamentPage: React.FC = () => {
                 onClick={() => setSelectedTeam(selectedTeam === key ? null : (key as TeamKey))}
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.95 }}
-                className={`relative px-6 py-4 rounded-2xl font-bold text-lg transition-all overflow-hidden group`}
+                className={`relative px-3 py-2 md:px-6 md:py-4 rounded-xl md:rounded-2xl font-bold text-sm md:text-lg transition-all overflow-hidden group`}
                 style={{
                   background: `linear-gradient(135deg, ${team.color}, ${team.color}dd)`,
                   color: key === "Oryx" ? "#000" : "#fff",
@@ -287,13 +313,13 @@ const TournamentPage: React.FC = () => {
                 <motion.div
                   className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity"
                 />
-                <span className="relative z-10 flex items-center gap-3">
+                <span className="relative z-10 flex items-center gap-2 md:gap-3">
                   <img
                     src={team.logo}
                     alt={`${team.name} logo`}
-                    className="w-8 h-8 rounded-full object-cover"
+                    className="w-6 h-6 md:w-8 md:h-8 rounded-full object-cover"
                   />
-                  {team.name}
+                  <span className="hidden sm:inline">{team.name}</span>
                 </span>
                 {selectedTeam === key && (
                   <motion.div
@@ -306,10 +332,10 @@ const TournamentPage: React.FC = () => {
             ))}
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
             <motion.div
               variants={itemVariants}
-              className="rounded-3xl overflow-hidden backdrop-blur-xl"
+              className="rounded-2xl md:rounded-3xl overflow-hidden backdrop-blur-xl"
               style={{
                 background: "linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))",
                 border: "1px solid rgba(255,255,255,0.1)",
@@ -317,25 +343,29 @@ const TournamentPage: React.FC = () => {
               }}
             >
               <div
-                className="px-6 py-5 flex items-center justify-center"
+                className="px-4 md:px-6 py-3 md:py-5 flex items-center justify-center"
                 style={{
                   background: `linear-gradient(135deg, ${pageAccentColor}dd, ${pageAccentColor}99)`,
                 }}
               >
-                <h2 className="text-2xl font-bold text-white">League Standings</h2>
+                <h2 className="text-lg md:text-2xl font-bold text-white">League Standings</h2>
               </div>
-              <div className="overflow-x-auto p-4">
-                <table className="w-full">
+              <div className="overflow-x-auto p-2 md:p-4">
+                <table className="w-full text-xs md:text-sm">
                   <thead>
-                    <tr className="border-b border-white/10">
-                      <th className="px-3 py-4 text-left text-sm font-bold text-gray-400">#</th>
-                      <th className="px-3 py-4 text-left text-sm font-bold text-gray-400">Team</th>
-                      <th className="px-3 py-4 text-center text-sm font-bold text-gray-400">P</th>
-                      <th className="px-3 py-4 text-center text-sm font-bold text-gray-400">W</th>
-                      <th className="px-3 py-4 text-center text-sm font-bold text-gray-400">D</th>
-                      <th className="px-3 py-4 text-center text-sm font-bold text-gray-400">L</th>
-                      <th className="px-3 py-4 text-center text-sm font-bold text-gray-400">GD</th>
-                      <th className="px-3 py-4 text-center text-sm font-bold text-gray-400">Pts</th>
+                    <tr
+                      className="border-b border-white/20"
+                      style={{ backgroundColor: "rgba(0, 0, 0, 0.4)" }}
+                    >
+                      <th className="px-1 md:px-3 py-2 md:py-4 text-left font-bold text-gray-200">#</th>
+                      <th className="px-1 md:px-3 py-2 md:py-4 text-left font-bold text-gray-200">Team</th>
+                      <th className="px-1 md:px-3 py-2 md:py-4 text-center font-bold text-gray-200">P</th>
+                      <th className="px-1 md:px-3 py-2 md:py-4 text-center font-bold text-green-400">W</th>
+                      <th className="px-1 md:px-3 py-2 md:py-4 text-center font-bold text-yellow-400">D</th>
+                      <th className="px-1 md:px-3 py-2 md:py-4 text-center font-bold text-red-400">L</th>
+                      <th className="hidden sm:table-cell px-1 md:px-3 py-2 md:py-4 text-center font-bold text-gray-200">GD</th>
+                      <th className="px-1 md:px-3 py-2 md:py-4 text-center font-bold text-gray-200">Pts</th>
+                      <th className="hidden md:table-cell px-1 md:px-3 py-2 md:py-4 text-center font-bold text-gray-200">Form</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -350,9 +380,9 @@ const TournamentPage: React.FC = () => {
                           backgroundColor: selectedTeam === row.team ? `${TEAMS[row.team as TeamKey].color}20` : undefined,
                         }}
                       >
-                        <td className="px-3 py-4">
+                        <td className="px-1 md:px-3 py-2 md:py-4">
                           <div
-                            className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                            className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center font-bold text-xs md:text-sm ${
                               idx === 0 ? "bg-yellow-500 text-black" :
                               idx === 1 ? "bg-gray-400 text-black" :
                               idx === 2 ? "bg-amber-700 text-white" :
@@ -362,22 +392,22 @@ const TournamentPage: React.FC = () => {
                             {idx + 1}
                           </div>
                         </td>
-                        <td className="px-3 py-4">
-                          <div className="flex items-center gap-3">
-                            {getTeamBadge(row.team)}
-                            <span className="font-semibold text-white">
+                        <td className="px-1 md:px-3 py-2 md:py-4">
+                          <div className="flex items-center gap-1 md:gap-3">
+                            {getTeamBadge(row.team, "sm")}
+                            <span className="font-semibold text-white text-xs md:text-sm">
                               {TEAMS[row.team as TeamKey].name}
                             </span>
                           </div>
                         </td>
-                        <td className="px-3 py-4 text-center text-gray-300">{row.won + row.drawn + row.lost}</td>
-                        <td className="px-3 py-4 text-center text-green-400 font-semibold">{row.won}</td>
-                        <td className="px-3 py-4 text-center text-yellow-400">{row.drawn}</td>
-                        <td className="px-3 py-4 text-center text-red-400">{row.lost}</td>
-                        <td className="px-3 py-4 text-center text-gray-300">{row.gf - row.ga > 0 ? `+${row.gf - row.ga}` : row.gf - row.ga}</td>
-                        <td className="px-3 py-4">
+                        <td className="px-1 md:px-3 py-2 md:py-4 text-center text-gray-300">{row.won + row.drawn + row.lost}</td>
+                        <td className="px-1 md:px-3 py-2 md:py-4 text-center text-green-400 font-semibold">{row.won}</td>
+                        <td className="px-1 md:px-3 py-2 md:py-4 text-center text-yellow-400">{row.drawn}</td>
+                        <td className="px-1 md:px-3 py-2 md:py-4 text-center text-red-400">{row.lost}</td>
+                        <td className="hidden sm:table-cell px-1 md:px-3 py-2 md:py-4 text-center text-gray-300">{row.gf - row.ga > 0 ? `+${row.gf - row.ga}` : row.gf - row.ga}</td>
+                        <td className="px-1 md:px-3 py-2 md:py-4">
                           <motion.span
-                            className="inline-flex items-center justify-center w-10 h-10 rounded-xl font-bold text-lg"
+                            className="inline-flex items-center justify-center w-7 h-7 md:w-10 md:h-10 rounded-lg md:rounded-xl font-bold text-sm md:text-lg"
                             style={{
                               background: `linear-gradient(135deg, ${TEAMS[row.team as TeamKey].color}, ${TEAMS[row.team as TeamKey].color}99)`,
                               color: row.team === "Oryx" ? "#000" : "#fff",
@@ -387,6 +417,26 @@ const TournamentPage: React.FC = () => {
                           >
                             {row.won * 3 + row.drawn}
                           </motion.span>
+                        </td>
+                        <td className="hidden md:table-cell px-1 md:px-3 py-2 md:py-4">
+                          <div className="flex items-center justify-center gap-1">
+                            {getTeamForm(row.team).map((result, formIdx) => (
+                              <motion.span
+                                key={formIdx}
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ delay: idx * 0.1 + formIdx * 0.05 }}
+                                className={`w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                                  result === 'W' ? 'bg-green-500 text-white' :
+                                  result === 'D' ? 'bg-yellow-500 text-black' :
+                                  'bg-red-500 text-white'
+                                }`}
+                                title={result === 'W' ? 'Win' : result === 'D' ? 'Draw' : 'Loss'}
+                              >
+                                {result}
+                              </motion.span>
+                            ))}
+                          </div>
                         </td>
                       </motion.tr>
                     ))}
@@ -405,14 +455,14 @@ const TournamentPage: React.FC = () => {
               }}
             >
               <div
-                className="px-6 py-5 flex items-center justify-center"
+                className="px-4 md:px-6 py-3 md:py-5 flex items-center justify-center"
                 style={{
                   background: `linear-gradient(135deg, ${pageAccentColor}dd, ${pageAccentColor}99)`,
                 }}
               >
-                <h2 className="text-2xl font-bold text-white">Top Scorers</h2>
+                <h2 className="text-lg md:text-2xl font-bold text-white">Top Scorers</h2>
               </div>
-              <div className="p-4 space-y-3">
+              <div className="p-2 md:p-4 space-y-2 md:space-y-3">
                 {TOP_SCORERS.slice(0, 6).map((scorer, idx) => (
                   <motion.div
                     key={scorer.name}
@@ -420,7 +470,7 @@ const TournamentPage: React.FC = () => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: idx * 0.1 }}
                     whileHover={{ scale: 1.02, x: 5 }}
-                    className="flex items-center justify-between p-4 rounded-2xl transition-all"
+                    className="flex items-center justify-between p-2 md:p-4 rounded-xl md:rounded-2xl transition-all"
                     style={{
                       background: selectedTeam === scorer.team
                         ? `linear-gradient(135deg, ${TEAMS[scorer.team as TeamKey].color}30, ${TEAMS[scorer.team as TeamKey].color}10)`
@@ -428,25 +478,25 @@ const TournamentPage: React.FC = () => {
                       border: `1px solid ${TEAMS[scorer.team as TeamKey].color}30`,
                     }}
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 md:gap-4">
                       <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
+                        className={`w-7 h-7 md:w-10 md:h-10 rounded-full flex items-center justify-center font-bold text-xs md:text-sm ${
                           idx === 0 ? "bg-gradient-to-br from-yellow-400 to-yellow-600 text-black" :
                           idx === 1 ? "bg-gradient-to-br from-gray-300 to-gray-500 text-black" :
                           idx === 2 ? "bg-gradient-to-br from-amber-600 to-amber-800 text-white" :
                           "bg-gray-700/50 text-gray-400"
                         }`}
                       >
-                        {idx === 0 ? <Award className="w-5 h-5" /> : idx + 1}
+                        {idx === 0 ? <Award className="w-4 h-4 md:w-5 md:h-5" /> : idx + 1}
                       </div>
-                      {getTeamBadge(scorer.team, "sm")}
+                      <div className="hidden sm:block">{getTeamBadge(scorer.team, "sm")}</div>
                       <div>
-                        <span className="font-semibold text-white block">{scorer.name}</span>
-                        <span className="text-xs text-gray-500">{TEAMS[scorer.team as TeamKey].name}</span>
+                        <span className="font-semibold text-white block text-xs md:text-sm">{scorer.name}</span>
+                        <span className="text-[10px] md:text-xs text-gray-500">{TEAMS[scorer.team as TeamKey].name}</span>
                       </div>
                     </div>
                     <motion.div
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xl"
+                      className="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1 md:py-2 rounded-lg md:rounded-xl font-bold text-sm md:text-xl"
                       style={{
                         background: `linear-gradient(135deg, ${TEAMS[scorer.team as TeamKey].color}, ${TEAMS[scorer.team as TeamKey].color}99)`,
                         color: scorer.team === "Oryx" ? "#000" : "#fff",
@@ -454,7 +504,7 @@ const TournamentPage: React.FC = () => {
                       }}
                       whileHover={{ scale: 1.1 }}
                     >
-                      <Zap className="w-4 h-4" />
+                      <Zap className="w-3 h-3 md:w-4 md:h-4" />
                       {scorer.goals}
                     </motion.div>
                   </motion.div>
@@ -472,14 +522,14 @@ const TournamentPage: React.FC = () => {
               }}
             >
               <div
-                className="px-6 py-5 flex items-center justify-center"
+                className="px-4 md:px-6 py-3 md:py-5 flex items-center justify-center"
                 style={{
                   background: `linear-gradient(135deg, ${pageAccentColor}dd, ${pageAccentColor}99)`,
                 }}
               >
-                <h2 className="text-2xl font-bold text-white">Recent Results</h2>
+                <h2 className="text-lg md:text-2xl font-bold text-white">Recent Results</h2>
               </div>
-              <div className="p-4 space-y-4">
+              <div className="p-2 md:p-4 space-y-2 md:space-y-4">
                 {PREVIOUS_RESULTS.map((match, idx) => (
                   <motion.div
                     key={idx}
@@ -487,24 +537,24 @@ const TournamentPage: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.1 }}
                     whileHover={{ scale: 1.02 }}
-                    className="rounded-2xl p-5 transition-all"
+                    className="rounded-xl md:rounded-2xl p-3 md:p-5 transition-all"
                     style={{
                       background: "rgba(255,255,255,0.03)",
                       border: "1px solid rgba(255,255,255,0.08)",
                     }}
                   >
-                    <div className="text-xs text-center mb-3 text-gray-500 font-medium tracking-wider uppercase">
+                    <div className="text-xs text-center mb-2 md:mb-3 text-gray-500 font-medium tracking-wider uppercase">
                       {match.date}
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 flex-1 justify-end">
-                        <span className="font-semibold text-white text-lg">
+                    <div className="flex items-center justify-between gap-2 md:gap-4">
+                      <div className="flex flex-col md:flex-row items-center gap-1 md:gap-3 flex-1 justify-end">
+                        <span className="font-semibold text-white text-xs md:text-lg order-2 md:order-1 hidden sm:block">
                           {TEAMS[match.home as TeamKey].name}
                         </span>
-                        {getTeamBadge(match.home)}
+                        {getTeamBadge(match.home, "sm")}
                       </div>
                       <motion.div
-                        className="px-6 py-3 rounded-2xl mx-4 font-black text-2xl min-w-[100px] text-center"
+                        className="px-3 py-2 md:px-6 md:py-3 rounded-xl md:rounded-2xl mx-1 md:mx-4 font-black text-lg md:text-2xl min-w-[70px] md:min-w-[100px] text-center"
                         style={{
                           background: "linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05))",
                           border: "1px solid rgba(255,255,255,0.1)",
@@ -515,18 +565,37 @@ const TournamentPage: React.FC = () => {
                         <span style={{ color: match.homeScore > match.awayScore ? "#4ade80" : match.homeScore < match.awayScore ? "#f87171" : "#fbbf24" }}>
                           {match.homeScore}
                         </span>
-                        <span className="mx-2 text-gray-500">-</span>
+                        <span className="mx-1 md:mx-2 text-gray-500">-</span>
                         <span style={{ color: match.awayScore > match.homeScore ? "#4ade80" : match.awayScore < match.homeScore ? "#f87171" : "#fbbf24" }}>
                           {match.awayScore}
                         </span>
                       </motion.div>
-                      <div className="flex items-center gap-3 flex-1">
-                        {getTeamBadge(match.away)}
-                        <span className="font-semibold text-white text-lg">
+                      <div className="flex flex-col md:flex-row items-center gap-1 md:gap-3 flex-1">
+                        {getTeamBadge(match.away, "sm")}
+                        <span className="font-semibold text-white text-xs md:text-lg hidden sm:block">
                           {TEAMS[match.away as TeamKey].name}
                         </span>
                       </div>
                     </div>
+                    {/* Team names for very small screens */}
+                    <div className="flex justify-between sm:hidden mt-2 text-xs text-gray-400">
+                      <span>{TEAMS[match.home as TeamKey].name}</span>
+                      <span>{TEAMS[match.away as TeamKey].name}</span>
+                    </div>
+                    {match.highlight && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                        className="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-white/10"
+                      >
+                        <p className="text-xs md:text-sm text-center text-gray-400 italic flex items-center justify-center gap-1 md:gap-2">
+                          <Star className="w-3 h-3 text-yellow-400 flex-shrink-0" />
+                          <span className="line-clamp-2">{match.highlight}</span>
+                          <Star className="w-3 h-3 text-yellow-400 flex-shrink-0" />
+                        </p>
+                      </motion.div>
+                    )}
                   </motion.div>
                 ))}
               </div>
@@ -542,14 +611,14 @@ const TournamentPage: React.FC = () => {
               }}
             >
               <div
-                className="px-6 py-5 flex items-center justify-center"
+                className="px-4 md:px-6 py-3 md:py-5 flex items-center justify-center"
                 style={{
                   background: `linear-gradient(135deg, ${pageAccentColor}dd, ${pageAccentColor}99)`,
                 }}
               >
-                <h2 className="text-2xl font-bold text-white">Upcoming Matches</h2>
+                <h2 className="text-lg md:text-2xl font-bold text-white">Upcoming Matches</h2>
               </div>
-              <div className="p-4 space-y-3">
+              <div className="p-2 md:p-4 space-y-2 md:space-y-3">
                 {NEXT_FIXTURES.map((match, idx) => (
                   <motion.div
                     key={idx}
@@ -557,16 +626,16 @@ const TournamentPage: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.08 }}
                     whileHover={{ scale: 1.02, x: 5 }}
-                    className="rounded-2xl p-4 transition-all"
+                    className="rounded-xl md:rounded-2xl p-2 md:p-4 transition-all"
                     style={{
                       background: "rgba(255,255,255,0.03)",
                       border: "1px solid rgba(255,255,255,0.08)",
                     }}
                   >
-                    <div className="flex items-center justify-between gap-2 text-xs mb-3">
+                    <div className="flex items-center justify-between gap-2 text-[10px] md:text-xs mb-2 md:mb-3">
                       <span className="text-gray-500 font-medium">{match.date}</span>
                       <span
-                        className="px-3 py-1 rounded-full font-bold"
+                        className="px-2 md:px-3 py-1 rounded-full font-bold"
                         style={{
                           background: `linear-gradient(135deg, ${pageAccentColor}30, ${pageAccentColor}10)`,
                           color: pageAccentColor,
@@ -575,15 +644,15 @@ const TournamentPage: React.FC = () => {
                         {match.time}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 flex-1 justify-end">
-                        <span className="font-semibold text-white">
+                    <div className="flex items-center justify-between gap-1 md:gap-2">
+                      <div className="flex items-center gap-1 md:gap-2 flex-1 justify-end">
+                        <span className="font-semibold text-white text-xs md:text-base hidden sm:block">
                           {TEAMS[match.home as TeamKey].name}
                         </span>
                         {getTeamBadge(match.home, "sm")}
                       </div>
                       <motion.div
-                        className="px-4 py-2 rounded-xl mx-3 font-bold text-sm"
+                        className="px-2 md:px-4 py-1 md:py-2 rounded-lg md:rounded-xl mx-1 md:mx-3 font-bold text-xs md:text-sm"
                         style={{
                           background: `linear-gradient(135deg, ${pageAccentColor}, ${pageAccentColor}99)`,
                           color: "#fff",
@@ -601,18 +670,83 @@ const TournamentPage: React.FC = () => {
                       >
                         VS
                       </motion.div>
-                      <div className="flex items-center gap-2 flex-1">
+                      <div className="flex items-center gap-1 md:gap-2 flex-1">
                         {getTeamBadge(match.away, "sm")}
-                        <span className="font-semibold text-white">
+                        <span className="font-semibold text-white text-xs md:text-base hidden sm:block">
                           {TEAMS[match.away as TeamKey].name}
                         </span>
                       </div>
+                    </div>
+                    {/* Team names for very small screens */}
+                    <div className="flex justify-between sm:hidden mt-2 text-[10px] text-gray-400">
+                      <span>{TEAMS[match.home as TeamKey].name}</span>
+                      <span>{TEAMS[match.away as TeamKey].name}</span>
                     </div>
                   </motion.div>
                 ))}
               </div>
             </motion.div>
           </div>
+
+          <motion.div
+            variants={itemVariants}
+            className="mt-8 rounded-3xl overflow-hidden backdrop-blur-xl"
+            style={{
+              background: "linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))",
+              border: "1px solid rgba(255,255,255,0.1)",
+            }}
+          >
+            <div
+              className="px-4 md:px-6 py-3 md:py-4 flex items-center justify-center gap-2"
+              style={{
+                background: "linear-gradient(135deg, #4a5568dd, #4a556899)",
+              }}
+            >
+              <Scale className="w-4 h-4 md:w-5 md:h-5 text-white" />
+              <h2 className="text-lg md:text-xl font-bold text-white">Tiebreaker Rules</h2>
+            </div>
+            <div className="p-3 md:p-6">
+              <div className="mb-3 md:mb-4 p-2 md:p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/30">
+                <p className="text-yellow-400 text-xs md:text-sm text-center font-medium">
+                  These are my rules for this tournament, not official FIFA/UEFA or even 42 regulations.
+                </p>
+              </div>
+              <p className="text-gray-400 text-xs md:text-sm mb-3 md:mb-4 text-center">
+                When teams are tied on points, the following criteria are applied in order:
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 md:gap-3">
+                {[
+                  { num: 1, title: "Points", desc: "Win=3, Draw=1" },
+                  { num: 2, title: "Goal Diff", desc: "GF minus GA" },
+                  { num: 3, title: "Goals For", desc: "Total goals scored" },
+                  { num: 4, title: "H2H Pts", desc: "Direct match points" },
+                  { num: 5, title: "H2H Goals", desc: "Direct match goals" },
+                ].map((rule) => (
+                  <motion.div
+                    key={rule.num}
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    className="p-2 md:p-4 rounded-xl text-center"
+                    style={{
+                      background: "rgba(255,255,255,0.03)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                    }}
+                  >
+                    <div
+                      className="w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center font-bold text-xs md:text-sm mx-auto mb-1 md:mb-2"
+                      style={{
+                        background: `linear-gradient(135deg, ${pageAccentColor}, ${pageAccentColor}99)`,
+                        color: "#fff",
+                      }}
+                    >
+                      {rule.num}
+                    </div>
+                    <h3 className="font-semibold text-white text-xs md:text-sm mb-1">{rule.title}</h3>
+                    <p className="text-gray-500 text-[10px] md:text-xs">{rule.desc}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
 
           <motion.div
             variants={itemVariants}
