@@ -254,9 +254,10 @@ const TournamentPage: React.FC = () => {
             >
               <Trophy className="w-6 h-6 md:w-10 md:h-10 text-yellow-400" />
               <motion.h1
-                className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tight"
+                className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tight drop-shadow-[0_0_30px_rgba(255,215,0,0.5)]"
                 style={{
-                  background: `linear-gradient(135deg, ${pageAccentColor}, #ffd700, ${pageAccentColor})`,
+                  color: "#ffd700",
+                  backgroundImage: `linear-gradient(135deg, ${pageAccentColor}, #ffd700, ${pageAccentColor})`,
                   backgroundSize: "200% 200%",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
@@ -267,7 +268,7 @@ const TournamentPage: React.FC = () => {
                 }}
                 transition={{ duration: 3, repeat: Infinity }}
               >
-                42 Coalistion Clash
+                42 Coalition Clash
               </motion.h1>
               <Trophy className="w-6 h-6 md:w-10 md:h-10 text-yellow-400" />
             </motion.div>
@@ -345,10 +346,10 @@ const TournamentPage: React.FC = () => {
               <div
                 className="px-4 md:px-6 py-3 md:py-5 flex items-center justify-center"
                 style={{
-                  background: `linear-gradient(135deg, ${pageAccentColor}dd, ${pageAccentColor}99)`,
+                  background: `linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.2)), linear-gradient(135deg, ${pageAccentColor}, ${pageAccentColor}cc)`,
                 }}
               >
-                <h2 className="text-lg md:text-2xl font-bold text-white">League Standings</h2>
+                <h2 className="text-lg md:text-2xl font-bold text-white drop-shadow-md">League Standings</h2>
               </div>
               <div className="overflow-x-auto p-2 md:p-4">
                 <table className="w-full text-xs md:text-sm">
@@ -457,10 +458,10 @@ const TournamentPage: React.FC = () => {
               <div
                 className="px-4 md:px-6 py-3 md:py-5 flex items-center justify-center"
                 style={{
-                  background: `linear-gradient(135deg, ${pageAccentColor}dd, ${pageAccentColor}99)`,
+                  background: `linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.2)), linear-gradient(135deg, ${pageAccentColor}, ${pageAccentColor}cc)`,
                 }}
               >
-                <h2 className="text-lg md:text-2xl font-bold text-white">Top Scorers</h2>
+                <h2 className="text-lg md:text-2xl font-bold text-white drop-shadow-md">Top Scorers</h2>
               </div>
               <div className="p-2 md:p-4 space-y-2 md:space-y-3">
                 {TOP_SCORERS.slice(0, 6).map((scorer, idx) => (
@@ -524,10 +525,10 @@ const TournamentPage: React.FC = () => {
               <div
                 className="px-4 md:px-6 py-3 md:py-5 flex items-center justify-center"
                 style={{
-                  background: `linear-gradient(135deg, ${pageAccentColor}dd, ${pageAccentColor}99)`,
+                  background: `linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.2)), linear-gradient(135deg, ${pageAccentColor}, ${pageAccentColor}cc)`,
                 }}
               >
-                <h2 className="text-lg md:text-2xl font-bold text-white">Recent Results</h2>
+                <h2 className="text-lg md:text-2xl font-bold text-white drop-shadow-md">Recent Results</h2>
               </div>
               <div className="p-2 md:p-4 space-y-2 md:space-y-4">
                 {PREVIOUS_RESULTS.map((match, idx) => (
@@ -613,10 +614,10 @@ const TournamentPage: React.FC = () => {
               <div
                 className="px-4 md:px-6 py-3 md:py-5 flex items-center justify-center"
                 style={{
-                  background: `linear-gradient(135deg, ${pageAccentColor}dd, ${pageAccentColor}99)`,
+                  background: `linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.2)), linear-gradient(135deg, ${pageAccentColor}, ${pageAccentColor}cc)`,
                 }}
               >
-                <h2 className="text-lg md:text-2xl font-bold text-white">Upcoming Matches</h2>
+                <h2 className="text-lg md:text-2xl font-bold text-white drop-shadow-md">Upcoming Matches</h2>
               </div>
               <div className="p-2 md:p-4 space-y-2 md:space-y-3">
                 {NEXT_FIXTURES.map((match, idx) => (
