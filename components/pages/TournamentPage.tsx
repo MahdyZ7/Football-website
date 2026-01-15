@@ -12,10 +12,10 @@ const TEAMS = {
 };
 
 const LEAGUE_TABLE = [
-	{ team: "Falcon", won: 1, drawn: 0, lost: 2, gf: 5, ga: 4 },
-	{ team: "Leopard", won: 1, drawn: 0, lost: 2, gf: 1, ga: 6 },
-	{ team: "Oryx", won: 1, drawn: 1, lost: 1, gf: 3, ga: 3 },
-	{ team: "Wolves", won: 2, drawn: 1, lost: 0, gf: 5, ga: 1 },
+	{ team: "Falcon", won: 1, drawn: 1, lost: 2, gf: 6, ga: 5 },
+	{ team: "Leopard", won: 1, drawn: 1, lost: 2, gf: 1, ga: 6 },
+	{ team: "Oryx", won: 1, drawn: 2, lost: 1, gf: 3, ga: 3 },
+	{ team: "Wolves", won: 2, drawn: 2, lost: 0, gf: 6, ga: 2 },
 ];
 
 const getPoints = (team: { won: number; drawn: number; lost: number }) => {
@@ -25,10 +25,12 @@ const getPoints = (team: { won: number; drawn: number; lost: number }) => {
 const PREVIOUS_RESULTS = [
   { home: "Falcon", away: "Wolves", homeScore: 0, awayScore: 2, date: "Jan 5, 2026", highlight: "Wolves crank a surprise double against title favorite Falcon" },
   { home: "Leopard", away: "Oryx", homeScore: 1, awayScore: 0, date: "Jan 5, 2026", highlight: "Unregistered Akram capitalises on a defensive error to score the only goal" },
-  { home: "Oryx", away: "Wolves", homeScore: 1, awayScore: 1, date: "Jan 8, 2026", highlight: "Oryx shows it's no easy prey, but Wolves hold on for a draw" },
-  { home: "Leopard", away: "Falcon", homeScore: 0, awayScore: 4, date: "Jan 8, 2026", highlight: "Falcons strike hard and fast to show why they are title favorites" },
+  { home: "Oryx", away: "Wolves", homeScore: 1, awayScore: 1, date: "Jan 8, 2026", highlight: "Wolves bite first but Oryx eke out a draw showing they are no easy prey" },
+  { home: "Leopard", away: "Falcon", homeScore: 0, awayScore: 4, date: "Jan 8, 2026", highlight: "Falcons strike hard and fast. A display worthy of title contenders" },
   { home: "Leopard", away: "Wolves", homeScore: 0, awayScore: 2, date: "Jan 12, 2026", highlight: "Wolves extend unbeaten run and it looks like they might run away with the title" },
   { home: "Falcon", away: "Oryx", homeScore: 1, awayScore: 2, date: "Jan 12, 2026", highlight: "Oryx with a quick double turn the table to win their first Game. The start of a comeback ???" },
+  { home: "Oryx", away: "Leopard",homeScore: 0, awayScore: 0,  date: "Jan 15, 2026", highlight: "Leopard prove once again they have Oryx's number. They can take pride in sabotaging the defending champions' campaign" },
+  { home: "Wolves", away: "Falcon", homeScore: 1, awayScore: 1, date: "Jan 15, 2026", highlight: "A cagey affair ends in stalemate. Wolves barely hold on and keep a healthy distance on top" },
 ];
 
 // Calculate recent form for a team (returns array of 'W', 'D', 'L' for last N matches)
@@ -49,8 +51,6 @@ const getTeamForm = (teamName: string, maxMatches: number = 5): Array<'W' | 'D' 
 }
 
 const NEXT_FIXTURES = [
-  { home: "Oryx", away: "Leopard", date: "Jan 15, 2026", time: "21:00" },
-  { home: "Wolves", away: "Falcon", date: "Jan 15, 2026", time: "21:30" },
   { home: "Wolves", away: "Leopard", date: "Jan 19, 2026", time: "21:00" },
   { home: "Oryx", away: "Falcon", date: "Jan 19, 2026", time: "21:30" },
   { home: "Wolves", away: "Oryx", date: "Jan 22, 2026", time: "21:00" },
@@ -58,9 +58,9 @@ const NEXT_FIXTURES = [
 ];
 
 const TOP_SCORERS = [
-  { name: "Zubidullah", team: "Falcon", goals: 3 },
+  { name: "Zubidullah", team: "Falcon", goals: 4 },
+  { name: "Moh'd Alfaqih", team: "Wolves", goals: 3 },
   { name: "Fisal", team: "Wolves", goals: 2 },
-  { name: "Moh'd Alfaqih", team: "Wolves", goals: 2 },
   { name: "Akram", team: "Leopard", goals: 1 },
   { name: "Moh'd Desogi", team: "Wolves", goals: 1 },
   { name: "Haitham", team: "Oryx", goals: 1 },
