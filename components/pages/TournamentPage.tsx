@@ -51,8 +51,8 @@ const getTeamForm = (teamName: string, maxMatches: number = 5): Array<'W' | 'D' 
 }
 
 const NEXT_FIXTURES = [
-  { home: "Wolves", away: "Leopard", date: "Jan 19, 2026", time: "21:00" },
-  { home: "Oryx", away: "Falcon", date: "Jan 19, 2026", time: "21:30" },
+  { home: "Falocn", away: "Leopard", date: "Jan 19, 2026", time: "21:00" },
+  { home: "Oryx", away: "Wolves", date: "Jan 19, 2026", time: "21:30" },
   { home: "Wolves", away: "Oryx", date: "Jan 22, 2026", time: "21:00" },
   { home: "Falcon", away: "Leopard", date: "Jan 22, 2026", time: "21:30" },
 ];
