@@ -14,10 +14,10 @@ const TEAMS = {
 };
 
 const LEAGUE_TABLE = [
-	{ team: "Falcon", won: 1, drawn: 2, lost: 2, gf: 7, ga: 6 },
-	{ team: "Leopard", won: 1, drawn: 2, lost: 2, gf: 2, ga: 7 },
-	{ team: "Oryx", won: 2, drawn: 2, lost: 1, gf: 4, ga: 3 },
-	{ team: "Wolves", won: 2, drawn: 2, lost: 1, gf: 6, ga: 3 },
+	{ team: "Falcon", won: 1, drawn: 2, lost: 3, gf: 9, ga: 10 },
+	{ team: "Leopard", won: 1, drawn: 2, lost: 3, gf: 2, ga: 10 },
+	{ team: "Oryx", won: 3, drawn: 2, lost: 1, gf: 8, ga: 5 },
+	{ team: "Wolves", won: 3, drawn: 2, lost: 1, gf: 9, ga: 3 },
 ];
 
 const getPoints = (team: { won: number; drawn: number; lost: number }) => {
@@ -25,20 +25,22 @@ const getPoints = (team: { won: number; drawn: number; lost: number }) => {
 }
 
 const PREVIOUS_RESULTS = [
+	{ home: "Wolves", away: "Leopard", homeScore: 3, awayScore: 0, date: "Jan 22, 2026", highlight: "Wolves capture the title against an abysmal display from Leopard" },
+	{ home: "Oryx", away: "Falcon", homeScore: 4, awayScore: 2, date: "Jan 22, 2026", highlight: "Oryx, with a man down, dominate Falcon chasing a pipe dream that eludes them" },
 	{ home: "Oryx", away: "Wolves", homeScore: 1, awayScore: 0, date: "Jan 19, 2026", highlight: "Injuries force Wolves to park the bus but the wheels fall off in the final minutes" },
-	{ home: "Falcon", away: "Leopard", homeScore: 1, awayScore: 1, date: "Jan 19, 2026", highlight: "Leopards fail turn thier numeric advantage into goals after an early send-off" },
+	{ home: "Falcon", away: "Leopard", homeScore: 1, awayScore: 1, date: "Jan 19, 2026", highlight: "Leopards fail to turn their numeric advantage into goals after an early send-off" },
 	{ home: "Wolves", away: "Falcon", homeScore: 1, awayScore: 1, date: "Jan 15, 2026", highlight: "A cagey affair ends in stalemate. Wolves barely hold on and keep a healthy distance on top" },
 	{ home: "Oryx", away: "Leopard",homeScore: 0, awayScore: 0,  date: "Jan 15, 2026", highlight: "Leopard prove once again they have Oryx's number. They can take pride in sabotaging the defending champions' campaign" },
 	{ home: "Falcon", away: "Oryx", homeScore: 1, awayScore: 2, date: "Jan 12, 2026", highlight: "Oryx with a quick double turn the table to win their first Game. The start of a comeback ???" },
 	{ home: "Leopard", away: "Wolves", homeScore: 0, awayScore: 2, date: "Jan 12, 2026", highlight: "Wolves extend unbeaten run and it looks like they might run away with the title" },
 	{ home: "Leopard", away: "Falcon", homeScore: 0, awayScore: 4, date: "Jan 8, 2026", highlight: "Falcons strike hard and fast. A display worthy of title contenders" },
-	{ home: "Oryx", away: "Wolves", homeScore: 1, awayScore: 1, date: "Jan 8, 2026", highlight: "Wolves bite first but Oryx eke out a draw showing they are no easy prey" },
+	{ home: "Wolves", away: "Oryx", homeScore: 1, awayScore: 1, date: "Jan 8, 2026", highlight: "Wolves bite first but Oryx eke out a draw showing they are no easy prey" },
 	{ home: "Leopard", away: "Oryx", homeScore: 1, awayScore: 0, date: "Jan 5, 2026", highlight: "Unregistered Akram capitalises on a defensive error to score the only goal" },
 	{ home: "Falcon", away: "Wolves", homeScore: 0, awayScore: 2, date: "Jan 5, 2026", highlight: "Wolves crank a surprise double against title favorite Falcon" },
 ];
 
 // Calculate recent form for a team (returns array of 'W', 'D', 'L' for last N matches)
-const getTeamForm = (teamName: string, maxMatches: number = 5): Array<'W' | 'D' | 'L'> => {
+const getTeamForm = (teamName: string, maxMatches: number = 6): Array<'W' | 'D' | 'L'> => {
 	const teamMatches = PREVIOUS_RESULTS
 		.filter(m => m.home === teamName || m.away === teamName)
 		.slice(-maxMatches)
@@ -55,24 +57,26 @@ const getTeamForm = (teamName: string, maxMatches: number = 5): Array<'W' | 'D' 
 	});	
 }
 
-const NEXT_FIXTURES = [
-  { home: "Wolves", away: "Oryx", date: "Jan 22, 2026", time: "21:00" },
-  { home: "Falcon", away: "Leopard", date: "Jan 22, 2026", time: "21:30" },
+const NEXT_FIXTURES: any[] = [
+	
 ];
 
 const TOP_SCORERS = [
-  { name: "Zubidullah", team: "Falcon", goals: 5 },
-  { name: "Moh'd Alfaqih", team: "Wolves", goals: 3 },
-  { name: "Fisal", team: "Wolves", goals: 2 },
+  { name: "Zubidullah", team: "Falcon", goals: 6 },
+  { name: "Moh'd Alfaqih", team: "Wolves", goals: 5 },
+  { name: "Fisal", team: "Wolves", goals: 3 },
+  { name: "Abdulla Gazi", team: "Oryx", goals: 3 },
   { name: "Akram", team: "Leopard", goals: 1 },
   { name: "Moh'd Desogi", team: "Wolves", goals: 1 },
   { name: "Haitham", team: "Oryx", goals: 1 },
   { name: "Moh'd Eid", team: "Falcon", goals: 1 },
   { name: "Ranem", team: "Falcon", goals: 1 },
   { name: "Khalil", team: "Oryx", goals: 1 },
-  { name: "Abdulla Gazi", team: "Oryx", goals: 1 },
   { name: "Abdulla Rashidov", team: "Leopard", goals: 1 },
   { name: "Hackeem", team: "Oryx", goals: 1 },
+  { name: "Yussef", team: "Falcon", goals: 1 },
+  { name: "Moh'd Ahmoudi", team: "Oryx", goals: 1 },
+  { name: "Ahmed Yassin", team: "Oryx", goals: 1 },
 ];
 
 type TeamKey = keyof typeof TEAMS;
@@ -789,6 +793,11 @@ const TournamentPage: React.FC = () => {
                 <h2 className="text-lg md:text-2xl font-bold text-white drop-shadow-md">Upcoming Matches</h2>
               </div>
               <div className="p-2 md:p-4 space-y-2 md:space-y-3">
+				{NEXT_FIXTURES.length === 0 && (
+				  <div className="p-4 text-center text-gray-400 italic">
+					No upcoming matches scheduled.
+				  </div>
+				)}
                 {NEXT_FIXTURES.map((match, idx) => (
                   <motion.div
                     key={idx}
