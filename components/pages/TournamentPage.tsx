@@ -166,7 +166,7 @@ const CrownIcon = () => (
   </svg>
 );
 
-const ChampionBanner = () => {
+const ChampionBanner = ({ mounted }: { mounted: boolean }) => {
   const confettiCount = 40;
   
   return (
@@ -183,7 +183,7 @@ const ChampionBanner = () => {
     >
       {/* Confetti Layer */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {Array.from({ length: confettiCount }).map((_, i) => (
+        {mounted && Array.from({ length: confettiCount }).map((_, i) => (
           <ConfettiPiece key={i} delay={i * 0.15} index={i} />
         ))}
       </div>
@@ -342,7 +342,7 @@ const ChampionBanner = () => {
       </div>
 
       {/* Sparkle Effects */}
-      {[...Array(6)].map((_, i) => (
+      {mounted && [...Array(6)].map((_, i) => (
         <motion.div
           key={`sparkle-${i}`}
           className="absolute w-1 h-1 md:w-2 md:h-2 bg-yellow-400 rounded-full"
@@ -684,6 +684,8 @@ const TournamentPage: React.FC = () => {
           initial="hidden"
           animate="visible"
         >
+          <ChampionBanner mounted={mounted} />
+          
           <motion.div
             className="text-center mb-12"
             variants={itemVariants}

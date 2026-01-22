@@ -1,0 +1,1003 @@
+## Error Type
+Console Error
+
+## Error Message
+A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <SegmentViewNode type="page" pagePath="page.tsx">
+      <SegmentTrieNode>
+      <ClientPageRoot Component={function Index} serverProvidedParams={{...}}>
+        <Index params={Promise} searchParams={Promise}>
+          <Home>
+            <TournamentPage>
+              <div className="min-h-scre..." style={{...}}>
+                <VotePopup>
+                <motion.div>
+                <Navbar>
+                <ChampionBanner>
+                  <motion.div initial={{opacity:0,y:-50}} animate={{opacity:1,y:0}} transition={{duration:0.8, ...}} ...>
+                    <div className="relative o..." style={{...}} ref={function useMotionRef.useCallback}>
+                      <div className="absolute i...">
+                        <ConfettiPiece delay={0} index={0}>
+                          <motion.div className={"absolute "} style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className={"absolute "}
+                              style={{
++                               backgroundColor: "#ffd700"
++                               width: 7.053753863891403
+-                               width: "12.1249px"
++                               height: 4.232252318334842
+-                               height: "7.27493px"
++                               left: "34.014010617566136%"
+-                               left: "91.0389%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(255, 215, 0)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={0.15} index={1}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#ffaa00"
++                               width: 10.020940004150077
+-                               width: "8.94813px"
++                               height: 10.020940004150077
+-                               height: "8.94813px"
++                               left: "7.644543744895749%"
+-                               left: "26.747%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(255, 170, 0)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={0.3} index={2}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#424242"
++                               width: 8.188751395989557
+-                               width: "10.5299px"
++                               height: 8.188751395989557
+-                               height: "10.5299px"
++                               left: "31.256522774841354%"
+-                               left: "61.078%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(66, 66, 66)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={0.44999999999999996} index={3}>
+                          <motion.div className={"absolute "} style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className={"absolute "}
+                              style={{
++                               backgroundColor: "#666666"
++                               width: 7.204500309028195
+-                               width: "13.1493px"
++                               height: 4.322700185416917
+-                               height: "7.88958px"
++                               left: "76.32698410880504%"
+-                               left: "21.0427%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(102, 102, 102)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={0.6} index={4}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#888888"
++                               width: 10.471825989725735
+-                               width: "7.56771px"
++                               height: 10.471825989725735
+-                               height: "7.56771px"
++                               left: "36.83251277134211%"
+-                               left: "16.2995%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(136, 136, 136)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={0.75} index={5}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#ffc107"
++                               width: 9.938058853828238
+-                               width: "6.74125px"
++                               height: 9.938058853828238
+-                               height: "6.74125px"
++                               left: "27.313396826025382%"
+-                               left: "29.1788%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(255, 193, 7)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={0.8999999999999999} index={6}>
+                          <motion.div className={"absolute "} style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className={"absolute "}
+                              style={{
++                               backgroundColor: "#ffd700"
++                               width: 9.430357473311894
+-                               width: "8.65368px"
++                               height: 5.658214483987136
+-                               height: "5.19221px"
++                               left: "74.43398447461108%"
+-                               left: "88.3785%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(255, 215, 0)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={1.05} index={7}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#ffaa00"
++                               width: 10.75581231129106
+-                               width: "11.1587px"
++                               height: 10.75581231129106
+-                               height: "11.1587px"
++                               left: "50.87123762691692%"
+-                               left: "25.1915%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(255, 170, 0)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={1.2} index={8}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#424242"
++                               width: 11.879266134230132
+-                               width: "12.7897px"
++                               height: 11.879266134230132
+-                               height: "12.7897px"
++                               left: "47.59644144006041%"
+-                               left: "77.7409%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(66, 66, 66)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={1.3499999999999999} index={9}>
+                          <motion.div className={"absolute "} style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className={"absolute "}
+                              style={{
++                               backgroundColor: "#666666"
++                               width: 7.588013362291048
+-                               width: "11.6998px"
++                               height: 4.552808017374629
+-                               height: "7.01986px"
++                               left: "36.11073792345265%"
+-                               left: "42.5136%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(102, 102, 102)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={1.5} index={10}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#888888"
++                               width: 10.905213997294517
+-                               width: "6.79595px"
++                               height: 10.905213997294517
+-                               height: "6.79595px"
++                               left: "44.95243784185073%"
+-                               left: "42.2661%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(136, 136, 136)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={1.65} index={11}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#ffc107"
++                               width: 8.626972432715688
+-                               width: "7.52786px"
++                               height: 8.626972432715688
+-                               height: "7.52786px"
++                               left: "0.11035581789810012%"
+-                               left: "47.1955%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(255, 193, 7)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={1.7999999999999998} index={12}>
+                          <motion.div className={"absolute "} style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className={"absolute "}
+                              style={{
++                               backgroundColor: "#ffd700"
++                               width: 11.381392046212888
+-                               width: "10.5416px"
++                               height: 6.828835227727732
+-                               height: "6.32496px"
++                               left: "9.515604499842812%"
+-                               left: "49.4034%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(255, 215, 0)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={1.95} index={13}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#ffaa00"
++                               width: 9.361937761576684
+-                               width: "8.59502px"
++                               height: 9.361937761576684
+-                               height: "8.59502px"
++                               left: "99.34658836370946%"
+-                               left: "9.34485%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(255, 170, 0)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={2.1} index={14}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#424242"
++                               width: 10.928685519805358
+-                               width: "6.71531px"
++                               height: 10.928685519805358
+-                               height: "6.71531px"
++                               left: "20.885634218950244%"
+-                               left: "43.448%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(66, 66, 66)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={2.25} index={15}>
+                          <motion.div className={"absolute "} style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className={"absolute "}
+                              style={{
++                               backgroundColor: "#666666"
++                               width: 6.258343339341305
+-                               width: "6.06886px"
++                               height: 3.755006003604783
+-                               height: "3.64132px"
++                               left: "23.726126154468986%"
+-                               left: "98.6473%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(102, 102, 102)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={2.4} index={16}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#888888"
++                               width: 7.989408291029649
+-                               width: "7.35575px"
++                               height: 7.989408291029649
+-                               height: "7.35575px"
++                               left: "68.42303152369593%"
+-                               left: "32.8488%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(136, 136, 136)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={2.55} index={17}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#ffc107"
++                               width: 13.483078049011308
+-                               width: "11.5914px"
++                               height: 13.483078049011308
+-                               height: "11.5914px"
++                               left: "61.42073781000794%"
+-                               left: "36.817%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(255, 193, 7)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={2.6999999999999997} index={18}>
+                          <motion.div className={"absolute "} style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className={"absolute "}
+                              style={{
++                               backgroundColor: "#ffd700"
++                               width: 11.994216495147535
+-                               width: "7.54643px"
++                               height: 7.196529897088521
+-                               height: "4.52786px"
++                               left: "2.889855777622896%"
+-                               left: "87.0023%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(255, 215, 0)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={2.85} index={19}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#ffaa00"
++                               width: 9.085585079408897
+-                               width: "10.2067px"
++                               height: 9.085585079408897
+-                               height: "10.2067px"
++                               left: "3.1041040513952622%"
+-                               left: "0.695023%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(255, 170, 0)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={3} index={20}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#424242"
++                               width: 8.399812437697129
+-                               width: "9.44033px"
++                               height: 8.399812437697129
+-                               height: "9.44033px"
++                               left: "32.595429920230345%"
+-                               left: "35.1992%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(66, 66, 66)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={3.15} index={21}>
+                          <motion.div className={"absolute "} style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className={"absolute "}
+                              style={{
++                               backgroundColor: "#666666"
++                               width: 8.01913883678565
+-                               width: "13.7961px"
++                               height: 4.81148330207139
+-                               height: "8.27769px"
++                               left: "47.237621530734884%"
+-                               left: "0.70631%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(102, 102, 102)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={3.3} index={22}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#888888"
++                               width: 10.316683087812095
+-                               width: "13.1855px"
++                               height: 10.316683087812095
+-                               height: "13.1855px"
++                               left: "51.69480643598455%"
+-                               left: "0.268582%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(136, 136, 136)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={3.4499999999999997} index={23}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#ffc107"
++                               width: 11.211920100872831
+-                               width: "7.95098px"
++                               height: 11.211920100872831
+-                               height: "7.95098px"
++                               left: "6.553049168782787%"
+-                               left: "18.4855%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(255, 193, 7)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={3.5999999999999996} index={24}>
+                          <motion.div className={"absolute "} style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className={"absolute "}
+                              style={{
++                               backgroundColor: "#ffd700"
++                               width: 13.635994543156636
+-                               width: "10.2332px"
++                               height: 8.181596725893982
+-                               height: "6.13989px"
++                               left: "58.99455057838112%"
+-                               left: "17.6849%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(255, 215, 0)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={3.75} index={25}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#ffaa00"
++                               width: 13.390221975868073
+-                               width: "12.71px"
++                               height: 13.390221975868073
+-                               height: "12.71px"
++                               left: "67.91589322867009%"
+-                               left: "35.5186%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(255, 170, 0)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={3.9} index={26}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#424242"
++                               width: 6.243474565849837
+-                               width: "7.92632px"
++                               height: 6.243474565849837
+-                               height: "7.92632px"
++                               left: "42.939295495919296%"
+-                               left: "8.78196%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(66, 66, 66)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={4.05} index={27}>
+                          <motion.div className={"absolute "} style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className={"absolute "}
+                              style={{
++                               backgroundColor: "#666666"
++                               width: 12.956876484133392
+-                               width: "12.052px"
++                               height: 7.774125890480035
+-                               height: "7.23123px"
++                               left: "28.14087936582861%"
+-                               left: "98.3557%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(102, 102, 102)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={4.2} index={28}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#888888"
++                               width: 13.24569068060107
+-                               width: "10.9894px"
++                               height: 13.24569068060107
+-                               height: "10.9894px"
++                               left: "86.49824711993762%"
+-                               left: "24.4286%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(136, 136, 136)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={4.35} index={29}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#ffc107"
++                               width: 7.220637434789364
+-                               width: "8.45085px"
++                               height: 7.220637434789364
+-                               height: "8.45085px"
++                               left: "38.318481234890655%"
+-                               left: "82.841%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(255, 193, 7)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={4.5} index={30}>
+                          <motion.div className={"absolute "} style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className={"absolute "}
+                              style={{
++                               backgroundColor: "#ffd700"
++                               width: 6.436376465971834
+-                               width: "6.97144px"
++                               height: 3.8618258795831
+-                               height: "4.18287px"
++                               left: "6.438284441039044%"
+-                               left: "56.3257%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(255, 215, 0)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={4.6499999999999995} index={31}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#ffaa00"
++                               width: 11.49509112229888
+-                               width: "12.005px"
++                               height: 11.49509112229888
+-                               height: "12.005px"
++                               left: "69.2740186789414%"
+-                               left: "25.7787%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(255, 170, 0)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={4.8} index={32}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#424242"
++                               width: 13.639234400366174
+-                               width: "10.0186px"
++                               height: 13.639234400366174
+-                               height: "10.0186px"
++                               left: "69.94760355838656%"
+-                               left: "78.1636%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(66, 66, 66)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={4.95} index={33}>
+                          <motion.div className={"absolute "} style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className={"absolute "}
+                              style={{
++                               backgroundColor: "#666666"
++                               width: 8.083227125588056
+-                               width: "9.11794px"
++                               height: 4.8499362753528334
+-                               height: "5.47077px"
++                               left: "46.51569753360095%"
+-                               left: "22.5092%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(102, 102, 102)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={5.1} index={34}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#888888"
++                               width: 12.651102854268661
+-                               width: "7.8862px"
++                               height: 12.651102854268661
+-                               height: "7.8862px"
++                               left: "96.7935285648447%"
+-                               left: "87.6919%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(136, 136, 136)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={5.25} index={35}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#ffc107"
++                               width: 6.523930418734868
+-                               width: "7.61969px"
++                               height: 6.523930418734868
+-                               height: "7.61969px"
++                               left: "51.59875236602246%"
+-                               left: "59.6332%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(255, 193, 7)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={5.3999999999999995} index={36}>
+                          <motion.div className={"absolute "} style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className={"absolute "}
+                              style={{
++                               backgroundColor: "#ffd700"
++                               width: 13.891078070689368
+-                               width: "13.1889px"
++                               height: 8.33464684241362
+-                               height: "7.91331px"
++                               left: "66.8495846085327%"
+-                               left: "68.7471%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(255, 215, 0)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={5.55} index={37}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#ffaa00"
++                               width: 8.268420469626346
+-                               width: "10.1817px"
++                               height: 8.268420469626346
+-                               height: "10.1817px"
++                               left: "54.84710675273379%"
+-                               left: "19.0392%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(255, 170, 0)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={5.7} index={38}>
+                          <motion.div className="absolute r..." style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className="absolute rounded-full"
+                              style={{
++                               backgroundColor: "#424242"
++                               width: 7.675319611151274
+-                               width: "13.9014px"
++                               height: 7.675319611151274
+-                               height: "13.9014px"
++                               left: "7.834619284603173%"
+-                               left: "0.78749%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(66, 66, 66)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                        <ConfettiPiece delay={5.85} index={39}>
+                          <motion.div className={"absolute "} style={{...}} initial={{y:-20,opacity:1, ...}} ...>
+                            <div
+                              className={"absolute "}
+                              style={{
++                               backgroundColor: "#666666"
++                               width: 6.121689195785336
+-                               width: "9.60905px"
++                               height: 3.6730135174712015
+-                               height: "5.76543px"
++                               left: "55.9494698830659%"
+-                               left: "8.065%"
++                               top: -20
+-                               top: "-20px"
++                               opacity: 1
+-                               opacity: "1"
++                               transform: "translateY(-20px)"
+-                               transform: "translateY(-20px)"
+-                               background-color: "rgb(102, 102, 102)"
+                              }}
+                              ref={function useMotionRef.useCallback}
+                            >
+                      <motion.div>
+                      <div>
+                      <motion.div className="absolute w..." style={{top:"74.35...", ...}} animate={{opacity:[...], ...}} ...>
+                        <div
+                          className="absolute w-1 h-1 md:w-2 md:h-2 bg-yellow-400 rounded-full"
+                          style={{
++                           top: "74.35004043878548%"
+-                           top: "77.7407%"
++                           left: "78.02080906082493%"
+-                           left: "77.3379%"
+                          }}
+                          ref={function useMotionRef.useCallback}
+                        >
+                      <motion.div className="absolute w..." style={{top:"65.24...", ...}} animate={{opacity:[...], ...}} ...>
+                        <div
+                          className="absolute w-1 h-1 md:w-2 md:h-2 bg-yellow-400 rounded-full"
+                          style={{
++                           top: "65.24420636725237%"
+-                           top: "30.0634%"
++                           left: "29.045333305189214%"
+-                           left: "68.3118%"
+                          }}
+                          ref={function useMotionRef.useCallback}
+                        >
+                      <motion.div className="absolute w..." style={{top:"67.47...", ...}} animate={{opacity:[...], ...}} ...>
+                        <div
+                          className="absolute w-1 h-1 md:w-2 md:h-2 bg-yellow-400 rounded-full"
+                          style={{
++                           top: "67.47852467797557%"
+-                           top: "64.649%"
++                           left: "86.75914840036111%"
+-                           left: "84.2171%"
+                          }}
+                          ref={function useMotionRef.useCallback}
+                        >
+                      <motion.div className="absolute w..." style={{top:"67.78...", ...}} animate={{opacity:[...], ...}} ...>
+                        <div
+                          className="absolute w-1 h-1 md:w-2 md:h-2 bg-yellow-400 rounded-full"
+                          style={{
++                           top: "67.78839948822524%"
+-                           top: "20.2975%"
++                           left: "68.26842706712122%"
+-                           left: "68.2533%"
+                          }}
+                          ref={function useMotionRef.useCallback}
+                        >
+                      <motion.div className="absolute w..." style={{top:"76.68...", ...}} animate={{opacity:[...], ...}} ...>
+                        <div
+                          className="absolute w-1 h-1 md:w-2 md:h-2 bg-yellow-400 rounded-full"
+                          style={{
++                           top: "76.68284553426753%"
+-                           top: "51.2117%"
++                           left: "69.28527082324533%"
+-                           left: "52.2575%"
+                          }}
+                          ref={function useMotionRef.useCallback}
+                        >
+                      <motion.div className="absolute w..." style={{top:"76.59...", ...}} animate={{opacity:[...], ...}} ...>
+                        <div
+                          className="absolute w-1 h-1 md:w-2 md:h-2 bg-yellow-400 rounded-full"
+                          style={{
++                           top: "76.59078376422397%"
+-                           top: "79.4801%"
++                           left: "17.0870601916861%"
+-                           left: "60.6608%"
+                          }}
+                          ref={function useMotionRef.useCallback}
+                        >
+                ...
+    ...
+
+
+
+    at div (<anonymous>:null:null)
+    at ConfettiPiece (components/pages/TournamentPage.tsx:112:5)
+    at <unknown> (components/pages/TournamentPage.tsx:187:11)
+    at Array.map (<anonymous>:null:null)
+    at ChampionBanner (components/pages/TournamentPage.tsx:186:48)
+    at TournamentPage (components/pages/TournamentPage.tsx:678:7)
+    at Home (components/pages/home.tsx:28:5)
+    at Index (app/page.tsx:6:9)
+
+## Code Frame
+  110 |   
+  111 |   return (
+> 112 |     <motion.div
+      |     ^
+  113 |       className={`absolute ${isSquare ? '' : 'rounded-full'}`}
+  114 |       style={{
+  115 |         backgroundColor: randomColor,
+
+Next.js version: 16.0.4 (Turbopack)
