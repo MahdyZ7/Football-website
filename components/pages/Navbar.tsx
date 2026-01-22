@@ -189,6 +189,8 @@ export default function Navbar() {
   // Check if any info route is active
   const isInfoRouteActive = currentRoute === "/banned-players" || currentRoute === "/feedback" || currentRoute === "/admin-logs" || currentRoute === "/rules";
 
+  // Check if any Tournament route is active
+  const isTournamentRouteActive = currentRoute === "/tournament" || currentRoute === "/tournament-voting";
   return (
     <div className="relative">
       {/* Desktop Navigation - Fixed Header */}
@@ -238,8 +240,20 @@ export default function Navbar() {
                 <DropdownLink href="/admin/feedback" isActive={currentRoute === "/admin/feedback"}>
                   Manage Feedback
                 </DropdownLink>
+                <DropdownLink href="/admin/tournament-votes" isActive={currentRoute === "/admin/tournament-votes"}>
+                  Tournament Votes
+                </DropdownLink>
               </Dropdown>
             )}
+			{/* Tournament Dropdown */}
+            <Dropdown label="Tournament" isActive={isTournamentRouteActive}>
+			  <DropdownLink href="/tournament" isActive={currentRoute === "/tournament"}>
+			  2026 Tournament
+			  </DropdownLink>
+              <DropdownLink href="/tournament/vote" isActive={currentRoute === "/tournament/vote"}>
+                Tournament Voting
+              </DropdownLink>
+            </Dropdown>
           </nav>
 
           {/* User Session Display - Desktop */}

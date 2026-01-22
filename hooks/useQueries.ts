@@ -111,6 +111,32 @@ const api = {
       },
     },
   },
+  tournamentVotes: {
+    getAll: async () => {
+      return await request('/api/tournament-votes');
+    },
+    submitVotes: async (voteData: {
+      awardType: string;
+      votes: Array<{ playerName: string; playerTeam: string; rank: number }>;
+    }) => {
+      return await request('/api/tournament-votes', { method: 'POST', body: JSON.stringify(voteData) });
+    },
+    removeVotes: async (awardType: string) => {
+      return await request(`/api/tournament-votes?awardType=${awardType}`, { method: 'DELETE' });
+    },
+    admin: {
+      getAll: async (filters?: { awardType?: string; playerName?: string }) => {
+        const params = new URLSearchParams();
+        if (filters?.awardType) params.append('awardType', filters.awardType);
+        if (filters?.playerName) params.append('playerName', filters.playerName);
+        const url = params.toString() ? `/api/admin/tournament-votes?${params}` : '/api/admin/tournament-votes';
+        return await request(url);
+      },
+      deleteUserVotes: async (voterId: string, awardType: string) => {
+        return await request(`/api/admin/tournament-votes?voterId=${voterId}&awardType=${awardType}`, { method: 'DELETE' });
+      },
+    },
+  },
 };
 
 // Query keys
@@ -126,6 +152,8 @@ export const queryKeys = {
   feedback: ['feedback'] as const,
   userVotes: ['userVotes'] as const,
   adminFeedback: ['adminFeedback'] as const,
+  tournamentVotes: ['tournamentVotes'] as const,
+  adminTournamentVotes: ['adminTournamentVotes'] as const,
 };
 
 // Custom hooks
@@ -378,6 +406,61 @@ export const useDeleteFeedback = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.feedback });
       queryClient.invalidateQueries({ queryKey: queryKeys.adminFeedback });
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminLogs });
+    },
+  });
+};
+
+// Tournament voting hooks
+export const useTournamentVotes = () => {
+  return useQuery({
+    queryKey: queryKeys.tournamentVotes,
+    queryFn: api.tournamentVotes.getAll,
+    staleTime: 1000 * 30, // 30 seconds
+  });
+};
+
+export const useSubmitTournamentVotes = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: api.tournamentVotes.submitVotes,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.tournamentVotes });
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminTournamentVotes });
+    },
+  });
+};
+
+export const useRemoveTournamentVotes = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (awardType: string) => api.tournamentVotes.removeVotes(awardType),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.tournamentVotes });
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminTournamentVotes });
+    },
+  });
+};
+
+export const useAdminTournamentVotes = (filters?: { awardType?: string; playerName?: string }) => {
+  return useQuery({
+    queryKey: filters ? [...queryKeys.adminTournamentVotes, filters] : queryKeys.adminTournamentVotes,
+    queryFn: () => api.tournamentVotes.admin.getAll(filters),
+    staleTime: 1000 * 30, // 30 seconds
+  });
+};
+
+export const useAdminDeleteTournamentVotes = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ voterId, awardType }: { voterId: string; awardType: string }) =>
+      api.tournamentVotes.admin.deleteUserVotes(voterId, awardType),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.tournamentVotes });
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminTournamentVotes });
       queryClient.invalidateQueries({ queryKey: queryKeys.adminLogs });
     },
   });

@@ -1,6 +1,7 @@
 import "../styles/globals.css";
 import ErrorBoundary from "../components/ErrorBoundary";
 import { ThemeProvider } from "../contexts/ThemeContext";
+import { TournamentAudioProvider } from "../contexts/TournamentAudioContext";
 import { QueryProvider } from "../providers/QueryProvider";
 import { SessionProvider } from "../providers/SessionProvider";
 import { Analytics } from "@vercel/analytics/next"
@@ -19,6 +20,7 @@ export default function RootLayout({
           <SessionProvider>
             <QueryProvider>
               <ThemeProvider>
+              <TournamentAudioProvider>
                 {children}
                 <Toaster
                   position="top-right"
@@ -38,6 +40,7 @@ export default function RootLayout({
                 />
                 <Analytics />
                 <SpeedInsights />
+              </TournamentAudioProvider>
               </ThemeProvider>
             </QueryProvider>
           </SessionProvider>
