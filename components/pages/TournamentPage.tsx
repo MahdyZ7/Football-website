@@ -674,9 +674,6 @@ const TournamentPage: React.FC = () => {
 
       <Navbar />
 
-      {/* Champion Celebration Banner */}
-      <ChampionBanner mounted={mounted} />
-
       <main className="flex-1 pt-6 pb-8 px-4 md:px-8 relative z-10">
         <motion.div
           className="max-w-6xl mx-auto"
