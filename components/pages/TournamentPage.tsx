@@ -14,10 +14,10 @@ const TEAMS = {
 };
 
 const LEAGUE_TABLE = [
-	{ team: "Falcon", won: 1, drawn: 2, lost: 3, gf: 9, ga: 10 },
-	{ team: "Leopard", won: 1, drawn: 2, lost: 3, gf: 2, ga: 10 },
-	{ team: "Oryx", won: 3, drawn: 2, lost: 1, gf: 8, ga: 5 },
-	{ team: "Wolves", won: 3, drawn: 2, lost: 1, gf: 9, ga: 3 },
+        { team: "Falcon", won: 1, drawn: 2, lost: 3, gf: 9, ga: 10 },
+        { team: "Leopard", won: 1, drawn: 2, lost: 3, gf: 2, ga: 10 },
+        { team: "Oryx", won: 3, drawn: 2, lost: 1, gf: 8, ga: 5 },
+        { team: "Wolves", won: 3, drawn: 2, lost: 1, gf: 9, ga: 3 },
 ];
 
 const getPoints = (team: { won: number; drawn: number; lost: number }) => {
@@ -25,40 +25,40 @@ const getPoints = (team: { won: number; drawn: number; lost: number }) => {
 }
 
 const PREVIOUS_RESULTS = [
-	{ home: "Wolves", away: "Leopard", homeScore: 3, awayScore: 0, date: "Jan 22, 2026", highlight: "Wolves capture the title against an abysmal display from Leopard" },
-	{ home: "Oryx", away: "Falcon", homeScore: 4, awayScore: 2, date: "Jan 22, 2026", highlight: "Oryx, with a man down, dominate Falcon chasing a pipe dream that eludes them" },
-	{ home: "Oryx", away: "Wolves", homeScore: 1, awayScore: 0, date: "Jan 19, 2026", highlight: "Injuries force Wolves to park the bus but the wheels fall off in the final minutes" },
-	{ home: "Falcon", away: "Leopard", homeScore: 1, awayScore: 1, date: "Jan 19, 2026", highlight: "Leopards fail to turn their numeric advantage into goals after an early send-off" },
-	{ home: "Wolves", away: "Falcon", homeScore: 1, awayScore: 1, date: "Jan 15, 2026", highlight: "A cagey affair ends in stalemate. Wolves barely hold on and keep a healthy distance on top" },
-	{ home: "Oryx", away: "Leopard",homeScore: 0, awayScore: 0,  date: "Jan 15, 2026", highlight: "Leopard prove once again they have Oryx's number. They can take pride in sabotaging the defending champions' campaign" },
-	{ home: "Falcon", away: "Oryx", homeScore: 1, awayScore: 2, date: "Jan 12, 2026", highlight: "Oryx with a quick double turn the table to win their first Game. The start of a comeback ???" },
-	{ home: "Leopard", away: "Wolves", homeScore: 0, awayScore: 2, date: "Jan 12, 2026", highlight: "Wolves extend unbeaten run and it looks like they might run away with the title" },
-	{ home: "Leopard", away: "Falcon", homeScore: 0, awayScore: 4, date: "Jan 8, 2026", highlight: "Falcons strike hard and fast. A display worthy of title contenders" },
-	{ home: "Wolves", away: "Oryx", homeScore: 1, awayScore: 1, date: "Jan 8, 2026", highlight: "Wolves bite first but Oryx eke out a draw showing they are no easy prey" },
-	{ home: "Leopard", away: "Oryx", homeScore: 1, awayScore: 0, date: "Jan 5, 2026", highlight: "Unregistered Akram capitalises on a defensive error to score the only goal" },
-	{ home: "Falcon", away: "Wolves", homeScore: 0, awayScore: 2, date: "Jan 5, 2026", highlight: "Wolves crank a surprise double against title favorite Falcon" },
+        { home: "Wolves", away: "Leopard", homeScore: 3, awayScore: 0, date: "Jan 22, 2026", highlight: "Wolves capture the title against an abysmal display from Leopard" },
+        { home: "Oryx", away: "Falcon", homeScore: 4, awayScore: 2, date: "Jan 22, 2026", highlight: "Oryx, with a man down, dominate Falcon chasing a pipe dream that eludes them" },
+        { home: "Oryx", away: "Wolves", homeScore: 1, awayScore: 0, date: "Jan 19, 2026", highlight: "Injuries force Wolves to park the bus but the wheels fall off in the final minutes" },
+        { home: "Falcon", away: "Leopard", homeScore: 1, awayScore: 1, date: "Jan 19, 2026", highlight: "Leopards fail to turn their numeric advantage into goals after an early send-off" },
+        { home: "Wolves", away: "Falcon", homeScore: 1, awayScore: 1, date: "Jan 15, 2026", highlight: "A cagey affair ends in stalemate. Wolves barely hold on and keep a healthy distance on top" },
+        { home: "Oryx", away: "Leopard",homeScore: 0, awayScore: 0,  date: "Jan 15, 2026", highlight: "Leopard prove once again they have Oryx's number. They can take pride in sabotaging the defending champions' campaign" },
+        { home: "Falcon", away: "Oryx", homeScore: 1, awayScore: 2, date: "Jan 12, 2026", highlight: "Oryx with a quick double turn the table to win their first Game. The start of a comeback ???" },
+        { home: "Leopard", away: "Wolves", homeScore: 0, awayScore: 2, date: "Jan 12, 2026", highlight: "Wolves extend unbeaten run and it looks like they might run away with the title" },
+        { home: "Leopard", away: "Falcon", homeScore: 0, awayScore: 4, date: "Jan 8, 2026", highlight: "Falcons strike hard and fast. A display worthy of title contenders" },
+        { home: "Wolves", away: "Oryx", homeScore: 1, awayScore: 1, date: "Jan 8, 2026", highlight: "Wolves bite first but Oryx eke out a draw showing they are no easy prey" },
+        { home: "Leopard", away: "Oryx", homeScore: 1, awayScore: 0, date: "Jan 5, 2026", highlight: "Unregistered Akram capitalises on a defensive error to score the only goal" },
+        { home: "Falcon", away: "Wolves", homeScore: 0, awayScore: 2, date: "Jan 5, 2026", highlight: "Wolves crank a surprise double against title favorite Falcon" },
 ];
 
 // Calculate recent form for a team (returns array of 'W', 'D', 'L' for last N matches)
 const getTeamForm = (teamName: string, maxMatches: number = 6): Array<'W' | 'D' | 'L'> => {
-	const teamMatches = PREVIOUS_RESULTS
-		.filter(m => m.home === teamName || m.away === teamName)
-		.slice(-maxMatches)
-		.reverse();
+        const teamMatches = PREVIOUS_RESULTS
+                .filter(m => m.home === teamName || m.away === teamName)
+                .slice(-maxMatches)
+                .reverse();
 
-	return teamMatches.map(match => {
-		const isHome = match.home === teamName;
-		const teamScore = isHome ? match.homeScore : match.awayScore;
-		const opponentScore = isHome ? match.awayScore : match.homeScore;
+        return teamMatches.map(match => {
+                const isHome = match.home === teamName;
+                const teamScore = isHome ? match.homeScore : match.awayScore;
+                const opponentScore = isHome ? match.awayScore : match.homeScore;
 
-		if (teamScore > opponentScore) return 'W';
-		if (teamScore < opponentScore) return 'L';
-		return 'D';
-	});	
+                if (teamScore > opponentScore) return 'W';
+                if (teamScore < opponentScore) return 'L';
+                return 'D';
+        });     
 }
 
 const NEXT_FIXTURES: any[] = [
-	
+        
 ];
 
 const TOP_SCORERS = [
@@ -99,6 +99,271 @@ const FloatingParticle = ({ delay, color }: { delay: number; color: string }) =>
     }}
   />
 );
+
+const ConfettiPiece = ({ delay, index }: { delay: number; index: number }) => {
+  const colors = ["#ffd700", "#ffaa00", "#424242", "#666666", "#888888", "#ffc107"];
+  const randomColor = colors[index % colors.length];
+  const randomX = Math.random() * 100;
+  const randomRotate = Math.random() * 360;
+  const size = 6 + Math.random() * 8;
+  const isSquare = index % 3 === 0;
+  
+  return (
+    <motion.div
+      className={`absolute ${isSquare ? '' : 'rounded-full'}`}
+      style={{
+        backgroundColor: randomColor,
+        width: size,
+        height: isSquare ? size * 0.6 : size,
+        left: `${randomX}%`,
+        top: -20,
+      }}
+      initial={{ y: -20, opacity: 1, rotate: 0 }}
+      animate={{
+        y: "100vh",
+        opacity: [1, 1, 0.8, 0],
+        rotate: randomRotate + 720,
+        x: [0, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 50],
+      }}
+      transition={{
+        duration: 4 + Math.random() * 2,
+        delay: delay,
+        repeat: Infinity,
+        ease: "linear",
+      }}
+    />
+  );
+};
+
+const CrownIcon = () => (
+  <svg 
+    viewBox="0 0 24 24" 
+    className="w-8 h-8 md:w-12 md:h-12"
+    fill="none"
+  >
+    <motion.path
+      d="M2 17L5 8L9 12L12 4L15 12L19 8L22 17H2Z"
+      fill="url(#crownGradient)"
+      stroke="#ffd700"
+      strokeWidth="1.5"
+      initial={{ pathLength: 0 }}
+      animate={{ pathLength: 1 }}
+      transition={{ duration: 1.5, ease: "easeInOut" }}
+    />
+    <motion.path
+      d="M4 17H20V19C20 19.5523 19.5523 20 19 20H5C4.44772 20 4 19.5523 4 19V17Z"
+      fill="url(#crownGradient)"
+      stroke="#ffd700"
+      strokeWidth="1.5"
+    />
+    <defs>
+      <linearGradient id="crownGradient" x1="2" y1="4" x2="22" y2="20">
+        <stop offset="0%" stopColor="#ffd700" />
+        <stop offset="50%" stopColor="#ffaa00" />
+        <stop offset="100%" stopColor="#ffd700" />
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
+const ChampionBanner = () => {
+  const confettiCount = 40;
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      className="relative overflow-hidden rounded-2xl md:rounded-3xl mx-4 md:mx-8 mt-20 md:mt-24 mb-6"
+      style={{
+        background: "linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%)",
+        border: "2px solid #ffd700",
+        boxShadow: "0 0 60px rgba(255, 215, 0, 0.3), inset 0 0 60px rgba(255, 215, 0, 0.05)",
+      }}
+    >
+      {/* Confetti Layer */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {Array.from({ length: confettiCount }).map((_, i) => (
+          <ConfettiPiece key={i} delay={i * 0.15} index={i} />
+        ))}
+      </div>
+
+      {/* Animated Gold Border Glow */}
+      <motion.div
+        className="absolute inset-0 rounded-2xl md:rounded-3xl pointer-events-none"
+        style={{
+          background: "linear-gradient(90deg, transparent, rgba(255,215,0,0.2), transparent)",
+          backgroundSize: "200% 100%",
+        }}
+        animate={{
+          backgroundPosition: ["0% 0%", "200% 0%"],
+        }}
+        transition={{
+          duration: 3,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+      />
+
+      {/* Content */}
+      <div className="relative z-10 py-6 md:py-10 px-4 md:px-8">
+        <div className="flex flex-col items-center justify-center gap-4 md:gap-6">
+          {/* Crown and Logo Section */}
+          <div className="relative">
+            {/* Crown above logo */}
+            <motion.div
+              className="absolute -top-6 md:-top-10 left-1/2 transform -translate-x-1/2"
+              animate={{ 
+                y: [0, -5, 0],
+                rotate: [-2, 2, -2],
+              }}
+              transition={{ 
+                duration: 2, 
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            >
+              <motion.div
+                animate={{ 
+                  filter: [
+                    "drop-shadow(0 0 10px #ffd700)",
+                    "drop-shadow(0 0 20px #ffd700)",
+                    "drop-shadow(0 0 10px #ffd700)",
+                  ],
+                }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              >
+                <CrownIcon />
+              </motion.div>
+            </motion.div>
+
+            {/* Wolves Logo */}
+            <motion.div
+              className="relative mt-4 md:mt-6"
+              whileHover={{ scale: 1.05 }}
+              animate={{
+                boxShadow: [
+                  "0 0 30px rgba(255, 215, 0, 0.4)",
+                  "0 0 50px rgba(255, 215, 0, 0.6)",
+                  "0 0 30px rgba(255, 215, 0, 0.4)",
+                ],
+              }}
+              transition={{ duration: 2, repeat: Infinity }}
+              style={{
+                borderRadius: "50%",
+              }}
+            >
+              <div
+                className="w-20 h-20 md:w-32 md:h-32 rounded-full overflow-hidden"
+                style={{
+                  border: "4px solid #ffd700",
+                  boxShadow: "0 0 30px rgba(255, 215, 0, 0.5)",
+                }}
+              >
+                <img
+                  src={TEAMS.Wolves.logo}
+                  alt="Wolves - Champions"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Champion Text */}
+          <div className="text-center">
+            <motion.div
+              className="flex items-center justify-center gap-2 md:gap-4 mb-2"
+              animate={{ scale: [1, 1.02, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <Trophy className="w-5 h-5 md:w-8 md:h-8 text-yellow-400" />
+              <motion.h2
+                className="text-2xl md:text-5xl font-black tracking-tight"
+                style={{
+                  background: "linear-gradient(135deg, #ffd700, #ffaa00, #ffd700)",
+                  backgroundSize: "200% 200%",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  textShadow: "0 0 30px rgba(255, 215, 0, 0.5)",
+                }}
+                animate={{
+                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                }}
+                transition={{ duration: 3, repeat: Infinity }}
+              >
+                WOLVES
+              </motion.h2>
+              <Trophy className="w-5 h-5 md:w-8 md:h-8 text-yellow-400" />
+            </motion.div>
+            
+            <motion.p
+              className="text-lg md:text-3xl font-bold text-white mb-1"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              2026 CHAMPIONS
+            </motion.p>
+            
+            <motion.p
+              className="text-xs md:text-sm text-gray-400 tracking-widest uppercase"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.7 }}
+            >
+              42 Coalition Clash
+            </motion.p>
+          </div>
+
+          {/* Stats Row */}
+          <motion.div
+            className="flex items-center justify-center gap-4 md:gap-8 mt-2"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.9 }}
+          >
+            <div className="text-center">
+              <p className="text-xl md:text-3xl font-bold text-white">11</p>
+              <p className="text-[10px] md:text-xs text-gray-500 uppercase">Points</p>
+            </div>
+            <div className="w-px h-8 bg-gray-600" />
+            <div className="text-center">
+              <p className="text-xl md:text-3xl font-bold text-green-400">3</p>
+              <p className="text-[10px] md:text-xs text-gray-500 uppercase">Wins</p>
+            </div>
+            <div className="w-px h-8 bg-gray-600" />
+            <div className="text-center">
+              <p className="text-xl md:text-3xl font-bold text-white">+6</p>
+              <p className="text-[10px] md:text-xs text-gray-500 uppercase">Goal Diff</p>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Sparkle Effects */}
+      {[...Array(6)].map((_, i) => (
+        <motion.div
+          key={`sparkle-${i}`}
+          className="absolute w-1 h-1 md:w-2 md:h-2 bg-yellow-400 rounded-full"
+          style={{
+            top: `${20 + Math.random() * 60}%`,
+            left: `${10 + Math.random() * 80}%`,
+          }}
+          animate={{
+            opacity: [0, 1, 0],
+            scale: [0, 1.5, 0],
+          }}
+          transition={{
+            duration: 1.5 + Math.random(),
+            repeat: Infinity,
+            delay: i * 0.4,
+          }}
+        />
+      ))}
+    </motion.div>
+  );
+};
 
 const GlowingOrb = ({ color, size, top, left, delay }: { color: string; size: number; top: string; left: string; delay: number }) => (
   <motion.div
@@ -276,51 +541,51 @@ const TournamentPage: React.FC = () => {
   });
 
   const sortedLeagueTable = [...LEAGUE_TABLE].sort((a, b) => {
-	const pointsA = getPoints(a);
-	const pointsB = getPoints(b);
-	const gdA = a.gf - a.ga;
-	const gdB = b.gf - b.ga;
-	if (pointsA !== pointsB) 
-		return pointsB - pointsA;
-	if (gdA !== gdB) 
-		return gdB - gdA;
-	if (a.gf !== b.gf) 
-		return b.gf - a.gf;
-	// Head-to-head tiebreaker: only consider direct matches between these two teams
-	const headToHeadMatches = PREVIOUS_RESULTS.filter(
-		m => (m.home === a.team && m.away === b.team) || (m.home === b.team && m.away === a.team)
-	);
+        const pointsA = getPoints(a);
+        const pointsB = getPoints(b);
+        const gdA = a.gf - a.ga;
+        const gdB = b.gf - b.ga;
+        if (pointsA !== pointsB) 
+                return pointsB - pointsA;
+        if (gdA !== gdB) 
+                return gdB - gdA;
+        if (a.gf !== b.gf) 
+                return b.gf - a.gf;
+        // Head-to-head tiebreaker: only consider direct matches between these two teams
+        const headToHeadMatches = PREVIOUS_RESULTS.filter(
+                m => (m.home === a.team && m.away === b.team) || (m.home === b.team && m.away === a.team)
+        );
 
-	if (headToHeadMatches.length > 0) {
-		let aH2HPoints = 0;
-		let bH2HPoints = 0;
-		let aH2HGf = 0;
-		let bH2HGf = 0;
+        if (headToHeadMatches.length > 0) {
+                let aH2HPoints = 0;
+                let bH2HPoints = 0;
+                let aH2HGf = 0;
+                let bH2HGf = 0;
 
-		for (const match of headToHeadMatches) {
-			if (match.home === a.team) {
-				if (match.homeScore > match.awayScore) aH2HPoints += 3;
-				else if (match.homeScore < match.awayScore) bH2HPoints += 3;
-				else { aH2HPoints += 1; bH2HPoints += 1; }
-				aH2HGf += match.homeScore;
-				bH2HGf += match.awayScore;
-			} else {
-				if (match.homeScore > match.awayScore) bH2HPoints += 3;
-				else if (match.homeScore < match.awayScore) aH2HPoints += 3;
-				else { aH2HPoints += 1; bH2HPoints += 1; }
-				bH2HGf += match.homeScore;
-				aH2HGf += match.awayScore;
-			}
-		}
+                for (const match of headToHeadMatches) {
+                        if (match.home === a.team) {
+                                if (match.homeScore > match.awayScore) aH2HPoints += 3;
+                                else if (match.homeScore < match.awayScore) bH2HPoints += 3;
+                                else { aH2HPoints += 1; bH2HPoints += 1; }
+                                aH2HGf += match.homeScore;
+                                bH2HGf += match.awayScore;
+                        } else {
+                                if (match.homeScore > match.awayScore) bH2HPoints += 3;
+                                else if (match.homeScore < match.awayScore) aH2HPoints += 3;
+                                else { aH2HPoints += 1; bH2HPoints += 1; }
+                                bH2HGf += match.homeScore;
+                                aH2HGf += match.awayScore;
+                        }
+                }
 
-		if (aH2HPoints !== bH2HPoints) {
-			return bH2HPoints - aH2HPoints;
-		}
-		if (aH2HGf !== bH2HGf) {
-			return bH2HGf - aH2HGf;
-		}
-	}
-	return 0;
+                if (aH2HPoints !== bH2HPoints) {
+                        return bH2HPoints - aH2HPoints;
+                }
+                if (aH2HGf !== bH2HGf) {
+                        return bH2HGf - aH2HGf;
+                }
+        }
+        return 0;
   });
 
 
@@ -409,7 +674,10 @@ const TournamentPage: React.FC = () => {
 
       <Navbar />
 
-      <main className="flex-1 pt-24 pb-8 px-4 md:px-8 relative z-10">
+      {/* Champion Celebration Banner */}
+      <ChampionBanner />
+
+      <main className="flex-1 pt-6 pb-8 px-4 md:px-8 relative z-10">
         <motion.div
           className="max-w-6xl mx-auto"
           variants={containerVariants}
@@ -793,11 +1061,11 @@ const TournamentPage: React.FC = () => {
                 <h2 className="text-lg md:text-2xl font-bold text-white drop-shadow-md">Upcoming Matches</h2>
               </div>
               <div className="p-2 md:p-4 space-y-2 md:space-y-3">
-				{NEXT_FIXTURES.length === 0 && (
-				  <div className="p-4 text-center text-gray-400 italic">
-					No upcoming matches scheduled.
-				  </div>
-				)}
+                                {NEXT_FIXTURES.length === 0 && (
+                                  <div className="p-4 text-center text-gray-400 italic">
+                                        No upcoming matches scheduled.
+                                  </div>
+                                )}
                 {NEXT_FIXTURES.map((match, idx) => (
                   <motion.div
                     key={idx}
