@@ -172,6 +172,9 @@ const DisclaimerBanner = () => (
         This is a <span className="text-blue-300 font-medium">fan-voted award</span> and is not affiliated with the official tournament prizes.
         Results reflect the preferences of participating fans only.
       </p>
+	  <p className="text-gray-400 text-sm mt-1">
+		Four players from each house were selected. May the best player win!
+		</p>
     </div>
   </motion.div>
 );
