@@ -14,6 +14,106 @@ import { RemovalDialog } from "../registration/dialogs/RemovalDialog";
 import { EditNameDialog } from "../registration/dialogs/EditNameDialog";
 import { ToastContainer } from "../registration/ToastContainer";
 import { Button } from "../ui/Button";
+import { Trophy, Star, Award, Zap, Scale, Vote, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
+
+// Vote Popup Component - defined outside Home to prevent re-creation on each render
+const VotePopup = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => (
+  <AnimatePresence>
+    {isOpen && (
+      <>
+        {/* Backdrop */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+        />
+        {/* Modal */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.9, y: 20 }}
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90%] max-w-md"
+        >
+          <div
+            className="rounded-2xl overflow-hidden shadow-2xl"
+            style={{
+              background: "linear-gradient(145deg, rgba(20,20,30,0.98), rgba(10,10,15,0.98))",
+              border: "1px solid rgba(255,215,0,0.3)",
+              boxShadow: "0 0 60px rgba(255,215,0,0.2)",
+            }}
+          >
+            {/* Header */}
+            <div
+              className="px-6 py-4 flex items-center justify-between"
+              style={{
+                background: "linear-gradient(135deg, #ffd70080, #ffd70040)",
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <Vote className="w-6 h-6 text-yellow-400" />
+                <h2 className="text-xl font-bold text-white">Tournament Fan Awards</h2>
+              </div>
+              <button
+                onClick={onClose}
+                className="p-1 rounded-full hover:bg-white/10 transition-colors"
+              >
+                <X className="w-5 h-5 text-white" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6">
+              <div className="text-center mb-6">
+                <motion.div
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+                  className="inline-block mb-4"
+                >
+                  <Trophy className="w-16 h-16 text-yellow-400 mx-auto" />
+                </motion.div>
+                <h3 className="text-2xl font-bold text-white mb-2">
+                  Cast Your Vote!
+                </h3>
+                <p className="text-gray-400">
+                  Help decide who deserves the Fans' favorite <span className="text-yellow-400 font-semibold">Player</span> and{" "}
+                  <span className="text-yellow-400 font-semibold">Goalkeeper</span> awards for this tournament.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <Link
+                  href="/tournament/vote"
+                  className="block w-full py-3 px-6 rounded-xl font-bold text-center transition-all duration-200 transform hover:scale-105"
+                  style={{
+                    background: "linear-gradient(135deg, #ffd700, #ffaa00)",
+                    color: "#000",
+                    boxShadow: "0 0 30px rgba(255,215,0,0.3)",
+                  }}
+                >
+                  <span className="flex items-center justify-center gap-2">
+                    <Award className="w-5 h-5" />
+                    Vote Now
+                  </span>
+                </Link>
+                <button
+                  onClick={onClose}
+                  className="block w-full py-3 px-6 rounded-xl font-medium text-center text-gray-400 hover:text-white hover:bg-white/5 transition-all duration-200"
+                >
+                  Maybe Later
+                </button>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </>
+    )}
+  </AnimatePresence>
+);
 
 /**
  * Home Component (Refactored)
@@ -25,6 +125,8 @@ import { Button } from "../ui/Button";
 const Home: React.FC = () => {
 
   const [showPopup, setShowPopup] = useState(false);
+  const [showVotePopup, setShowVotePopup] = useState(false);
+  
 
   // Data fetching
   const { data: registeredUsers = [], isLoading: loading, error: usersError } = useUsers();
@@ -45,8 +147,48 @@ const Home: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Show vote popup after a short delay if user hasn't dismissed it before
+  useEffect(() => {
+    const hasSeenPopup = sessionStorage.getItem('tournament-vote-popup-seen');
+    if (!hasSeenPopup) {
+      const timer = setTimeout(() => {
+        setShowVotePopup(true);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const handleCloseVotePopup = () => {
+    setShowVotePopup(false);
+    sessionStorage.setItem('tournament-vote-popup-seen', 'true');
+  };
+
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--bg-primary)' }}>
+	  {/* Vote Popup */}
+      <VotePopup isOpen={showVotePopup} onClose={handleCloseVotePopup} />
+	  {/* Floating Vote Button */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 1, type: "spring" }}
+        className="fixed bottom-6 right-6 z-40"
+      >
+        <Link
+          href="/tournament/vote"
+          className="flex items-center gap-2 px-5 py-3 rounded-full font-bold shadow-lg transition-all duration-200 transform hover:scale-110"
+          style={{
+            background: "linear-gradient(135deg, #ffd700, #ffaa00)",
+            color: "#000",
+            boxShadow: "0 0 30px rgba(255,215,0,0.4)",
+          }}
+        >
+          <Vote className="w-5 h-5" />
+          <span className="hidden sm:inline">Vote for Awards</span>
+          <span className="sm:hidden">Vote</span>
+        </Link>
+      </motion.div>
+
       <Navbar />
 
       <main className="flex-1 pt-24 pb-8 px-4 md:px-8">
