@@ -1,4 +1,3 @@
-import TournamentPage from "./TournamentPage";
 import React, { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import Footer from "./footer";
@@ -24,9 +23,7 @@ import { Button } from "../ui/Button";
  * After: ~150 lines, clean separation of concerns
  */
 const Home: React.FC = () => {
-  return (
-    <TournamentPage />
-  )
+
   const [showPopup, setShowPopup] = useState(false);
 
   // Data fetching
