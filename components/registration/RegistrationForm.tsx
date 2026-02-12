@@ -51,9 +51,9 @@ export function RegistrationForm({
       <h1 className="text-3xl md:text-4xl font-bold text-center mb-6" style={{ color: 'var(--text-primary)' }}>
         Football Registration
       </h1>
-      <p className="text-center text-m">Game time: 9 PM - Mondays and Thursdays</p>
+      <p className="text-center text-m">Game time: 8 PM - Mondays and Thursdays</p>
       <p className="text-center text-m">Registration opens: 12 noon - Sundays and Wednesdays</p>
-      <p className="text-center text-m mb-6">Location: Outdoor Pitch 2 - Active Al Maria</p>
+      <p className="text-center text-m mb-6">Location: Indoor Pitch 2 - Active Al Maria</p>
 
       {/* Authentication Notice */}
       {!session && (

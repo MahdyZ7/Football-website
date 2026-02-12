@@ -17,7 +17,7 @@ import { Button } from "../ui/Button";
 
 const Home: React.FC = () => {
 
-  const [showPopup, setShowPopup] = useState(false);
+  const [showPopup, setShowPopup] = useState(true);
   
 
   // Data fetching
@@ -85,15 +85,15 @@ const Home: React.FC = () => {
       {/* Alert Popup */}
       {showPopup && (
         <div
-          className="fixed top-[5%] left-[5%] z-[1000] p-6 rounded-lg shadow-2xl text-center"
+          className="fixed top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2 z-[1000] p-6 rounded-lg shadow-2xl text-center"
           style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-primary)' }}
           role="dialog"
           aria-modal="true"
           aria-labelledby="alert-popup-title"
           aria-live="polite"
         >
-          <h1 id="alert-popup-title" className="text-2xl font-bold mb-4">Back to Al Maryah Alert</h1>
-          <p className="mb-6">Game @ Active Al Maryah. Check The location from the nav bar</p>
+          <h1 id="alert-popup-title" className="text-2xl font-bold mb-4">Game Time Change</h1>
+          <p className="mb-6">Game at 8 PM - Indoor Pitch 2 - Active Al Maria</p>
           <Button
             onClick={() => setShowPopup(false)}
             variant="primary"
