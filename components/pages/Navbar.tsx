@@ -184,7 +184,7 @@ export default function Navbar() {
   }, [isMenuOpen]);
 
   // Check if any admin route is active
-  const isAdminRouteActive = currentRoute === "/admin" || currentRoute === "/admin/feedback";
+  const isAdminRouteActive = currentRoute === "/admin";
 
   // Check if any info route is active
   const isInfoRouteActive = currentRoute === "/banned-players" || currentRoute === "/feedback" || currentRoute === "/admin-logs" || currentRoute === "/rules";
@@ -234,14 +234,20 @@ export default function Navbar() {
             {/* Admin Dropdown */}
             {session?.user?.isAdmin && (
               <Dropdown label="Admin" isActive={isAdminRouteActive}>
-                <DropdownLink href="/admin" isActive={currentRoute === "/admin"}>
+                <DropdownLink href="/admin?tab=users" isActive={currentRoute === "/admin"}>
                   User Management
                 </DropdownLink>
-                <DropdownLink href="/admin/feedback" isActive={currentRoute === "/admin/feedback"}>
+                <DropdownLink href="/admin?tab=banned" isActive={false}>
+                  Banned Users
+                </DropdownLink>
+                <DropdownLink href="/admin?tab=feedback" isActive={false}>
                   Manage Feedback
                 </DropdownLink>
-                <DropdownLink href="/admin/tournament-votes" isActive={currentRoute === "/admin/tournament-votes"}>
+                <DropdownLink href="/admin?tab=votes" isActive={false}>
                   Tournament Votes
+                </DropdownLink>
+                <DropdownLink href="/admin?tab=logs" isActive={false}>
+                  Admin Logs
                 </DropdownLink>
               </Dropdown>
             )}
@@ -397,11 +403,20 @@ export default function Navbar() {
             <div className="text-xs font-semibold mt-2 mb-1 px-4" style={{ color: 'var(--text-secondary)' }}>
               ADMIN
             </div>
-            <NavLink href="/admin" isActive={currentRoute === "/admin"} onClick={closeMenu}>
+            <NavLink href="/admin?tab=users" isActive={currentRoute === "/admin"} onClick={closeMenu}>
               User Management
             </NavLink>
-            <NavLink href="/admin/feedback" isActive={currentRoute === "/admin/feedback"} onClick={closeMenu}>
+            <NavLink href="/admin?tab=banned" isActive={false} onClick={closeMenu}>
+              Banned Users
+            </NavLink>
+            <NavLink href="/admin?tab=feedback" isActive={false} onClick={closeMenu}>
               Manage Feedback
+            </NavLink>
+            <NavLink href="/admin?tab=votes" isActive={false} onClick={closeMenu}>
+              Tournament Votes
+            </NavLink>
+            <NavLink href="/admin?tab=logs" isActive={false} onClick={closeMenu}>
+              Admin Logs
             </NavLink>
           </>
         )}
