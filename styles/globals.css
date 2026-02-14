@@ -85,186 +85,20 @@ body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 h1 {
+  font-family: var(--font-display), "Rajdhani", sans-serif;
   color: var(--text-primary);
   text-align: center;
   margin-bottom: 2rem;
 }
 
 h2 {
+  font-family: var(--font-display), "Rajdhani", sans-serif;
   color: var(--text-secondary);
   text-align: center;
   margin-bottom: 2rem;
-}
-
-/* ===================================
-   Custom Component Styles
-   Only truly custom styles that components will use
-   =================================== */
-
-/* Toast Container - Fixed positioning */
-.toast-container {
-  position: fixed;
-  top: 1.25rem;
-  right: 1.25rem;
-  z-index: 10000;
-  display: flex;
-  flex-direction: column;
-  gap: 0.625rem;
-  max-width: 28rem;
-}
-
-/* Toast Base */
-.toast {
-  background-color: var(--bg-card);
-  color: var(--text-primary);
-  padding: 1rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 12px var(--shadow);
-  border-left: 4px solid;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  animation: slideIn 0.3s ease-out;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.toast:hover {
-  transform: translateX(-0.25rem);
-}
-
-.toast-success {
-  border-left-color: #16a34a;
-}
-
-.toast-error {
-  border-left-color: #dc2626;
-}
-
-.toast-info {
-  border-left-color: var(--ft-primary);
-}
-
-.toast-close {
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  font-size: 1.25rem;
-  cursor: pointer;
-  padding: 0;
-  margin-left: 0.625rem;
-  width: 1.25rem;
-  height: 1.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.2s;
-}
-
-.toast-close:hover {
-  color: var(--text-primary);
-}
-
-/* Special Event Toast - Complex centered positioning */
-.special-event-toast {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10001;
-  max-width: 90%;
-  width: 500px;
-  animation: specialToastFadeIn 0.4s ease-out;
-  cursor: pointer;
-}
-
-.special-event-content {
-  background: linear-gradient(135deg, var(--ft-primary) 0%, var(--ft-secondary) 100%);
-  color: white;
-  padding: 2rem;
-  border-radius: 0.75rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  display: flex;
-  align-items: flex-start;
-  gap: 1.25rem;
-  position: relative;
-}
-
-.special-event-icon {
-  font-size: 2.5rem;
-  flex-shrink: 0;
-  animation: bounce 1s ease-in-out infinite;
-}
-
-.special-event-message {
-  flex: 1;
-}
-
-.special-event-message strong {
-  display: block;
-  font-size: 1.25rem;
-  margin-bottom: 0.5rem;
-  color: white;
-}
-
-.special-event-message p {
-  margin: 0;
-  font-size: 1rem;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.95);
-}
-
-.special-event-close {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  color: white;
-  font-size: 1.5rem;
-  cursor: pointer;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 9999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  padding: 0;
-  line-height: 1;
-}
-
-.special-event-close:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: rotate(90deg);
-}
-
-/* Mobile responsive special event toast */
-@media (max-width: 600px) {
-  .special-event-toast {
-    width: 90%;
-  }
-
-  .special-event-content {
-    padding: 1.5rem;
-    gap: 1rem;
-  }
-
-  .special-event-icon {
-    font-size: 2rem;
-  }
-
-  .special-event-message strong {
-    font-size: 1.125rem;
-  }
-
-  .special-event-message p {
-    font-size: 0.875rem;
-  }
 }
 
 /* ===================================
@@ -308,17 +142,6 @@ h2 {
   }
   50% {
     transform: translateY(-10px);
-  }
-}
-
-@keyframes specialToastFadeIn {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
   }
 }
 

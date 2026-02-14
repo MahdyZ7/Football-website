@@ -78,7 +78,9 @@ const AdminLogs: React.FC = () => {
                       No admin actions logged yet
                     </p>
                   ) : (
-                    <div className="overflow-x-auto">
+                    <>
+                    {/* Desktop Table */}
+                    <div className="hidden md:block overflow-x-auto">
                       <table className="w-full">
                         <thead style={{ backgroundColor: 'var(--bg-secondary)' }}>
                           <tr>
@@ -139,6 +141,47 @@ const AdminLogs: React.FC = () => {
                         </tbody>
                       </table>
                     </div>
+
+                    {/* Mobile Card View */}
+                    <div className="md:hidden space-y-3">
+                      {logs.map((log: AdminLog) => (
+                        <div
+                          key={log.id}
+                          className="rounded-lg p-4 border"
+                          style={{
+                            backgroundColor: 'var(--bg-secondary)',
+                            borderColor: 'var(--border-color)',
+                          }}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className={`font-bold text-sm ${getActionColorClass(log.action)}`}>
+                              {formatActionName(log.action)}
+                            </span>
+                            <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                              {formatTimestamp(log.timestamp)}
+                            </span>
+                          </div>
+                          <div className="text-sm mb-1">
+                            <span style={{ color: 'var(--text-secondary)' }}>By: </span>
+                            <strong className="text-ft-primary">{log.admin_user}</strong>
+                          </div>
+                          {log.target_user && (
+                            <div className="text-sm mb-1">
+                              <span style={{ color: 'var(--text-secondary)' }}>Target: </span>
+                              <span style={{ color: 'var(--text-primary)' }}>
+                                {log.target_name} ({log.target_user})
+                              </span>
+                            </div>
+                          )}
+                          {log.details && (
+                            <p className="text-sm italic mt-2" style={{ color: 'var(--text-primary)' }}>
+                              {log.details}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    </>
                   )}
                 </div>
               </div>

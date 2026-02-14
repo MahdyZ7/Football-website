@@ -7,6 +7,21 @@ import { SessionProvider } from "../providers/SessionProvider";
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Toaster } from "sonner"
+import { Rajdhani, DM_Sans } from "next/font/google"
+
+const rajdhani = Rajdhani({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-body",
+  display: "swap",
+});
 
 export default function RootLayout({
   children,
@@ -14,8 +29,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" className={`${rajdhani.variable} ${dmSans.variable}`}>
+      <body className={dmSans.className}>
         <ErrorBoundary>
           <SessionProvider>
             <QueryProvider>

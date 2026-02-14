@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import Footer from "./footer";
 import { useUsers, useAllowedStatus } from "../../hooks/useQueries";
-import { useToastNotifications } from "../../hooks/useToastNotifications";
 import { useCountdown } from "../../hooks/useCountdown";
 import { useRegistrationForm } from "../../hooks/useRegistrationForm";
 import { usePlayerManagement } from "../../hooks/usePlayerManagement";
@@ -12,13 +11,12 @@ import { BanRulesTable } from "../registration/BanRulesTable";
 import { BannedPlayersCard } from "../registration/BannedPlayersCard";
 import { RemovalDialog } from "../registration/dialogs/RemovalDialog";
 import { EditNameDialog } from "../registration/dialogs/EditNameDialog";
-import { ToastContainer } from "../registration/ToastContainer";
 import { Button } from "../ui/Button";
 
 const Home: React.FC = () => {
 
-  const [showPopup, setShowPopup] = useState(true);
-  
+  const [showPopup, setShowPopup] = useState(false);
+
 
   // Data fetching
   const { data: registeredUsers = [], isLoading: loading, error: usersError } = useUsers();
@@ -26,12 +24,11 @@ const Home: React.FC = () => {
   const isSubmissionAllowed = allowedData?.isAllowed ?? false;
 
   // Custom hooks for business logic
-  const { toasts, showToast, removeToast } = useToastNotifications();
   const timeUntilNext = useCountdown();
 
-  const registrationForm = useRegistrationForm(showToast);
+  const registrationForm = useRegistrationForm();
 
-  const playerManagement = usePlayerManagement(showToast);
+  const playerManagement = usePlayerManagement();
 
   // Popup timer
   useEffect(() => {
@@ -93,7 +90,7 @@ const Home: React.FC = () => {
           aria-live="polite"
         >
           <h1 id="alert-popup-title" className="text-2xl font-bold mb-4">Game Time Change</h1>
-          <p className="mb-6">Game at 8 PM - Indoor Pitch 2 - Active Al Maria</p>
+          <p className="mb-6">Game at 9 PM - Outdoor Pitch 2 - Active Al Maria</p>
           <Button
             onClick={() => setShowPopup(false)}
             variant="primary"
@@ -104,9 +101,6 @@ const Home: React.FC = () => {
           </Button>
         </div>
       )}
-
-      {/* Toast Notifications */}
-      <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
 
       {/* Dialogs */}
       <RemovalDialog

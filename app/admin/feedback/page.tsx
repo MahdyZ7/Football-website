@@ -11,7 +11,7 @@ import { Button, IconButton } from '../../../components/ui/Button';
 import { Select } from '../../../components/ui/Input';
 import Navbar from '../../../components/pages/Navbar';
 import Footer from '../../../components/pages/footer';
-import { FiCheck, FiX, FiTrash2, FiEye } from 'react-icons/fi';
+import { Check, X, Trash2, Eye } from 'lucide-react';
 
 interface AdminFeedbackSubmission {
   id: number;
@@ -183,7 +183,7 @@ export default function AdminFeedbackPage() {
                         onClick={() => setExpandedId(expandedId === submission.id ? null : submission.id)}
                         variant="ghost"
                         size="md"
-                        icon={<FiEye size={20} />}
+                        icon={<Eye size={20} />}
                         label={expandedId === submission.id ? "Collapse details" : "Expand details"}
                         aria-label={`${expandedId === submission.id ? 'Collapse' : 'Expand'} details for "${submission.title}"`}
                         aria-expanded={expandedId === submission.id}
@@ -215,7 +215,7 @@ export default function AdminFeedbackPage() {
                             disabled={approvePending}
                             variant="success"
                             size="sm"
-                            icon={<FiCheck size={16} />}
+                            icon={<Check size={16} />}
                           >
                             Approve
                           </Button>
@@ -224,7 +224,7 @@ export default function AdminFeedbackPage() {
                             disabled={approvePending}
                             variant="danger"
                             size="sm"
-                            icon={<FiX size={16} />}
+                            icon={<X size={16} />}
                           >
                             Reject
                           </Button>
@@ -249,7 +249,7 @@ export default function AdminFeedbackPage() {
                         disabled={deletePending}
                         variant="danger"
                         size="sm"
-                        icon={<FiTrash2 size={16} />}
+                        icon={<Trash2 size={16} />}
                         className="ml-auto"
                       >
                         Delete

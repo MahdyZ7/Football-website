@@ -20,12 +20,6 @@ export type User = {
 	user_id?:	string;
 }
 
-export type Toast = {
-  id: number;
-  message: string;
-  type: 'success' | 'error' | 'info';
-};
-
 export type MoneyRecord = {
   date: string;
   name: string;

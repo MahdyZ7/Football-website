@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { FeedbackCardSkeleton } from '../../components/Skeleton';
 import Navbar from '../../components/pages/Navbar';
 import Footer from '../../components/pages/footer';
-import { FiThumbsUp, FiThumbsDown, FiPlus, FiX } from 'react-icons/fi';
+import { ThumbsUp, ThumbsDown, Plus, X } from 'lucide-react';
 import { Button, IconButton } from '../../components/ui/Button';
 import { Input, Textarea, Select } from '../../components/ui/Input';
 import { Card, CardContent } from '../../components/ui/Card';
@@ -116,7 +116,7 @@ export default function FeedbackPage() {
               onClick={() => setShowSubmitForm(true)}
               variant="primary"
               size="lg"
-              icon={<FiPlus size={20} />}
+              icon={<Plus size={20} />}
               className="mb-6"
             >
               Submit Feedback
@@ -141,7 +141,7 @@ export default function FeedbackPage() {
                 <IconButton
                   onClick={() => setShowSubmitForm(false)}
                   variant="ghost"
-                  icon={<FiX size={24} />}
+                  icon={<X size={24} />}
                   label="Close feedback form"
                   aria-label="Close feedback submission form"
                 />
@@ -253,7 +253,7 @@ export default function FeedbackPage() {
                         aria-pressed={userVotes[submission.id] === 'upvote'}
                         title={userVotes[submission.id] === 'upvote' ? 'Remove upvote' : 'Upvote this feedback'}
                       >
-                        <FiThumbsUp size={20} />
+                        <ThumbsUp size={20} />
                       </button>
                       <span
                         className="text-lg font-bold"
@@ -275,7 +275,7 @@ export default function FeedbackPage() {
                         aria-pressed={userVotes[submission.id] === 'downvote'}
                         title={userVotes[submission.id] === 'downvote' ? 'Remove downvote' : 'Downvote this feedback'}
                       >
-                        <FiThumbsDown size={20} />
+                        <ThumbsDown size={20} />
                       </button>
                     </div>
 

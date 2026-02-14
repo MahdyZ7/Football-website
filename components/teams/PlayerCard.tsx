@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, IconButton } from '../ui/Button';
 import { StarRating } from '../ui/StarRating';
-import { FiX } from 'react-icons/fi';
+import { X } from 'lucide-react';
 
 /**
  * PlayerCard Component
@@ -70,7 +70,7 @@ export function PlayerCard({
           onClick={() => onDiscard(player)}
           variant="danger"
           size="sm"
-          icon={<FiX size={16} />}
+          icon={<X size={16} />}
           label="Remove player (didn't show up)"
           aria-label={`Remove ${player.name} from available players`}
         />

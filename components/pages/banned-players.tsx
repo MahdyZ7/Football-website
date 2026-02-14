@@ -75,52 +75,89 @@ const BannedPlayersPage: React.FC = () => {
                       No players are currently banned
                     </p>
                   ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead style={{ backgroundColor: 'var(--bg-secondary)' }}>
-                          <tr>
-                            <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>
-                              Player
-                            </th>
-                            <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>
-                              ID
-                            </th>
-                            <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>
-                              Reason
-                            </th>
-                            <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>
-                              Banned Date
-                            </th>
-                            <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>
-                              Ban Expires
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {activeBans.map((user, idx) => (
-                            <tr key={`${user.intra}-${user.banned_at}-${idx}`} className="border-b" style={{ borderColor: 'var(--border-color)' }}>
-                              <td className="px-4 py-3 font-medium" style={{ color: 'var(--text-primary)' }}>
-                                {user.name}
-                              </td>
-                              <td className="px-4 py-3" style={{ color: 'var(--text-primary)' }}>
-                                {user.intra}
-                              </td>
-                              <td className="px-4 py-3" style={{ color: 'var(--text-primary)' }}>
-                                {user.reason}
-                              </td>
-                              <td className="px-4 py-3 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                                {formatDate(user.banned_at)}
-                              </td>
-                              <td className="px-4 py-3">
-                                <span className="text-red-600 font-bold">
-                                  {formatDate(user.banned_until)}
-                                </span>
-                              </td>
+                    <>
+                      {/* Desktop Table */}
+                      <div className="hidden md:block overflow-x-auto">
+                        <table className="w-full">
+                          <thead style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                            <tr>
+                              <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>
+                                Player
+                              </th>
+                              <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>
+                                ID
+                              </th>
+                              <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>
+                                Reason
+                              </th>
+                              <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>
+                                Banned Date
+                              </th>
+                              <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>
+                                Ban Expires
+                              </th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                          </thead>
+                          <tbody>
+                            {activeBans.map((user, idx) => (
+                              <tr key={`${user.intra}-${user.banned_at}-${idx}`} className="border-b" style={{ borderColor: 'var(--border-color)' }}>
+                                <td className="px-4 py-3 font-medium" style={{ color: 'var(--text-primary)' }}>
+                                  {user.name}
+                                </td>
+                                <td className="px-4 py-3" style={{ color: 'var(--text-primary)' }}>
+                                  {user.intra}
+                                </td>
+                                <td className="px-4 py-3" style={{ color: 'var(--text-primary)' }}>
+                                  {user.reason}
+                                </td>
+                                <td className="px-4 py-3 text-sm" style={{ color: 'var(--text-secondary)' }}>
+                                  {formatDate(user.banned_at)}
+                                </td>
+                                <td className="px-4 py-3">
+                                  <span className="text-red-600 font-bold">
+                                    {formatDate(user.banned_until)}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* Mobile Card View */}
+                      <div className="md:hidden space-y-3">
+                        {activeBans.map((user, idx) => (
+                          <div
+                            key={`${user.intra}-${user.banned_at}-${idx}`}
+                            className="rounded-lg p-4 border"
+                            style={{
+                              backgroundColor: 'var(--bg-secondary)',
+                              borderColor: 'var(--border-color)',
+                            }}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                                {user.name}
+                              </span>
+                              <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                                {user.intra}
+                              </span>
+                            </div>
+                            <p className="text-sm mb-2" style={{ color: 'var(--text-primary)' }}>
+                              {user.reason}
+                            </p>
+                            <div className="flex items-center justify-between text-xs">
+                              <span style={{ color: 'var(--text-secondary)' }}>
+                                Banned: {formatDate(user.banned_at)}
+                              </span>
+                              <span className="text-red-600 font-bold">
+                                Expires: {formatDate(user.banned_until)}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
@@ -134,7 +171,8 @@ const BannedPlayersPage: React.FC = () => {
                     </h3>
                   </div>
                   <div className="p-6">
-                    <div className="overflow-x-auto">
+                    {/* Desktop Table */}
+                    <div className="hidden md:block overflow-x-auto">
                       <table className="w-full">
                         <thead style={{ backgroundColor: 'var(--bg-secondary)' }}>
                           <tr>
@@ -179,6 +217,40 @@ const BannedPlayersPage: React.FC = () => {
                           ))}
                         </tbody>
                       </table>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="md:hidden space-y-3">
+                      {expiredBans.map((user, idx) => (
+                        <div
+                          key={`${user.intra}-${user.banned_at}-${idx}`}
+                          className="rounded-lg p-4 border"
+                          style={{
+                            backgroundColor: 'var(--bg-secondary)',
+                            borderColor: 'var(--border-color)',
+                          }}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                              {user.name}
+                            </span>
+                            <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                              {user.intra}
+                            </span>
+                          </div>
+                          <p className="text-sm mb-2" style={{ color: 'var(--text-primary)' }}>
+                            {user.reason}
+                          </p>
+                          <div className="flex items-center justify-between text-xs">
+                            <span style={{ color: 'var(--text-secondary)' }}>
+                              Banned: {formatDate(user.banned_at)}
+                            </span>
+                            <span className="text-green-600 font-bold">
+                              Expired: {formatDate(user.banned_until)}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>

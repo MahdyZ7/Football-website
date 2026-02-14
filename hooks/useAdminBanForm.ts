@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { TIG_BAN_DURATIONS } from '../lib/utils/TIG_list';
 import { useBanUser } from './useQueries';
+import { toast } from 'sonner';
 
 /**
  * Ban form state interface
@@ -26,7 +27,12 @@ export interface BanReason {
  *
  * Extracted from Admin component to separate form logic from UI rendering
  */
-export function useAdminBanForm(showToast: (message: string, type: 'success' | 'error' | 'info') => void) {
+export function useAdminBanForm() {
+  const showToast = useCallback((message: string, type: 'success' | 'error' | 'info') => {
+    if (type === 'success') toast.success(message);
+    else if (type === 'error') toast.error(message);
+    else toast.info(message);
+  }, []);
   const [banForm, setBanForm] = useState<BanFormState>({
     userId: '',
     reason: '',

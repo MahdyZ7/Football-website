@@ -15,16 +15,15 @@ import {
   useAdminDeleteUser,
   useVerifyUser
 } from '../../hooks/useQueries';
-import { useToastNotifications } from '../../hooks/useToastNotifications';
 import { useAdminBanForm } from '../../hooks/useAdminBanForm';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
+import { toast } from 'sonner';
 
 /**
  * Admin Component
  * Single Responsibility: Orchestrate admin dashboard UI
  *
  * Business logic extracted to custom hooks:
- * - useToastNotifications: Toast notification management
  * - useAdminBanForm: Ban form state and submission
  * - useConfirmDialog: Confirmation dialog management
  */
@@ -32,9 +31,8 @@ const Admin: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'users' | 'banned'>('users');
 
   // Custom hooks for business logic
-  const { toasts, showToast, removeToast } = useToastNotifications();
   const { confirmDialog, showConfirm, closeConfirm } = useConfirmDialog();
-  const banFormHook = useAdminBanForm(showToast);
+  const banFormHook = useAdminBanForm();
 
   // React Query hooks
   const { data: authData, isLoading: authLoading, error: authError } = useAdminAuth();
@@ -57,10 +55,10 @@ const Admin: React.FC = () => {
       onConfirm: () => {
         deleteUserMutation.mutate(intra, {
           onSuccess: () => {
-            showToast('User deleted successfully', 'success');
+            toast.success('User deleted successfully');
           },
           onError: () => {
-            showToast('Failed to delete user', 'error');
+            toast.error('Failed to delete user');
           }
         });
       }
@@ -72,10 +70,10 @@ const Admin: React.FC = () => {
       { id, verified: !currentStatus },
       {
         onSuccess: () => {
-          showToast(`User ${!currentStatus ? 'verified' : 'unverified'} successfully`, 'success');
+          toast.success(`User ${!currentStatus ? 'verified' : 'unverified'} successfully`);
         },
         onError: () => {
-          showToast('Failed to update verification status', 'error');
+          toast.error('Failed to update verification status');
         }
       }
     );
@@ -89,10 +87,10 @@ const Admin: React.FC = () => {
       onConfirm: () => {
         unbanUserMutation.mutate(userId, {
           onSuccess: () => {
-            showToast('User unbanned successfully', 'success');
+            toast.success('User unbanned successfully');
           },
           onError: () => {
-            showToast('Failed to unban user', 'error');
+            toast.error('Failed to unban user');
           }
         });
       }
@@ -314,7 +312,8 @@ const Admin: React.FC = () => {
               </div>
 
               <div className="rounded-lg shadow-md overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
-                <div className="overflow-x-auto">
+                {/* Desktop Table */}
+                <div className="hidden md:block overflow-x-auto">
                   <table className="w-full">
                     <thead style={{ backgroundColor: 'var(--bg-secondary)' }}>
                       <tr>
@@ -382,6 +381,60 @@ const Admin: React.FC = () => {
                     </tbody>
                   </table>
                 </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden p-4 space-y-3">
+                  {users.map((user, index) => (
+                    <div
+                      key={user.intra + index}
+                      className="rounded-lg p-4 border"
+                      style={{
+                        backgroundColor: 'var(--bg-secondary)',
+                        borderColor: 'var(--border-color)',
+                      }}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                          {user.name}
+                        </span>
+                        <Button
+                          onClick={() => handleVerifyToggle(user.intra, user.verified)}
+                          disabled={verifyUserMutation.isPending}
+                          variant={user.verified ? 'success' : 'secondary'}
+                          size="sm"
+                        >
+                          {user.verified ? '✅' : '❌'}
+                        </Button>
+                      </div>
+                      <div className="flex items-center justify-between mb-3 text-sm">
+                        <span style={{ color: 'var(--text-secondary)' }}>{user.intra}</span>
+                        <span style={{ color: 'var(--text-secondary)' }}>
+                          {new Date(user.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => handleDelete(user.intra)}
+                          variant="danger"
+                          size="sm"
+                          loading={deleteUserMutation.isPending}
+                          fullWidth
+                        >
+                          Delete
+                        </Button>
+                        <Button
+                          onClick={() => banFormHook.quickBan(user.intra)}
+                          variant="primary"
+                          size="sm"
+                          className="bg-ft-accent hover:bg-orange-600"
+                          fullWidth
+                        >
+                          Quick Ban
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -423,7 +476,8 @@ const Admin: React.FC = () => {
               )}
 
               <div className="rounded-lg shadow-md overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
-                <div className="overflow-x-auto">
+                {/* Desktop Table */}
+                <div className="hidden md:block overflow-x-auto">
                   <table className="w-full">
                     <thead style={{ backgroundColor: 'var(--bg-secondary)' }}>
                       <tr>
@@ -492,6 +546,52 @@ const Admin: React.FC = () => {
                     </tbody>
                   </table>
                 </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden p-4 space-y-3">
+                  {bannedUsers.map((user, index) => {
+                    const isExpired = new Date(user.banned_until) < new Date();
+                    return (
+                      <div
+                        key={`${user.intra}-${index}`}
+                        className={`rounded-lg p-4 border ${isExpired ? 'opacity-60' : ''}`}
+                        style={{
+                          backgroundColor: 'var(--bg-secondary)',
+                          borderColor: 'var(--border-color)',
+                        }}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                            {user.name}
+                          </span>
+                          <span className={`font-bold text-sm ${isExpired ? 'text-green-600' : 'text-red-600'}`}>
+                            {isExpired ? 'Expired' : 'Active'}
+                          </span>
+                        </div>
+                        <div className="text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
+                          {user.intra}
+                        </div>
+                        <p className="text-sm mb-2" style={{ color: 'var(--text-primary)' }}>
+                          {user.reason}
+                        </p>
+                        <div className="flex items-center justify-between text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
+                          <span>Banned: {new Date(user.banned_at).toLocaleDateString()}</span>
+                          <span>Expires: {new Date(user.banned_until).toLocaleDateString()}</span>
+                        </div>
+                        <Button
+                          onClick={() => user.user_id && handleUnban(user.user_id, user.name)}
+                          variant="success"
+                          size="sm"
+                          loading={unbanUserMutation.isPending}
+                          disabled={!user.user_id}
+                          fullWidth
+                        >
+                          Unban
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           )}
@@ -499,22 +599,6 @@ const Admin: React.FC = () => {
       </main>
 
       <Footer />
-
-      {/* Toast Container */}
-      <div className="toast-container">
-        {toasts.map((toast) => (
-          <div
-            key={toast.id}
-            className={`toast toast-${toast.type}`}
-            onClick={() => removeToast(toast.id)}
-          >
-            <span>{toast.message}</span>
-            <button className="toast-close" onClick={() => removeToast(toast.id)}>
-              ×
-            </button>
-          </div>
-        ))}
-      </div>
 
       {/* Confirmation Dialog */}
       <ConfirmDialog

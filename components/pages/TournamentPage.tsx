@@ -2,15 +2,16 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Trophy, Star, Award, Zap, Scale, Vote, X } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import Navbar from "./Navbar";
 import Footer from "./footer";
 import { useTournamentAudio } from "../../contexts/TournamentAudioContext";
 
 const TEAMS = {
-  Falcon: { name: "Falcon", color: "#fe6640", logo: "/teams/falcon.png", gradient: "from-orange-500 to-red-600" },
-  Leopard: { name: "Leopard", color: "#7111f8", logo: "/teams/leopard.png", gradient: "from-purple-500 to-indigo-700" },
-  Oryx: { name: "Oryx", color: "#01eafa", logo: "/teams/oryx.png", gradient: "from-cyan-400 to-blue-500" },
-  Wolves: { name: "Wolves", color: "#424242", logo: "/teams/wolves.png", gradient: "from-gray-600 to-gray-800" },
+  Falcon: { name: "Falcon", color: "#fe6640", logo: "/teams/falcon.webp", gradient: "from-orange-500 to-red-600" },
+  Leopard: { name: "Leopard", color: "#7111f8", logo: "/teams/leopard.webp", gradient: "from-purple-500 to-indigo-700" },
+  Oryx: { name: "Oryx", color: "#01eafa", logo: "/teams/oryx.webp", gradient: "from-cyan-400 to-blue-500" },
+  Wolves: { name: "Wolves", color: "#424242", logo: "/teams/wolves.webp", gradient: "from-gray-600 to-gray-800" },
 };
 
 const LEAGUE_TABLE = [
@@ -254,16 +255,18 @@ const ChampionBanner = ({ mounted }: { mounted: boolean }) => {
               }}
             >
               <div
-                className="w-20 h-20 md:w-32 md:h-32 rounded-full overflow-hidden"
+                className="w-20 h-20 md:w-32 md:h-32 rounded-full overflow-hidden relative"
                 style={{
                   border: "4px solid #ffd700",
                   boxShadow: "0 0 30px rgba(255, 215, 0, 0.5)",
                 }}
               >
-                <img
+                <Image
                   src={TEAMS.Wolves.logo}
                   alt="Wolves - Champions"
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 80px, 128px"
                 />
               </div>
             </motion.div>
@@ -488,16 +491,18 @@ const TournamentPage: React.FC = () => {
     return (
       <motion.div
         whileHover={{ scale: 1.1, rotate: 5 }}
-        className={`inline-flex items-center justify-center rounded-full overflow-hidden shadow-lg ${sizeClasses[size]}`}
+        className={`inline-flex items-center justify-center rounded-full overflow-hidden shadow-lg relative ${sizeClasses[size]}`}
         style={{
           boxShadow: `0 0 20px ${TEAMS[teamKey as TeamKey].color}60`,
           border: `2px solid ${TEAMS[teamKey as TeamKey].color}`,
         }}
       >
-        <img
+        <Image
           src={TEAMS[teamKey as TeamKey].logo}
           alt={`${TEAMS[teamKey as TeamKey].name} logo`}
-          className="w-full h-full object-cover"
+          fill
+          className="object-cover"
+          sizes="64px"
         />
       </motion.div>
     );
@@ -622,9 +627,11 @@ const TournamentPage: React.FC = () => {
                   className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity"
                 />
                 <span className="relative z-10 flex items-center gap-2 md:gap-3">
-                  <img
+                  <Image
                     src={team.logo}
                     alt={`${team.name} logo`}
+                    width={32}
+                    height={32}
                     className="w-6 h-6 md:w-8 md:h-8 rounded-full object-cover"
                   />
                   <span className="hidden sm:inline">{team.name}</span>

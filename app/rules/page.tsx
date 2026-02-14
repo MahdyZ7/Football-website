@@ -2,7 +2,7 @@
 
 import Navbar from '../../components/pages/Navbar';
 import Footer from '../../components/pages/footer';
-import { FiClock, FiAlertCircle, FiCheckCircle, FiUsers, FiUserX, FiShield } from 'react-icons/fi';
+import { Clock, AlertCircle, CheckCircle, Users, UserX, Shield } from 'lucide-react';
 
 export default function RulesPage() {
   return (
@@ -23,7 +23,7 @@ export default function RulesPage() {
           {/* Time and Score Section */}
           <div className="rounded-lg shadow-md p-6 mb-6" style={{ backgroundColor: 'var(--bg-card)' }}>
             <div className="flex items-center gap-3 mb-4">
-              <FiClock size={28} className="text-ft-primary" />
+              <Clock size={28} className="text-ft-primary" />
               <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
                 Time and Score
               </h2>
@@ -55,7 +55,7 @@ export default function RulesPage() {
           {/* Teams Section */}
           <div className="rounded-lg shadow-md p-6 mb-6" style={{ backgroundColor: 'var(--bg-card)' }}>
             <div className="flex items-center gap-3 mb-4">
-              <FiUsers size={28} className="text-ft-primary" />
+              <Users size={28} className="text-ft-primary" />
               <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
                 Teams
               </h2>
@@ -103,7 +103,7 @@ export default function RulesPage() {
           {/* Referee Section */}
           <div className="rounded-lg shadow-md p-6 mb-6" style={{ backgroundColor: 'var(--bg-card)' }}>
             <div className="flex items-center gap-3 mb-4">
-              <FiShield size={28} className="text-ft-primary" />
+              <Shield size={28} className="text-ft-primary" />
               <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
                 Referee
               </h2>
@@ -139,7 +139,7 @@ export default function RulesPage() {
           {/* Late TIG Section */}
           <div className="rounded-lg shadow-md p-6 mb-6" style={{ backgroundColor: 'var(--bg-card)' }}>
             <div className="flex items-center gap-3 mb-4">
-              <FiUserX size={28} className="text-ft-primary" />
+              <UserX size={28} className="text-ft-primary" />
               <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
                 Late TIG
               </h2>
@@ -191,7 +191,7 @@ export default function RulesPage() {
           {/* Conduct Section */}
           <div className="rounded-lg shadow-md p-6 mb-6" style={{ backgroundColor: 'var(--bg-card)' }}>
             <div className="flex items-center gap-3 mb-4">
-              <FiCheckCircle size={28} className="text-ft-primary" />
+              <CheckCircle size={28} className="text-ft-primary" />
               <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
                 Conduct
               </h2>

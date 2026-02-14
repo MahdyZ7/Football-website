@@ -77,7 +77,8 @@ module.exports = {
         button: "0 4px 8px rgba(0, 0, 0, 0.1)",
       },
       fontFamily: {
-        sans: ["Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
+        sans: ["var(--font-body)", "DM Sans", "Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
+        display: ["var(--font-display)", "Rajdhani", "Helvetica Neue", "sans-serif"],
       },
       keyframes: {
         slideIn: {
@@ -88,16 +89,6 @@ module.exports = {
           to: {
             transform: "translateX(0)",
             opacity: "1",
-          },
-        },
-        specialToastFadeIn: {
-          from: {
-            opacity: "0",
-            transform: "translate(-50%, -60%)",
-          },
-          to: {
-            opacity: "1",
-            transform: "translate(-50%, -50%)",
           },
         },
         bounce: {
@@ -115,7 +106,6 @@ module.exports = {
       },
       animation: {
         slideIn: "slideIn 0.3s ease-out",
-        specialToastFadeIn: "specialToastFadeIn 0.4s ease-out",
         bounce: "bounce 1s ease-in-out infinite",
         spin: "spin 1s linear infinite",
       },

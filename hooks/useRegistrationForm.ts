@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, KeyboardEvent, FormEvent } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRegisterUser } from './useQueries';
+import { toast } from 'sonner';
 
 interface FormErrors {
   name: string;
@@ -11,9 +12,12 @@ interface FormErrors {
  * Custom hook for registration form logic
  * Single Responsibility: Manage form state, validation, and submission
  */
-export function useRegistrationForm(
-  onSuccess: (message: string, type: 'success' | 'error' | 'info') => void
-) {
+export function useRegistrationForm() {
+  const onSuccess = useCallback((message: string, type: 'success' | 'error' | 'info') => {
+    if (type === 'success') toast.success(message);
+    else if (type === 'error') toast.error(message);
+    else toast.info(message);
+  }, []);
   const [name, setName] = useState("");
   const [intra, setIntra] = useState("");
   const [errors, setErrors] = useState<FormErrors>({ name: "", intra: "" });

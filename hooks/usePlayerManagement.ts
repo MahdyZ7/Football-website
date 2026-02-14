@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useEditName } from './useQueries';
+import { toast } from 'sonner';
 
 type RemovalReason = '' | 'CANCEL' | 'CANCEL_GAME_DAY' | 'NOT_READY' | 'LATE' | 'NO_SHOW' | 'NO_BAN';
 
@@ -8,9 +9,12 @@ type RemovalReason = '' | 'CANCEL' | 'CANCEL_GAME_DAY' | 'NOT_READY' | 'LATE' | 
  * Custom hook for player management (removal and name editing)
  * Single Responsibility: Handle player modification operations
  */
-export function usePlayerManagement(
-  onSuccess: (message: string, type: 'success' | 'error' | 'info') => void
-) {
+export function usePlayerManagement() {
+  const onSuccess = useCallback((message: string, type: 'success' | 'error' | 'info') => {
+    if (type === 'success') toast.success(message);
+    else if (type === 'error') toast.error(message);
+    else toast.info(message);
+  }, []);
   const [showRemoveDialog, setShowRemoveDialog] = useState(false);
   const [removeReason, setRemoveReason] = useState<RemovalReason>('');
   const [targetIntra, setTargetIntra] = useState("");

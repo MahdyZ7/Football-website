@@ -1,6 +1,6 @@
 import React from 'react';
 import { Input, IconButton } from '../ui';
-import { FiX } from 'react-icons/fi';
+import { X } from 'lucide-react';
 
 /**
  * TeamRoster Component
@@ -157,7 +157,7 @@ export function TeamRoster({
                 onClick={() => onRemovePlayer(player, teamNumber)}
                 variant="danger"
                 size="sm"
-                icon={<FiX size={16} />}
+                icon={<X size={16} />}
                 label="Remove from team"
                 aria-label={`Remove ${player.name} from team ${teamNumber}`}
               />
