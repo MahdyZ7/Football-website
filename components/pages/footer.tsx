@@ -113,7 +113,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="mailto:football@42abudhabi.ae"
+                  href="mailto:ayassin@student.42abudhabi.ae"
                   className="flex items-center gap-2 text-sm transition-colors duration-200 hover:text-ft-primary"
                   style={{ color: 'var(--text-secondary)' }}
                 >
