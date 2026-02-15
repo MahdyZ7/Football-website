@@ -157,14 +157,19 @@ async function registerUser(user: User, userId: string) {
       return { error: "Intra not found", status: 404 };
     }
 
-    const { rows } = await client.query("SELECT name, intra FROM players");
+    const { rows } = await client.query("SELECT name, intra, is_banned FROM players");
 
-    if (player_limit_reached(rows.length)) {
+    // Count only non-banned players toward the limit
+    const activePlayers = rows.filter(row => !row.is_banned);
+    if (player_limit_reached(activePlayers.length)) {
       return { error: "Player limit reached", status: 403 };
     }
 
     const player = rows.find(row => row.intra === user.intra);
     if (player) {
+      if (player.is_banned) {
+        return { error: "You are currently banned from registering", status: 403 };
+      }
       return { error: "Player already exists", status: 409 };
     }
 

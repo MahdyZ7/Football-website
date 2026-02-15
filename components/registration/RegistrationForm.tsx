@@ -45,6 +45,7 @@ export function RegistrationForm({
   onSubmit
 }: RegistrationFormProps) {
   const { data: session } = useSession();
+  const isBanned = session?.user?.isBanned ?? false;
 
   return (
     <div>
@@ -83,6 +84,7 @@ export function RegistrationForm({
           onChange={(e) => onNameChange(e.target.value)}
           onKeyDown={(e) => onKeyDown(e, 'name')}
           error={errors.name}
+          disabled={isBanned}
           required
           fullWidth
         />
@@ -99,6 +101,7 @@ export function RegistrationForm({
             onChange={(e) => onIntraChange(e.target.value)}
             onKeyDown={(e) => onKeyDown(e, 'intra')}
             error={errors.intra}
+            disabled={isBanned}
             required
             fullWidth
           />
@@ -110,13 +113,13 @@ export function RegistrationForm({
               <Button
                 ref={submitButtonRef}
                 type="submit"
-                variant="primary"
+                variant={isBanned ? 'danger' : 'primary'}
                 size="lg"
                 fullWidth
-                disabled={!isAllowed}
+                disabled={!isAllowed || isBanned}
                 loading={isSubmitting}
               >
-                {isSubmitting ? 'Submitting...' : 'Register Now'}
+                {isBanned ? 'Registration Banned' : isSubmitting ? 'Submitting...' : 'Register Now'}
               </Button>
             </div>
             {!isAllowed && (

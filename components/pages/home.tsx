@@ -9,6 +9,7 @@ import { RegistrationForm } from "../registration/RegistrationForm";
 import { PlayerList } from "../registration/PlayerList";
 import { BanRulesTable } from "../registration/BanRulesTable";
 import { BannedPlayersCard } from "../registration/BannedPlayersCard";
+import { BanNotificationBanner } from "../registration/BanNotificationBanner";
 import { RemovalDialog } from "../registration/dialogs/RemovalDialog";
 import { EditNameDialog } from "../registration/dialogs/EditNameDialog";
 import { Button } from "../ui/Button";
@@ -42,6 +43,9 @@ const Home: React.FC = () => {
 
       <main className="flex-1 pt-24 pb-8 px-4 md:px-8">
         <div className="max-w-6xl mx-auto">
+          {/* Ban Notification */}
+          <BanNotificationBanner />
+
           {/* Registration Form */}
           <RegistrationForm
             name={registrationForm.name}

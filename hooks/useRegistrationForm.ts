@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, KeyboardEvent, FormEvent } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRegisterUser } from './useQueries';
+import { useRegisterUser, ApiError } from './useQueries';
 import { toast } from 'sonner';
 
 interface FormErrors {
@@ -153,9 +153,8 @@ export function useRegistrationForm() {
           nameInputRef.current?.focus();
         },
         onError: (error: unknown) => {
-          if (typeof error === 'object' && error !== null && 'response' in error) {
-            const response = (error as { response: { status: number, data?: any } }).response;
-            const { status, data } = response;
+          if (error instanceof ApiError) {
+            const { status, data } = error;
             if (status === 401) {
               onSuccess(data?.error || "Please sign in to register", 'error');
             } else if (status === 403) {

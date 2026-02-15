@@ -64,8 +64,8 @@ export async function POST(req: NextRequest) {
       `Banned for ${duration} days. Reason: ${reason}`
     );
 
-    // Remove user from current registration if they exist
-    await client.query('DELETE FROM players WHERE intra = $1', [userId]);
+    // Mark user as banned in current registration (preserves their spot)
+    await client.query('UPDATE players SET is_banned = TRUE WHERE intra = $1', [userId]);
 
     return NextResponse.json({ message: 'User banned successfully' }, { status: 200 });
 
@@ -95,6 +95,9 @@ export async function DELETE(req: NextRequest) {
     const userName = userResult.rows[0]?.name || 'Unknown';
 
     await client.query('DELETE FROM banned_users WHERE user_id = $1', [user_id]);
+
+    // Restore player's active status if they have a registration
+    await client.query('UPDATE players SET is_banned = FALSE WHERE user_id = $1', [user_id]);
 
     // Log the action
     await logAdminAction(

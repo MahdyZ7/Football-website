@@ -57,6 +57,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         );
         session.user.role = result.rows[0]?.role || 'user';
         session.user.isAdmin = result.rows[0]?.role === 'admin';
+
+        // Check if user is currently banned
+        const banResult = await pool.query(
+          'SELECT reason, banned_until FROM banned_users WHERE user_id = $1 AND banned_until > NOW()',
+          [user.id]
+        );
+        session.user.isBanned = banResult.rows.length > 0;
+        session.user.banReason = banResult.rows[0]?.reason;
+        session.user.bannedUntil = banResult.rows[0]?.banned_until;
       }
       return session;
     },
@@ -88,6 +97,9 @@ declare module "next-auth" {
       image?: string | null;
       role: string;
       isAdmin: boolean;
+      isBanned?: boolean;
+      banReason?: string;
+      bannedUntil?: string;
     }
   }
 

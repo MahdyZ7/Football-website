@@ -1,6 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { User, BannedUser } from '../types/user';
 
+// Custom error class that preserves HTTP status and parsed response data
+export class ApiError extends Error {
+  status: number;
+  data: any;
+  constructor(message: string, status: number, data?: any) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.data = data;
+  }
+}
+
 // lightweight fetch wrapper to replace axios
 const request = async (url: string, options?: RequestInit) => {
   const res = await fetch(url, {
@@ -8,8 +20,14 @@ const request = async (url: string, options?: RequestInit) => {
     ...options,
   });
   if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || res.statusText);
+    let data: any;
+    try {
+      data = await res.json();
+    } catch {
+      const text = await res.text();
+      data = { error: text || res.statusText };
+    }
+    throw new ApiError(data?.error || res.statusText, res.status, data);
   }
   return res.json();
 };
@@ -266,6 +284,7 @@ export const useUnbanUser = () => {
   return useMutation({
     mutationFn: api.admin.unbanUser,
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.users });
       queryClient.invalidateQueries({ queryKey: queryKeys.bannedUsers });
       queryClient.invalidateQueries({ queryKey: queryKeys.adminBanned });
       queryClient.invalidateQueries({ queryKey: queryKeys.adminLogs });

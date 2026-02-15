@@ -18,6 +18,7 @@ export type User = {
 	verified:	boolean;
 	created_at:	string;
 	user_id?:	string;
+	is_banned?:	boolean;
 }
 
 export type MoneyRecord = {

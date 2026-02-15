@@ -27,6 +27,9 @@ export function PlayerList({
 }: PlayerListProps) {
   const { data: session } = useSession();
 
+  // Filter out banned players — they don't appear and don't count toward spots
+  const visibleUsers = users.filter(u => !u.is_banned);
+
   return (
     <div className="max-w-4xl mx-auto mb-12">
       <h2 className="text-2xl font-semibold text-center mb-4" style={{ color: 'var(--text-secondary)' }}>
@@ -37,18 +40,18 @@ export function PlayerList({
       <div className="max-w-2xl mx-auto mb-6 rounded-xl shadow-lg overflow-hidden transition-all duration-300
         bg-gradient-to-b from-stone-700 to-zinc-700">
         <div className="bg-white/20 backdrop-blur-sm text-center rounded-lg px-4 py-2 text-white">
-          <div className="text-2xl font-bold">{users.length}/{GUARANTEED_SPOT}</div>
+          <div className="text-2xl font-bold">{visibleUsers.length}/{GUARANTEED_SPOT}</div>
           <div className="text-xs">Spots Filled</div>
         </div>
         <div className="bg-black/50 h-2 mb-6">
           <div
             className="bg-white/50 h-full transition-all duration-500 ease-out"
-            style={{ width: `${Math.min((users.length / GUARANTEED_SPOT) * 100, 100)}%` }}
+            style={{ width: `${Math.min((visibleUsers.length / GUARANTEED_SPOT) * 100, 100)}%` }}
             role="progressbar"
-            aria-valuenow={users.length}
+            aria-valuenow={visibleUsers.length}
             aria-valuemin={0}
             aria-valuemax={GUARANTEED_SPOT}
-            aria-label={`${users.length} out of ${GUARANTEED_SPOT} spots filled`}
+            aria-label={`${visibleUsers.length} out of ${GUARANTEED_SPOT} spots filled`}
           />
         </div>
       </div>
@@ -62,12 +65,12 @@ export function PlayerList({
             <div className="col-span-full text-center py-8 text-red-600 font-medium" role="alert">
               Error loading players. Please refresh the page.
             </div>
-          ) : users.length === 0 ? (
+          ) : visibleUsers.length === 0 ? (
             <div className="col-span-full text-center py-12 text-red-600 font-bold text-xl">
               Dare to be First
             </div>
           ) : (
-            users.map((user, index) => {
+            visibleUsers.map((user, index) => {
               const isOwnRegistration = session && user.user_id && user.user_id === session.user.id;
               const isAdmin = session?.user?.isAdmin || false;
 

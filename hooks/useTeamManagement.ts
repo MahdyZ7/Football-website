@@ -79,10 +79,11 @@ export function useTeamManagement({
       // Do NOT read sessionStorage here — letting the page-level
       // `useSessionStorage` restore full state prevents race conditions
       // between this hook and the consumer component.
-      const eligiblePlayers = registeredUsers
+      const activePlayers = registeredUsers.filter(u => !('is_banned' in u && u.is_banned));
+      const eligiblePlayers = activePlayers
         .slice(0, guaranteedSpot)
         .map(user => ({ ...user, rating: 1 }));
-      const waitingPlayers = registeredUsers.slice(guaranteedSpot);
+      const waitingPlayers = activePlayers.slice(guaranteedSpot);
 
       setAvailablePlayers(eligiblePlayers);
       setWaitingListPlayers(waitingPlayers);
@@ -178,7 +179,8 @@ export function useTeamManagement({
       ratingMap.set(player.intra, player.rating || 1);
     });
 
-    const eligiblePlayers = registeredUsers
+    const activePlayersForReset = registeredUsers.filter(u => !('is_banned' in u && u.is_banned));
+    const eligiblePlayers = activePlayersForReset
       .slice(0, guaranteedSpot)
       .map(user => ({
         ...user,

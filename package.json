@@ -22,6 +22,7 @@
     "db:migrate:feedback": "tsx scripts/migrate_feedback.ts",
     "db:migrate:tournament-votes": "tsx scripts/migrate_tournament_votes.ts",
     "db:migrate:ranked-votes": "tsx scripts/migrate_tournament_ranked_votes.ts",
+    "db:migrate:ban-status": "tsx scripts/migrate_ban_status.ts",
     "db:backup": "node scripts/database-migration.js backup",
     "db:restore": "node scripts/database-migration.js restore",
     "db:status": "node scripts/database-migration.js status",

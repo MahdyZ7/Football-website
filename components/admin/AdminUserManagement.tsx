@@ -1,22 +1,23 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Skeleton, TableRowSkeleton } from '../Skeleton';
 import { Button } from '../ui/Button';
-import { Input, Select } from '../ui/Input';
-import { useUsers, useAdminDeleteUser, useVerifyUser } from '../../hooks/useQueries';
-import { useAdminBanForm } from '../../hooks/useAdminBanForm';
+import { useUsers, useAdminDeleteUser, useVerifyUser, useBanUser, useUnbanUser } from '../../hooks/useQueries';
 import { useConfirmDialog } from '../../hooks/useConfirmDialog';
 import ConfirmDialog from '../ConfirmDialog';
+import BanDialog from './BanDialog';
 import { toast } from 'sonner';
 
 const AdminUserManagement: React.FC = () => {
   const { confirmDialog, showConfirm, closeConfirm } = useConfirmDialog();
-  const banFormHook = useAdminBanForm();
+  const [banTarget, setBanTarget] = useState<{ name: string; intra: string } | null>(null);
 
   const { data: users = [], isLoading: usersLoading, error: usersError } = useUsers();
   const deleteUserMutation = useAdminDeleteUser();
   const verifyUserMutation = useVerifyUser();
+  const banUserMutation = useBanUser();
+  const unbanUserMutation = useUnbanUser();
 
   const handleDelete = (intra: string) => {
     const user = users.find(u => u.intra === intra);
@@ -43,6 +44,47 @@ const AdminUserManagement: React.FC = () => {
     );
   };
 
+  const handleBanConfirm = (banData: { userId: string; reason: string; duration: string }) => {
+    banUserMutation.mutate(banData, {
+      onSuccess: () => {
+        toast.success('User banned successfully');
+        setBanTarget(null);
+      },
+      onError: () => toast.error('Failed to ban user'),
+    });
+  };
+
+  const handleQuickBan = (user: { name: string; intra: string }) => {
+    showConfirm({
+      title: 'Quick Ban (2 days)',
+      message: `Ban "${user.name}" (${user.intra}) for 2 days with reason "Quick ban"?`,
+      type: 'warning',
+      onConfirm: () => {
+        banUserMutation.mutate(
+          { userId: user.intra, reason: 'Quick ban - 2 days', duration: '2' },
+          {
+            onSuccess: () => toast.success('User banned for 2 days'),
+            onError: () => toast.error('Failed to ban user'),
+          }
+        );
+      },
+    });
+  };
+
+  const handleUnban = (user: { name: string; intra: string; user_id?: string }) => {
+    showConfirm({
+      title: 'Unban User',
+      message: `Are you sure you want to unban "${user.name}" (${user.intra})?`,
+      type: 'info',
+      onConfirm: () => {
+        unbanUserMutation.mutate(user.user_id || user.intra, {
+          onSuccess: () => toast.success('User unbanned successfully'),
+          onError: () => toast.error('Failed to unban user'),
+        });
+      },
+    });
+  };
+
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-6" style={{ color: 'var(--text-primary)' }}>
@@ -60,10 +102,11 @@ const AdminUserManagement: React.FC = () => {
                   <th className="px-4 py-3 text-left"><Skeleton width="60%" height={20} /></th>
                   <th className="px-4 py-3 text-left"><Skeleton width="60%" height={20} /></th>
                   <th className="px-4 py-3 text-left"><Skeleton width="60%" height={20} /></th>
+                  <th className="px-4 py-3 text-left"><Skeleton width="60%" height={20} /></th>
                 </tr>
               </thead>
               <tbody>
-                <TableRowSkeleton columns={5} rows={8} />
+                <TableRowSkeleton columns={6} rows={8} />
               </tbody>
             </table>
           </div>
@@ -75,76 +118,6 @@ const AdminUserManagement: React.FC = () => {
         </div>
       )}
 
-      {/* Ban User Form */}
-      <div className="rounded-lg shadow-md p-6 mb-8" style={{ backgroundColor: 'var(--bg-card)' }}>
-        <h3 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
-          Ban User
-        </h3>
-        <form onSubmit={banFormHook.handleBanUser} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input
-            label="User ID"
-            type="text"
-            value={banFormHook.banForm.userId}
-            onChange={(e) => banFormHook.setBanForm(prev => ({ ...prev, userId: e.target.value }))}
-            placeholder="Enter user intra login"
-            fullWidth
-          />
-          <Select
-            label="Reason"
-            value={banFormHook.isCustomReason ? 'custom' : banFormHook.banForm.reason}
-            onChange={(e) => banFormHook.handleReasonChange(e.target.value)}
-            fullWidth
-          >
-            {banFormHook.banReasons.map((reason) => (
-              <option key={reason.value} value={reason.value}>
-                {reason.label}
-              </option>
-            ))}
-          </Select>
-          {banFormHook.isCustomReason && (
-            <div className="md:col-span-2">
-              <Input
-                label="Custom Reason"
-                type="text"
-                value={banFormHook.banForm.reason}
-                onChange={(e) => banFormHook.setBanForm(prev => ({ ...prev, reason: e.target.value }))}
-                placeholder="Enter custom ban reason"
-                fullWidth
-              />
-            </div>
-          )}
-          <div>
-            <Input
-              label="Duration (days)"
-              type="number"
-              value={banFormHook.banForm.duration.toString()}
-              onChange={(e) => banFormHook.setBanForm(prev => ({ ...prev, duration: parseFloat(e.target.value) }))}
-              min="0.5"
-              max="365"
-              step="0.5"
-              disabled={!banFormHook.isCustomReason && banFormHook.banForm.reason !== ''}
-              fullWidth
-            />
-            {banFormHook.banForm.duration > 0 && (
-              <div className="mt-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                Ban ends: {banFormHook.getBanEndDate()}
-              </div>
-            )}
-          </div>
-          <div className="md:col-span-2">
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              fullWidth
-              loading={banFormHook.isPending}
-            >
-              Ban User
-            </Button>
-          </div>
-        </form>
-      </div>
-
       <div className="rounded-lg shadow-md overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
         {/* Desktop Table */}
         <div className="hidden md:block overflow-x-auto">
@@ -153,6 +126,7 @@ const AdminUserManagement: React.FC = () => {
               <tr>
                 <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>Name</th>
                 <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>Intra</th>
+                <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>Status</th>
                 <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>Verified</th>
                 <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>Registered</th>
                 <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--text-secondary)' }}>Actions</th>
@@ -161,8 +135,26 @@ const AdminUserManagement: React.FC = () => {
             <tbody>
               {users.map((user, index) => (
                 <tr key={user.intra + index} className="border-b" style={{ borderColor: 'var(--border-color)' }}>
-                  <td className="px-4 py-3 font-medium" style={{ color: 'var(--text-primary)' }}>{user.name}</td>
+                  <td className="px-4 py-3 font-medium" style={{ color: 'var(--text-primary)' }}>
+                    {user.name}
+                    {user.is_banned && (
+                      <span className="ml-2 px-2 py-0.5 text-xs font-bold bg-red-600 text-white rounded">
+                        BANNED
+                      </span>
+                    )}
+                  </td>
                   <td className="px-4 py-3" style={{ color: 'var(--text-primary)' }}>{user.intra}</td>
+                  <td className="px-4 py-3">
+                    {user.is_banned ? (
+                      <span className="px-2 py-1 text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded">
+                        Banned
+                      </span>
+                    ) : (
+                      <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded">
+                        Active
+                      </span>
+                    )}
+                  </td>
                   <td className="px-4 py-3">
                     <Button
                       onClick={() => handleVerifyToggle(user.intra, user.verified)}
@@ -170,7 +162,7 @@ const AdminUserManagement: React.FC = () => {
                       variant={user.verified ? 'success' : 'secondary'}
                       size="sm"
                     >
-                      {user.verified ? '✅ Verified' : '❌ Unverified'}
+                      {user.verified ? 'Verified' : 'Unverified'}
                     </Button>
                   </td>
                   <td className="px-4 py-3 text-sm" style={{ color: 'var(--text-secondary)' }}>
@@ -178,6 +170,34 @@ const AdminUserManagement: React.FC = () => {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-2">
+                      {user.is_banned ? (
+                        <Button
+                          onClick={() => handleUnban({ name: user.name, intra: user.intra, user_id: user.user_id })}
+                          variant="success"
+                          size="sm"
+                          loading={unbanUserMutation.isPending}
+                        >
+                          Unban
+                        </Button>
+                      ) : (
+                        <>
+                          <Button
+                            onClick={() => setBanTarget({ name: user.name, intra: user.intra })}
+                            variant="primary"
+                            size="sm"
+                            className="bg-ft-accent hover:bg-orange-600"
+                          >
+                            Ban
+                          </Button>
+                          <Button
+                            onClick={() => handleQuickBan({ name: user.name, intra: user.intra })}
+                            variant="secondary"
+                            size="sm"
+                          >
+                            Quick Ban (2d)
+                          </Button>
+                        </>
+                      )}
                       <Button
                         onClick={() => handleDelete(user.intra)}
                         variant="danger"
@@ -185,14 +205,6 @@ const AdminUserManagement: React.FC = () => {
                         loading={deleteUserMutation.isPending}
                       >
                         Delete
-                      </Button>
-                      <Button
-                        onClick={() => banFormHook.quickBan(user.intra)}
-                        variant="primary"
-                        size="sm"
-                        className="bg-ft-accent hover:bg-orange-600"
-                      >
-                        Quick Ban (2d)
                       </Button>
                     </div>
                   </td>
@@ -210,18 +222,25 @@ const AdminUserManagement: React.FC = () => {
               className="rounded-lg p-4 border"
               style={{
                 backgroundColor: 'var(--bg-secondary)',
-                borderColor: 'var(--border-color)',
+                borderColor: user.is_banned ? 'rgb(220, 38, 38)' : 'var(--border-color)',
               }}
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{user.name}</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{user.name}</span>
+                  {user.is_banned && (
+                    <span className="px-2 py-0.5 text-xs font-bold bg-red-600 text-white rounded">
+                      BANNED
+                    </span>
+                  )}
+                </div>
                 <Button
                   onClick={() => handleVerifyToggle(user.intra, user.verified)}
                   disabled={verifyUserMutation.isPending}
                   variant={user.verified ? 'success' : 'secondary'}
                   size="sm"
                 >
-                  {user.verified ? '✅' : '❌'}
+                  {user.verified ? 'Verified' : 'Unverified'}
                 </Button>
               </div>
               <div className="flex items-center justify-between mb-3 text-sm">
@@ -230,7 +249,38 @@ const AdminUserManagement: React.FC = () => {
                   {new Date(user.created_at).toLocaleDateString()}
                 </span>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
+                {user.is_banned ? (
+                  <Button
+                    onClick={() => handleUnban({ name: user.name, intra: user.intra, user_id: user.user_id })}
+                    variant="success"
+                    size="sm"
+                    loading={unbanUserMutation.isPending}
+                    fullWidth
+                  >
+                    Unban
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      onClick={() => setBanTarget({ name: user.name, intra: user.intra })}
+                      variant="primary"
+                      size="sm"
+                      className="bg-ft-accent hover:bg-orange-600"
+                      fullWidth
+                    >
+                      Ban
+                    </Button>
+                    <Button
+                      onClick={() => handleQuickBan({ name: user.name, intra: user.intra })}
+                      variant="secondary"
+                      size="sm"
+                      fullWidth
+                    >
+                      Quick Ban (2d)
+                    </Button>
+                  </>
+                )}
                 <Button
                   onClick={() => handleDelete(user.intra)}
                   variant="danger"
@@ -240,20 +290,19 @@ const AdminUserManagement: React.FC = () => {
                 >
                   Delete
                 </Button>
-                <Button
-                  onClick={() => banFormHook.quickBan(user.intra)}
-                  variant="primary"
-                  size="sm"
-                  className="bg-ft-accent hover:bg-orange-600"
-                  fullWidth
-                >
-                  Quick Ban
-                </Button>
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      <BanDialog
+        isOpen={banTarget !== null}
+        targetUser={banTarget}
+        onConfirm={handleBanConfirm}
+        onCancel={() => setBanTarget(null)}
+        isPending={banUserMutation.isPending}
+      />
 
       <ConfirmDialog
         isOpen={confirmDialog.isOpen}
