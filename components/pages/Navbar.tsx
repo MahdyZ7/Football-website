@@ -233,23 +233,9 @@ export default function Navbar() {
 
             {/* Admin Dropdown */}
             {session?.user?.isAdmin && (
-              <Dropdown label="Admin" isActive={isAdminRouteActive}>
-                <DropdownLink href="/admin?tab=users" isActive={currentRoute === "/admin"}>
-                  User Management
-                </DropdownLink>
-                <DropdownLink href="/admin?tab=banned" isActive={false}>
-                  Banned Users
-                </DropdownLink>
-                <DropdownLink href="/admin?tab=feedback" isActive={false}>
-                  Manage Feedback
-                </DropdownLink>
-                <DropdownLink href="/admin?tab=votes" isActive={false}>
-                  Tournament Votes
-                </DropdownLink>
-                <DropdownLink href="/admin?tab=logs" isActive={false}>
-                  Admin Logs
-                </DropdownLink>
-              </Dropdown>
+              <NavLink href="/admin?tab=users" isActive={isAdminRouteActive}>
+				Admin
+			  </NavLink>
             )}
 			{/* Tournament Dropdown */}
             <Dropdown label="Tournament" isActive={isTournamentRouteActive}>
