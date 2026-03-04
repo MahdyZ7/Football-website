@@ -43,5 +43,9 @@ yarn-error.log*
 #breakpoints
 .breakpoints
 
-#database backup
+# database backup
 database-backups/
+
+# generated/temp artifacts
+/cache
+/attached_assets
