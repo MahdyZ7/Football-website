@@ -1,9 +1,6 @@
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { Pool } = require('pg');
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const fs = require('fs').promises;
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const path = require('path');
 // load environment variables from .env file
 require('dotenv').config();
