@@ -7,8 +7,8 @@ import Navbar from './Navbar';
 import Footer from './footer';
 import { Button } from '../ui/Button';
 import { TeamCardSkeleton } from '../Skeleton';
-import { GuaranteedSpot } from '../../types/user';
 import { useUsers } from '../../hooks/useQueries';
+import { useConfig } from '../../contexts/SiteConfigContext';
 import { useTeamManagement } from '../../hooks/useTeamManagement';
 import { useTeamBalance } from '../../hooks/useTeamBalance';
 import { usePlayerRating } from '../../hooks/usePlayerRating';
@@ -35,17 +35,20 @@ import { TeamRoster } from '../teams/TeamRoster';
 
 const TeamsImproved: React.FC = () => {
   const router = useRouter();
-  const [teamMode, setTeamMode] = useState<2 | 3>(3);
+  const { config } = useConfig();
+  const [teamMode, setTeamMode] = useState<2 | 3>(config.defaultTeamMode);
   const { data: registeredUsers = [], isLoading: loading, error: usersError } = useUsers();
 
   // Custom hooks for business logic
   const teamManagement = useTeamManagement({
     registeredUsers,
     teamMode,
-    guaranteedSpot: GuaranteedSpot,
+    guaranteedSpot: config.guaranteedSpots,
+    playersPerTeam2Mode: config.playersPerTeam2Mode,
+    playersPerTeam3Mode: config.playersPerTeam3Mode,
   });
 
-  const { autoBalance } = useTeamBalance(teamMode);
+  const { autoBalance } = useTeamBalance(teamMode, config.playersPerTeam2Mode, config.playersPerTeam3Mode);
 
   const { updatePlayerRating } = usePlayerRating({
     availablePlayers: teamManagement.availablePlayers,
@@ -382,7 +385,7 @@ const TeamsImproved: React.FC = () => {
                 ⏳ Waiting List ({teamManagement.waitingListPlayers.length})
               </h3>
               <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
-                Players beyond the first {GuaranteedSpot}
+                Players beyond the first {config.guaranteedSpots}
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {teamManagement.waitingListPlayers.map((player, index) => (
@@ -392,7 +395,7 @@ const TeamsImproved: React.FC = () => {
                     style={{ backgroundColor: 'var(--bg-secondary)' }}
                   >
                     <span className="flex-shrink-0 px-2 py-1 rounded bg-ft-accent text-white text-xs font-bold">
-                      #{GuaranteedSpot + index + 1}
+                      #{config.guaranteedSpots + index + 1}
                     </span>
                     <span className="truncate text-sm" style={{ color: 'var(--text-primary)' }}>
                       {player.name}

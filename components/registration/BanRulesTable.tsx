@@ -1,10 +1,21 @@
-import React from 'react';
+'use client';
 
-/**
- * BanRulesTable Component
- * Single Responsibility: Display TIG ban rules in a table format
- */
+import React from 'react';
+import { useConfig } from '../../contexts/SiteConfigContext';
+
+function formatDuration(days: number): string {
+  if (days === 0) return 'No ban';
+  if (days <= 4) return 'Half a week';
+  if (days <= 8) return 'One week';
+  if (days <= 15) return 'Two weeks';
+  if (days <= 30) return 'Four weeks';
+  return `${days} days`;
+}
+
 export function BanRulesTable() {
+  const { config } = useConfig();
+  const { banDurations, gracePeriodMinutes, lateThresholdMinutes } = config;
+
   return (
     <div
       className="max-w-4xl mx-auto mb-12 rounded-lg shadow-md overflow-hidden"
@@ -33,7 +44,7 @@ export function BanRulesTable() {
                 Cancel reservation
               </td>
               <td className="px-4 py-3" style={{ color: 'var(--text-primary)' }}>
-                One week (or Two weeks if on game day after 5 PM)
+                {formatDuration(banDurations.CANCEL)} (or {formatDuration(banDurations.CANCEL_GAME_DAY)} if on game day after {config.gameDayBanThresholdHour}:00)
               </td>
             </tr>
             <tr className="border-b" style={{ borderColor: 'var(--border-color)' }}>
@@ -41,15 +52,15 @@ export function BanRulesTable() {
                 Not ready when booking time starts
               </td>
               <td className="px-4 py-3" style={{ color: 'var(--text-primary)' }}>
-                Half a week
+                {formatDuration(banDurations.NOT_READY)}
               </td>
             </tr>
             <tr className="border-b" style={{ borderColor: 'var(--border-color)' }}>
               <td className="px-4 py-3 font-medium" style={{ color: 'var(--text-primary)' }}>
-                Late {">"} 15 minutes
+                Late {">"} {lateThresholdMinutes} minutes
               </td>
               <td className="px-4 py-3" style={{ color: 'var(--text-primary)' }}>
-                One week
+                {formatDuration(banDurations.LATE)}
               </td>
             </tr>
             <tr>
@@ -57,7 +68,7 @@ export function BanRulesTable() {
                 No Show without notice
               </td>
               <td className="px-4 py-3" style={{ color: 'var(--text-primary)' }}>
-                Four weeks
+                {formatDuration(banDurations.NO_SHOW)}
               </td>
             </tr>
           </tbody>
@@ -65,7 +76,7 @@ export function BanRulesTable() {
       </div>
       <div className="px-6 py-4 bg-blue-50 dark:bg-blue-900/20 border-t" style={{ borderColor: 'var(--border-color)' }}>
         <p className="text-sm text-center" style={{ color: 'var(--text-secondary)' }}>
-          <strong>Note:</strong> You can remove your registration without a ban within 15 minutes of registering.
+          <strong>Note:</strong> You can remove your registration without a ban within {gracePeriodMinutes} minutes of registering.
         </p>
       </div>
     </div>

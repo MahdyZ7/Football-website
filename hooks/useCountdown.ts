@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
-import { getNextRegistration } from '../lib/utils/allowed_times';
+import { getNextRegistrationFromConfig } from '../lib/utils/registration-helpers';
+import { useConfig } from '../contexts/SiteConfigContext';
 
 /**
  * Custom hook for countdown timer to next registration
  * Single Responsibility: Manage countdown state and updates
  */
 export function useCountdown() {
+  const { config } = useConfig();
   const [timeUntilNext, setTimeUntilNext] = useState("");
 
   useEffect(() => {
-    const next = getNextRegistration();
+    const next = getNextRegistrationFromConfig(config);
 
     const updateCountdown = () => {
       const now = new Date();
@@ -38,7 +40,7 @@ export function useCountdown() {
     return () => {
       clearInterval(countdownTimer);
     };
-  }, []);
+  }, [config]);
 
   return timeUntilNext;
 }

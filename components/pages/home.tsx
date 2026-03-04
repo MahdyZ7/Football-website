@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Navbar from "./Navbar";
 import Footer from "./footer";
 import { useUsers, useAllowedStatus } from "../../hooks/useQueries";
@@ -12,13 +12,9 @@ import { BannedPlayersCard } from "../registration/BannedPlayersCard";
 import { BanNotificationBanner } from "../registration/BanNotificationBanner";
 import { RemovalDialog } from "../registration/dialogs/RemovalDialog";
 import { EditNameDialog } from "../registration/dialogs/EditNameDialog";
-import { Button } from "../ui/Button";
+import { AnnouncementPopup } from "../AnnouncementPopup";
 
 const Home: React.FC = () => {
-
-  const [showPopup, setShowPopup] = useState(false);
-
-
   // Data fetching
   const { data: registeredUsers = [], isLoading: loading, error: usersError } = useUsers();
   const { data: allowedData } = useAllowedStatus();
@@ -30,12 +26,6 @@ const Home: React.FC = () => {
   const registrationForm = useRegistrationForm();
 
   const playerManagement = usePlayerManagement();
-
-  // Popup timer
-  useEffect(() => {
-    const timer = setTimeout(() => setShowPopup(false), 3000);
-    return () => clearTimeout(timer);
-  }, []);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--bg-primary)' }}>
@@ -83,28 +73,7 @@ const Home: React.FC = () => {
 
       <Footer />
 
-      {/* Alert Popup */}
-      {showPopup && (
-        <div
-          className="fixed top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2 z-[1000] p-6 rounded-lg shadow-2xl text-center"
-          style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-primary)' }}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="alert-popup-title"
-          aria-live="polite"
-        >
-          <h1 id="alert-popup-title" className="text-2xl font-bold mb-4">Game Time Change</h1>
-          <p className="mb-6">Game at 9 PM - Outdoor Pitch 2 - Active Al Maria</p>
-          <Button
-            onClick={() => setShowPopup(false)}
-            variant="primary"
-            size="lg"
-            aria-label="Close location alert popup"
-          >
-            Close
-          </Button>
-        </div>
-      )}
+      <AnnouncementPopup />
 
       {/* Dialogs */}
       <RemovalDialog

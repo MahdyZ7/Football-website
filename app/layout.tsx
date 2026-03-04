@@ -4,6 +4,7 @@ import { ThemeProvider } from "../contexts/ThemeContext";
 import { TournamentAudioProvider } from "../contexts/TournamentAudioContext";
 import { QueryProvider } from "../providers/QueryProvider";
 import { SessionProvider } from "../providers/SessionProvider";
+import { SiteConfigProvider } from "../contexts/SiteConfigContext";
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Toaster } from "sonner"
@@ -34,6 +35,7 @@ export default function RootLayout({
         <ErrorBoundary>
           <SessionProvider>
             <QueryProvider>
+              <SiteConfigProvider>
               <ThemeProvider>
               <TournamentAudioProvider>
                 {children}
@@ -57,6 +59,7 @@ export default function RootLayout({
                 <SpeedInsights />
               </TournamentAudioProvider>
               </ThemeProvider>
+              </SiteConfigProvider>
             </QueryProvider>
           </SessionProvider>
         </ErrorBoundary>

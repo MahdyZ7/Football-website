@@ -1,10 +1,70 @@
 'use client';
 
+import React from 'react';
 import Navbar from '../../components/pages/Navbar';
 import Footer from '../../components/pages/footer';
-import { Clock, AlertCircle, CheckCircle, Users, UserX, Shield } from 'lucide-react';
+import { Clock, CheckCircle, Users, UserX, Shield } from 'lucide-react';
+import { useConfig } from '../../contexts/SiteConfigContext';
+
+function formatDuration(days: number): string {
+  if (days === 0) return 'No ban';
+  if (days <= 4) return 'half a week ban';
+  if (days <= 8) return '1 week ban';
+  if (days <= 15) return '2 week ban';
+  if (days <= 30) return '1 month ban';
+  return `${days} day ban`;
+}
+
+// Parse **bold** markdown into React elements without dangerouslySetInnerHTML
+function MarkdownLine({ text }: { text: string }) {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return (
+    <span>
+      {parts.map((part, i) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return <strong key={i}>{part.slice(2, -2)}</strong>;
+        }
+        return <React.Fragment key={i}>{part}</React.Fragment>;
+      })}
+    </span>
+  );
+}
+
+function RuleSection({
+  icon,
+  title,
+  content,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  content: string;
+}) {
+  const lines = content.split('\n').filter((l) => l.trim());
+
+  return (
+    <div className="rounded-lg shadow-md p-6 mb-6" style={{ backgroundColor: 'var(--bg-card)' }}>
+      <div className="flex items-center gap-3 mb-4">
+        {icon}
+        <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+          {title}
+        </h2>
+      </div>
+      <ul className="space-y-3" style={{ color: 'var(--text-secondary)' }}>
+        {lines.map((line, i) => (
+          <li key={i} className="flex gap-2">
+            <span className="text-ft-primary font-bold">•</span>
+            <MarkdownLine text={line} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export default function RulesPage() {
+  const { config } = useConfig();
+  const { banDurations, lateThresholdMinutes } = config;
+
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--bg-primary)' }}>
       <Navbar />
@@ -20,123 +80,25 @@ export default function RulesPage() {
             </p>
           </div>
 
-          {/* Time and Score Section */}
-          <div className="rounded-lg shadow-md p-6 mb-6" style={{ backgroundColor: 'var(--bg-card)' }}>
-            <div className="flex items-center gap-3 mb-4">
-              <Clock size={28} className="text-ft-primary" />
-              <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                Time and Score
-              </h2>
-            </div>
-            <ul className="space-y-3" style={{ color: 'var(--text-secondary)' }}>
-              <li className="flex gap-2">
-                <span className="text-ft-primary font-bold">•</span>
-                <span>Games are <strong>10 minutes long</strong> or until a team scores <strong>2 goals</strong>.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-ft-primary font-bold">•</span>
-                <span><strong>Winner stays on</strong>, loser rotates out.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-ft-primary font-bold">•</span>
-                <span>In case of a draw, the team that played consecutive games is out.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-ft-primary font-bold">•</span>
-                <span>If the first game ends in a draw, a <strong>coin toss</strong> will decide which team is out.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-ft-primary font-bold">•</span>
-                <span>Game ends with referee&apos;s call.</span>
-              </li>
-            </ul>
-          </div>
+          <RuleSection
+            icon={<Clock size={28} className="text-ft-primary" />}
+            title="Time and Score"
+            content={config.gameRules.timeAndScore}
+          />
 
-          {/* Teams Section */}
-          <div className="rounded-lg shadow-md p-6 mb-6" style={{ backgroundColor: 'var(--bg-card)' }}>
-            <div className="flex items-center gap-3 mb-4">
-              <Users size={28} className="text-ft-primary" />
-              <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                Teams
-              </h2>
-            </div>
-            <ul className="space-y-3" style={{ color: 'var(--text-secondary)' }}>
-              <li className="flex gap-2">
-                <span className="text-ft-primary font-bold">•</span>
-                <span>Three teams of <strong>7 players each</strong>.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-ft-primary font-bold">•</span>
-                <span>First two teams wear colored bibs, third team waits off the field.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-ft-primary font-bold">•</span>
-                <span>The waiting team rotates in after each game with the losing team.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-ft-primary font-bold">•</span>
-                <span>Team selection is done <strong>5 minutes</strong> before the pitch booking starts.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-ft-primary font-bold">•</span>
-                <span>If a player is late for team selection, they are presumed to be unregistered.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-ft-primary font-bold">•</span>
-                <span>Unregistered and waiting list players can join the game as <strong>substitutes only</strong>.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-ft-primary font-bold">•</span>
-                <span>In case of missing players, due to late arrival or injury, players from the waiting team or waiting list can substitute in.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-ft-primary font-bold">•</span>
-                <span>The referee has the final say on substitutions skill level and fairness.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-ft-primary font-bold">•</span>
-                <span>Rebalancing teams is at the discretion of all teams involved.</span>
-              </li>
-            </ul>
-          </div>
+          <RuleSection
+            icon={<Users size={28} className="text-ft-primary" />}
+            title="Teams"
+            content={config.gameRules.teams}
+          />
 
-          {/* Referee Section */}
-          <div className="rounded-lg shadow-md p-6 mb-6" style={{ backgroundColor: 'var(--bg-card)' }}>
-            <div className="flex items-center gap-3 mb-4">
-              <Shield size={28} className="text-ft-primary" />
-              <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                Referee
-              </h2>
-            </div>
-            <ul className="space-y-3" style={{ color: 'var(--text-secondary)' }}>
-              <li className="flex gap-2">
-                <span className="text-ft-primary font-bold">•</span>
-                <span>A referee is chosen for each game from the <strong>waiting team</strong>.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-ft-primary font-bold">•</span>
-                <span>Their decision is <strong>final</strong> and they can arbitrate any disagreement.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-ft-primary font-bold">•</span>
-                <span>This includes decisions on fouls, goals, and rule interpretations.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-ft-primary font-bold">•</span>
-                <span>The referee is responsible for <strong>game time</strong>.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-ft-primary font-bold">•</span>
-                <span>They also have a final say in substituting missing, late or injured players with another player of comparable skill level from the waiting team.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-ft-primary font-bold">•</span>
-                <span>The referees are fallible human beings, <strong>respect their decisions</strong> despite any shortcomings.</span>
-              </li>
-            </ul>
-          </div>
+          <RuleSection
+            icon={<Shield size={28} className="text-ft-primary" />}
+            title="Referee"
+            content={config.gameRules.referee}
+          />
 
-          {/* Late TIG Section */}
+          {/* Late TIG Section - includes dynamic ban rules */}
           <div className="rounded-lg shadow-md p-6 mb-6" style={{ backgroundColor: 'var(--bg-card)' }}>
             <div className="flex items-center gap-3 mb-4">
               <UserX size={28} className="text-ft-primary" />
@@ -146,18 +108,12 @@ export default function RulesPage() {
             </div>
             <div className="space-y-4">
               <ul className="space-y-3" style={{ color: 'var(--text-secondary)' }}>
-                <li className="flex gap-2">
-                  <span className="text-ft-primary font-bold">•</span>
-                  <span>Late players forfeit their position and can join as <strong>substitutes only</strong>.</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-ft-primary font-bold">•</span>
-                  <span>Joining as a substitute can only happen if the substituted player forfeits their position voluntarily.</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-ft-primary font-bold">•</span>
-                  <span>Players are responsible for removing themselves from the roster if they do not intend to show up.</span>
-                </li>
+                {config.gameRules.lateTig.split('\n').filter((l) => l.trim()).map((line, i) => (
+                  <li key={i} className="flex gap-2">
+                    <span className="text-ft-primary font-bold">•</span>
+                    <MarkdownLine text={line} />
+                  </li>
+                ))}
               </ul>
 
               <div className="mt-4 p-4 rounded-lg border-2 border-red-500" style={{ backgroundColor: 'var(--bg-secondary)' }}>
@@ -165,19 +121,19 @@ export default function RulesPage() {
                 <ul className="space-y-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
                   <li className="flex gap-2">
                     <span className="text-red-500 font-bold">•</span>
-                    <span><strong>&lt; 15 mins late:</strong> half a week ban</span>
+                    <span><strong>&lt; {lateThresholdMinutes} mins late:</strong> {formatDuration(banDurations.NOT_READY)}</span>
                   </li>
                   <li className="flex gap-2">
                     <span className="text-red-500 font-bold">•</span>
-                    <span><strong>&gt; 15 mins late:</strong> 1 week ban</span>
+                    <span><strong>&gt; {lateThresholdMinutes} mins late:</strong> {formatDuration(banDurations.LATE)}</span>
                   </li>
                   <li className="flex gap-2">
                     <span className="text-red-500 font-bold">•</span>
-                    <span><strong>No show:</strong> 1 month ban</span>
+                    <span><strong>No show:</strong> {formatDuration(banDurations.NO_SHOW)}</span>
                   </li>
                   <li className="flex gap-2">
                     <span className="text-red-500 font-bold">•</span>
-                    <span><strong>Cancellation:</strong> 1 week - 1 month ban depending on when cancellation is made</span>
+                    <span><strong>Cancellation:</strong> {formatDuration(banDurations.CANCEL)} - {formatDuration(banDurations.CANCEL_GAME_DAY)} depending on when cancellation is made</span>
                   </li>
                   <li className="flex gap-2">
                     <span className="text-red-500 font-bold">•</span>
@@ -188,29 +144,11 @@ export default function RulesPage() {
             </div>
           </div>
 
-          {/* Conduct Section */}
-          <div className="rounded-lg shadow-md p-6 mb-6" style={{ backgroundColor: 'var(--bg-card)' }}>
-            <div className="flex items-center gap-3 mb-4">
-              <CheckCircle size={28} className="text-ft-primary" />
-              <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                Conduct
-              </h2>
-            </div>
-            <ul className="space-y-3" style={{ color: 'var(--text-secondary)' }}>
-              <li className="flex gap-2">
-                <span className="text-ft-primary font-bold">•</span>
-                <span>This is a <strong>friendly game</strong>.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-ft-primary font-bold">•</span>
-                <span>No aggressive behavior or foul language.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-ft-primary font-bold">•</span>
-                <span className="text-red-600 font-semibold">Any use of physical violence outside the game will result in <strong>immediate banning</strong> from future games.</span>
-              </li>
-            </ul>
-          </div>
+          <RuleSection
+            icon={<CheckCircle size={28} className="text-ft-primary" />}
+            title="Conduct"
+            content={config.gameRules.conduct}
+          />
 
           {/* Fair Play Notice */}
           <div className="mt-8 p-6 rounded-lg border-l-4 border-ft-primary" style={{ backgroundColor: 'var(--bg-secondary)' }}>

@@ -38,7 +38,13 @@ interface UseTeamBalanceReturn {
   ) => BalanceResult;
 }
 
-export function useTeamBalance(teamMode: 2 | 3): UseTeamBalanceReturn {
+export function useTeamBalance(
+  teamMode: 2 | 3,
+  playersPerTeam2Mode: number = 10,
+  playersPerTeam3Mode: number = 7,
+): UseTeamBalanceReturn {
+  const playersPerTeam = teamMode === 2 ? playersPerTeam2Mode : playersPerTeam3Mode;
+  const totalPlayers = teamMode === 2 ? playersPerTeam * 2 : playersPerTeam * 3;
   /**
    * Auto-balance teams using snake draft algorithm
    *
@@ -87,8 +93,8 @@ export function useTeamBalance(teamMode: 2 | 3): UseTeamBalanceReturn {
     const randomFirstPick = Math.floor(Math.random() * 2);
     const pickOrder: number[] = [];
 
-    // Build pick order for 10 rounds (20 players total)
-    for (let round = 0; round < 10; round++) {
+    // Build pick order for N rounds
+    for (let round = 0; round < playersPerTeam; round++) {
       if (round % 2 === 0) {
         // Even round: first picker goes first
         pickOrder.push(randomFirstPick, (randomFirstPick + 1) % 2);
@@ -99,7 +105,8 @@ export function useTeamBalance(teamMode: 2 | 3): UseTeamBalanceReturn {
     }
 
     // Assign players to teams according to pick order
-    sortedPlayers.slice(0, 20).forEach((player, index) => {
+    const totalFor2 = playersPerTeam * 2;
+    sortedPlayers.slice(0, totalFor2).forEach((player, index) => {
       teams[pickOrder[index]].push(player);
     });
 
@@ -107,12 +114,12 @@ export function useTeamBalance(teamMode: 2 | 3): UseTeamBalanceReturn {
       team1: { name: currentTeams.team1.name, players: teams[0] },
       team2: { name: currentTeams.team2.name, players: teams[1] },
       team3: { name: currentTeams.team3.name, players: [] },
-      remaining: sortedPlayers.slice(20),
+      remaining: sortedPlayers.slice(totalFor2),
     };
   };
 
   /**
-   * Balance algorithm for 3 teams (7 players each)
+   * Balance algorithm for 3 teams
    *
    * Uses snake draft:
    * - Even rounds: Team A, Team B, Team C
@@ -127,8 +134,8 @@ export function useTeamBalance(teamMode: 2 | 3): UseTeamBalanceReturn {
     const randomFirstPick = Math.floor(Math.random() * 3);
     const pickOrder: number[] = [];
 
-    // Build pick order for 7 rounds (21 players total)
-    for (let round = 0; round < 7; round++) {
+    // Build pick order for N rounds
+    for (let round = 0; round < playersPerTeam; round++) {
       if (round % 2 === 0) {
         // Even round: normal order starting from random first pick
         pickOrder.push(
@@ -147,7 +154,8 @@ export function useTeamBalance(teamMode: 2 | 3): UseTeamBalanceReturn {
     }
 
     // Assign players to teams according to pick order
-    sortedPlayers.slice(0, 21).forEach((player, index) => {
+    const totalFor3 = playersPerTeam * 3;
+    sortedPlayers.slice(0, totalFor3).forEach((player, index) => {
       teams[pickOrder[index]].push(player);
     });
 
@@ -155,7 +163,7 @@ export function useTeamBalance(teamMode: 2 | 3): UseTeamBalanceReturn {
       team1: { name: currentTeams.team1.name, players: teams[0] },
       team2: { name: currentTeams.team2.name, players: teams[1] },
       team3: { name: currentTeams.team3.name, players: teams[2] },
-      remaining: sortedPlayers.slice(21),
+      remaining: sortedPlayers.slice(totalFor3),
     };
   };
 

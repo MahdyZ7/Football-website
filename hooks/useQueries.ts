@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { User, BannedUser } from '../types/user';
+import { SiteConfig } from '../lib/config/defaults';
 
 // Custom error class that preserves HTTP status and parsed response data
 export class ApiError extends Error {
@@ -129,6 +130,31 @@ const api = {
       },
     },
   },
+  config: {
+    get: async (): Promise<{ config: SiteConfig; version: number; updatedAt: string | null }> => {
+      return await request('/api/config');
+    },
+    adminGet: async (): Promise<{ config: SiteConfig; version: number; updatedAt: string | null; updatedByName: string | null }> => {
+      return await request('/api/admin/config');
+    },
+    adminUpdate: async (data: { changes: Partial<SiteConfig>; expectedVersion: number }): Promise<{ config: SiteConfig; version: number }> => {
+      return await request('/api/admin/config', { method: 'PATCH', body: JSON.stringify(data) });
+    },
+    snapshots: {
+      list: async (): Promise<{ snapshots: Array<{ id: number; name: string; description: string | null; config_version: number; is_auto: boolean; created_at: string; created_by_name: string }> }> => {
+        return await request('/api/admin/config/snapshots');
+      },
+      create: async (data: { name: string; description?: string }) => {
+        return await request('/api/admin/config/snapshots', { method: 'POST', body: JSON.stringify(data) });
+      },
+      restore: async (snapshotId: number) => {
+        return await request('/api/admin/config/snapshots', {
+          method: 'POST',
+          body: JSON.stringify({ action: 'restore', snapshotId }),
+        });
+      },
+    },
+  },
   tournamentVotes: {
     getAll: async () => {
       return await request('/api/tournament-votes');
@@ -172,6 +198,9 @@ export const queryKeys = {
   adminFeedback: ['adminFeedback'] as const,
   tournamentVotes: ['tournamentVotes'] as const,
   adminTournamentVotes: ['adminTournamentVotes'] as const,
+  siteConfig: ['siteConfig'] as const,
+  adminConfig: ['adminConfig'] as const,
+  configSnapshots: ['configSnapshots'] as const,
 };
 
 // Custom hooks
@@ -481,6 +510,72 @@ export const useAdminDeleteTournamentVotes = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tournamentVotes });
       queryClient.invalidateQueries({ queryKey: queryKeys.adminTournamentVotes });
       queryClient.invalidateQueries({ queryKey: queryKeys.adminLogs });
+    },
+  });
+};
+
+// Site config hooks
+export const useSiteConfig = () => {
+  return useQuery({
+    queryKey: queryKeys.siteConfig,
+    queryFn: api.config.get,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 30,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const useAdminConfig = () => {
+  return useQuery({
+    queryKey: queryKeys.adminConfig,
+    queryFn: api.config.adminGet,
+    staleTime: 1000 * 30,
+  });
+};
+
+export const useUpdateConfig = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: api.config.adminUpdate,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.siteConfig });
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminConfig });
+      queryClient.invalidateQueries({ queryKey: queryKeys.configSnapshots });
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminLogs });
+      queryClient.invalidateQueries({ queryKey: queryKeys.allowed });
+    },
+  });
+};
+
+export const useConfigSnapshots = () => {
+  return useQuery({
+    queryKey: queryKeys.configSnapshots,
+    queryFn: api.config.snapshots.list,
+    staleTime: 1000 * 60,
+  });
+};
+
+export const useCreateSnapshot = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: api.config.snapshots.create,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.configSnapshots });
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminLogs });
+    },
+  });
+};
+
+export const useRestoreSnapshot = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: api.config.snapshots.restore,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.siteConfig });
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminConfig });
+      queryClient.invalidateQueries({ queryKey: queryKeys.configSnapshots });
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminLogs });
+      queryClient.invalidateQueries({ queryKey: queryKeys.allowed });
     },
   });
 };

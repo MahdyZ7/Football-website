@@ -32,6 +32,8 @@ interface UseTeamManagementProps {
   registeredUsers: User[];
   teamMode: 2 | 3;
   guaranteedSpot: number;
+  playersPerTeam2Mode?: number;
+  playersPerTeam3Mode?: number;
 }
 
 interface UseTeamManagementReturn {
@@ -64,7 +66,10 @@ export function useTeamManagement({
   registeredUsers,
   teamMode,
   guaranteedSpot,
+  playersPerTeam2Mode = 10,
+  playersPerTeam3Mode = 7,
 }: UseTeamManagementProps): UseTeamManagementReturn {
+  const maxPlayersPerTeam = teamMode === 2 ? playersPerTeam2Mode : playersPerTeam3Mode;
   const [availablePlayers, setAvailablePlayers] = useState<User[]>([]);
   const [waitingListPlayers, setWaitingListPlayers] = useState<User[]>([]);
   const [discardedPlayers, setDiscardedPlayers] = useState<User[]>([]);
@@ -96,9 +101,7 @@ export function useTeamManagement({
    */
   const addToTeam = (player: User, teamNumber: 1 | 2 | 3) => {
     const targetTeam = teamNumber === 1 ? team1 : teamNumber === 2 ? team2 : team3;
-    const maxPlayersPerTeam = teamMode === 2 ? 10 : 7;
-
-    if (targetTeam.players.length >= maxPlayersPerTeam) return;
+        if (targetTeam.players.length >= maxPlayersPerTeam) return;
     if (teamNumber === 3 && teamMode === 2) return;
 
     if (teamNumber === 1) {
@@ -228,7 +231,6 @@ export function useTeamManagement({
    * Check if a team is at full capacity
    */
   const isTeamFull = (teamNumber: 1 | 2 | 3): boolean => {
-    const maxPlayersPerTeam = teamMode === 2 ? 10 : 7;
     const team = teamNumber === 1 ? team1 : teamNumber === 2 ? team2 : team3;
     return team.players.length >= maxPlayersPerTeam;
   };

@@ -2,7 +2,8 @@ import React from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { Input } from '../ui/Input';
-import { Button, ButtonProps } from '../ui/Button';
+import { Button } from '../ui/Button';
+import { useConfig } from '../../contexts/SiteConfigContext';
 
 interface RegistrationFormProps {
   name: string;
@@ -45,6 +46,7 @@ export function RegistrationForm({
   onSubmit
 }: RegistrationFormProps) {
   const { data: session } = useSession();
+  const { config } = useConfig();
   const isBanned = session?.user?.isBanned ?? false;
 
   return (
@@ -52,9 +54,16 @@ export function RegistrationForm({
       <h1 className="text-3xl md:text-4xl font-bold text-center mb-6" style={{ color: 'var(--text-primary)' }}>
         Football Registration
 	</h1>
-      <p className="text-center text-m">Game time: 9 PM - Mondays and Thursdays</p>
-      <p className="text-center text-m">Registration opens: 12 noon - Sundays and Wednesdays</p>
-      <p className="text-center text-m mb-6">Location: Outddor Pitch 2 - Active Al Maria</p>
+      <p className="text-center text-m">
+        Game time: {config.gameDays.map((g) => `${g.time} ${g.dayName}s`).join(' and ')}
+      </p>
+      <p className="text-center text-m">
+        Registration opens: {config.registrationWindows.map((w) => {
+          const hr = w.openHour === 12 ? '12 noon' : `${w.openHour}:00`;
+          return `${hr} ${w.dayName}s`;
+        }).join(' and ')}
+      </p>
+      <p className="text-center text-m mb-6">Location: {config.location}</p>
 
       {/* Authentication Notice */}
       {!session && (

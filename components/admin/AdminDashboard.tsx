@@ -13,8 +13,9 @@ import AdminBannedUsers from './AdminBannedUsers';
 import AdminFeedback from './AdminFeedback';
 import AdminTournamentVotes from './AdminTournamentVotes';
 import AdminLogsTab from './AdminLogs';
+import AdminSettings from './AdminSettings';
 
-type TabKey = 'users' | 'banned' | 'feedback' | 'votes' | 'logs';
+type TabKey = 'users' | 'banned' | 'feedback' | 'votes' | 'logs' | 'settings';
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: 'users', label: 'Users' },
@@ -22,6 +23,7 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: 'feedback', label: 'Feedback' },
   { key: 'votes', label: 'Votes' },
   { key: 'logs', label: 'Logs' },
+  { key: 'settings', label: 'Settings' },
 ];
 
 const AdminDashboard: React.FC = () => {
@@ -124,6 +126,7 @@ const AdminDashboard: React.FC = () => {
           {activeTab === 'feedback' && <AdminFeedback />}
           {activeTab === 'votes' && <AdminTournamentVotes />}
           {activeTab === 'logs' && <AdminLogsTab />}
+          {activeTab === 'settings' && <AdminSettings />}
         </div>
       </main>
 

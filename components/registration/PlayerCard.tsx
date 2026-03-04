@@ -1,8 +1,6 @@
 import React from 'react';
 import { User } from '../../types/user';
-
-const GUARANTEED_SPOT = 21;
-const GRACE_PERIOD_MINUTES = 15;
+import { useConfig } from '../../contexts/SiteConfigContext';
 
 interface PlayerCardProps {
   user: User;
@@ -25,17 +23,18 @@ export function PlayerCard({
   onRemove,
   onEditName
 }: PlayerCardProps) {
+  const { config } = useConfig();
   const canRemove = isOwnRegistration || isAdmin;
 
-  // Check if within 15-minute grace period for name editing (own registration only)
+  // Check if within grace period for name editing (own registration only)
   const registrationTime = user.created_at ? new Date(user.created_at) : null;
   const now = new Date();
   const minutesSinceRegistration = registrationTime
     ? (now.getTime() - registrationTime.getTime()) / (1000 * 60)
     : Infinity;
-  const withinGracePeriod = isOwnRegistration && !user.verified && minutesSinceRegistration <= GRACE_PERIOD_MINUTES;
+  const withinGracePeriod = isOwnRegistration && !user.verified && minutesSinceRegistration <= config.gracePeriodMinutes;
 
-  const isGuaranteedSpot = index < GUARANTEED_SPOT;
+  const isGuaranteedSpot = index < config.guaranteedSpots;
 
   return (
     <div

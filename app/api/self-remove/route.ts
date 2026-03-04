@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import pool from "../../../lib/utils/db";
 import { auth } from "../../../auth";
 import { logAdminAction } from "../../../lib/utils/adminLogger";
-import { TIG_BAN_DURATIONS } from "../../../lib/utils/TIG_list";
-import { calculateCancelBanDuration } from "../../../lib/utils/TIG_list";
+import { calculateCancelBanDurationAsync } from "../../../lib/utils/TIG_list";
+import { getSiteConfig } from "../../../lib/config/server";
 
 export async function POST(req: NextRequest) {
   try {
@@ -35,13 +35,14 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "You can only remove your own registration" }, { status: 403 });
       }
 
-      // Check if within 15-minute grace period for no-ban removal
+      // Check if within grace period for no-ban removal
+      const config = await getSiteConfig();
       const registrationTime = new Date(player.created_at);
       const now = new Date();
       const minutesSinceRegistration = (now.getTime() - registrationTime.getTime()) / (1000 * 60);
 
-      if (!reason && minutesSinceRegistration <= 15) {
-        // No-ban removal within 15 minutes
+      if (!reason && minutesSinceRegistration <= config.gracePeriodMinutes) {
+        // No-ban removal within grace period
         await client.query("DELETE FROM players WHERE intra = $1", [intra]);
 
         await logAdminAction(
@@ -49,18 +50,18 @@ export async function POST(req: NextRequest) {
           'self_remove_no_ban',
           intra,
           player.name,
-          `Self-removed within 15-minute grace period (no ban applied)`
+          `Self-removed within ${config.gracePeriodMinutes}-minute grace period (no ban applied)`
         );
 
         return NextResponse.json({
           success: true,
-          message: `Registration removed successfully (no ban applied - within 15-minute grace period)`,
+          message: `Registration removed successfully (no ban applied - within ${config.gracePeriodMinutes}-minute grace period)`,
         }, { status: 200 });
       }
 
       // Validate reason is provided for ban removal
       if (!reason) {
-        return NextResponse.json({ error: "Removal reason is required after 15-minute grace period" }, { status: 400 });
+        return NextResponse.json({ error: `Removal reason is required after ${config.gracePeriodMinutes}-minute grace period` }, { status: 400 });
       }
 
       // Validate reason
@@ -70,13 +71,13 @@ export async function POST(req: NextRequest) {
       }
 
       // Calculate ban duration based on timing
-      const banDurationDays = calculateCancelBanDuration();
+      const banDurationDays = await calculateCancelBanDurationAsync();
       const bannedUntil = new Date();
       bannedUntil.setDate(bannedUntil.getDate() + banDurationDays);
 
       // Determine reason text based on when cancellation happened
-      const reasonText = banDurationDays === TIG_BAN_DURATIONS.CANCEL_GAME_DAY
-        ? "Cancel reservation on game day after 5 PM"
+      const reasonText = banDurationDays === config.banDurations.CANCEL_GAME_DAY
+        ? `Cancel reservation on game day after ${config.gameDayBanThresholdHour}:00`
         : "Cancel reservation";
 
       // Remove player from registered list

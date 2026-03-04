@@ -2,10 +2,9 @@ import React from 'react';
 import { useSession } from 'next-auth/react';
 import { User } from '../../../types/user';
 import { Button } from '../../ui/Button';
+import { useConfig } from '../../../contexts/SiteConfigContext';
 
 type RemovalReason = '' | 'CANCEL' | 'CANCEL_GAME_DAY' | 'NOT_READY' | 'LATE' | 'NO_SHOW' | 'NO_BAN';
-
-const GRACE_PERIOD_MINUTES = 15;
 
 interface RemovalDialogProps {
   isOpen: boolean;
@@ -31,6 +30,7 @@ export function RemovalDialog({
   onCancel
 }: RemovalDialogProps) {
   const { data: session } = useSession();
+  const { config } = useConfig();
 
   if (!isOpen) return null;
 
@@ -39,13 +39,13 @@ export function RemovalDialog({
 
   const isAdminAction: boolean = !!(session?.user?.isAdmin && targetUser.user_id !== session.user.id);
 
-  // Check if within 15-minute grace period for self-removal
+  // Check if within grace period for self-removal
   const registrationTime = targetUser.created_at ? new Date(targetUser.created_at) : null;
   const now = new Date();
   const minutesSinceRegistration = registrationTime
     ? (now.getTime() - registrationTime.getTime()) / (1000 * 60)
     : Infinity;
-  const withinGracePeriod = !isAdminAction && minutesSinceRegistration <= GRACE_PERIOD_MINUTES;
+  const withinGracePeriod = !isAdminAction && minutesSinceRegistration <= config.gracePeriodMinutes;
 
   return (
     <div

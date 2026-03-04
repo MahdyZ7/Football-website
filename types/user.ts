@@ -1,4 +1,6 @@
+/** @deprecated Use config.guaranteedSpots from SiteConfigContext or getSiteConfig() instead */
 export const GuaranteedSpot = 21;
+/** @deprecated Use config.maxPlayers from SiteConfigContext or getSiteConfig() instead */
 export const MaxPlayers = 40;
 
 export type BannedUser = {

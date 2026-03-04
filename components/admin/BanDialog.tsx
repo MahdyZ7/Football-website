@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '../ui/Button';
 import { Input, Select } from '../ui/Input';
-import { TIG_BAN_DURATIONS } from '../../lib/utils/TIG_list';
+import { useConfig } from '../../contexts/SiteConfigContext';
 
 interface BanTarget {
   name: string;
@@ -18,17 +18,17 @@ interface BanDialogProps {
   isPending: boolean;
 }
 
-const banReasons = [
-  { label: 'Select a reason...', value: '', duration: 7 },
-  { label: 'Not ready when booking time starts', value: 'Not ready when booking time starts', duration: TIG_BAN_DURATIONS.NOT_READY },
-  { label: 'Cancel reservation', value: 'Cancel reservation', duration: TIG_BAN_DURATIONS.CANCEL },
-  { label: 'Late > 15 minutes', value: 'Late > 15 minutes', duration: TIG_BAN_DURATIONS.LATE },
-  { label: 'Cancel reservation on game day after 5 PM', value: 'Cancel reservation on game day after 5 PM', duration: TIG_BAN_DURATIONS.CANCEL_GAME_DAY },
-  { label: 'No Show without notice', value: 'No Show without notice', duration: TIG_BAN_DURATIONS.NO_SHOW },
-  { label: 'Custom reason', value: 'custom', duration: 7 },
-];
-
 const BanDialog: React.FC<BanDialogProps> = ({ isOpen, targetUser, onConfirm, onCancel, isPending }) => {
+  const { config } = useConfig();
+  const banReasons = useMemo(() => [
+    { label: 'Select a reason...', value: '', duration: 7 },
+    { label: 'Not ready when booking time starts', value: 'Not ready when booking time starts', duration: config.banDurations.NOT_READY },
+    { label: 'Cancel reservation', value: 'Cancel reservation', duration: config.banDurations.CANCEL },
+    { label: `Late > ${config.lateThresholdMinutes} minutes`, value: `Late > ${config.lateThresholdMinutes} minutes`, duration: config.banDurations.LATE },
+    { label: `Cancel reservation on game day after ${config.gameDayBanThresholdHour}:00`, value: `Cancel reservation on game day after ${config.gameDayBanThresholdHour}:00`, duration: config.banDurations.CANCEL_GAME_DAY },
+    { label: 'No Show without notice', value: 'No Show without notice', duration: config.banDurations.NO_SHOW },
+    { label: 'Custom reason', value: 'custom', duration: 7 },
+  ], [config.banDurations, config.lateThresholdMinutes, config.gameDayBanThresholdHour]);
   const [reason, setReason] = useState('');
   const [customReason, setCustomReason] = useState('');
   const [duration, setDuration] = useState(7);

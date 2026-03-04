@@ -3,8 +3,7 @@ import { useSession } from 'next-auth/react';
 import { User } from '../../types/user';
 import { PlayerCard } from './PlayerCard';
 import { PlayerListSkeleton } from '../Skeleton';
-
-const GUARANTEED_SPOT = 21;
+import { useConfig } from '../../contexts/SiteConfigContext';
 
 interface PlayerListProps {
   users: User[];
@@ -26,6 +25,8 @@ export function PlayerList({
   onEditName
 }: PlayerListProps) {
   const { data: session } = useSession();
+  const { config } = useConfig();
+  const guaranteedSpots = config.guaranteedSpots;
 
   // Filter out banned players — they don't appear and don't count toward spots
   const visibleUsers = users.filter(u => !u.is_banned);
@@ -40,18 +41,18 @@ export function PlayerList({
       <div className="max-w-2xl mx-auto mb-6 rounded-xl shadow-lg overflow-hidden transition-all duration-300
         bg-gradient-to-b from-stone-700 to-zinc-700">
         <div className="bg-white/20 backdrop-blur-sm text-center rounded-lg px-4 py-2 text-white">
-          <div className="text-2xl font-bold">{visibleUsers.length}/{GUARANTEED_SPOT}</div>
+          <div className="text-2xl font-bold">{visibleUsers.length}/{guaranteedSpots}</div>
           <div className="text-xs">Spots Filled</div>
         </div>
         <div className="bg-black/50 h-2 mb-6">
           <div
             className="bg-white/50 h-full transition-all duration-500 ease-out"
-            style={{ width: `${Math.min((visibleUsers.length / GUARANTEED_SPOT) * 100, 100)}%` }}
+            style={{ width: `${Math.min((visibleUsers.length / guaranteedSpots) * 100, 100)}%` }}
             role="progressbar"
             aria-valuenow={visibleUsers.length}
             aria-valuemin={0}
-            aria-valuemax={GUARANTEED_SPOT}
-            aria-label={`${visibleUsers.length} out of ${GUARANTEED_SPOT} spots filled`}
+            aria-valuemax={guaranteedSpots}
+            aria-label={`${visibleUsers.length} out of ${guaranteedSpots} spots filled`}
           />
         </div>
       </div>

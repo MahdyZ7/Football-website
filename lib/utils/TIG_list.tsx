@@ -1,31 +1,49 @@
-import { isGameDay } from "./allowed_times";
+import { isGameDay, isGameDayAsync } from "./allowed_times";
+import { getSiteConfig } from '../config/server';
 
-
-// TIG Ban durations in days (admin-only reasons)
+// Legacy static exports (kept for backward compatibility)
 export const TIG_BAN_DURATIONS = {
-  NOT_READY: 4, // Half a week - admin only
-  CANCEL: 8, // One week - admin can explicitly choose
-  CANCEL_GAME_DAY: 15, // Two weeks - admin can explicitly choose
-  LATE: 8, // One week - admin only
-  NO_SHOW: 30, // Four weeks - admin only
-  NO_BAN: 0, // Admin can remove without ban
+  NOT_READY: 4,
+  CANCEL: 8,
+  CANCEL_GAME_DAY: 15,
+  LATE: 8,
+  NO_SHOW: 30,
+  NO_BAN: 0,
 };
 
+// Async config-driven versions
+export async function getBanDurations() {
+  const config = await getSiteConfig();
+  return { ...config.banDurations, NO_BAN: 0 };
+}
+
+export async function calculateCancelBanDurationAsync(): Promise<number> {
+  const config = await getSiteConfig();
+  const now = new Date();
+  const hour = now.getHours();
+  const adjustedHour = (hour + config.timezoneOffset) % 24;
+  const isGame = await isGameDayAsync();
+
+  if (isGame && adjustedHour >= config.gameDayBanThresholdHour) {
+    return config.banDurations.CANCEL_GAME_DAY;
+  }
+  return config.banDurations.CANCEL;
+}
+
+// Legacy synchronous version
 export function calculateCancelBanDuration(): number {
   const now = new Date();
   const hour = now.getHours();
   const minutes = now.getMinutes();
-  const timeZoneOffset = 4; // UTC+4
+  const timeZoneOffset = 4;
   const adjustedHour = (hour + timeZoneOffset) % 24;
 
   const isAfter5PM = adjustedHour >= 17;
   const isAfter830PM = adjustedHour >= 20 && minutes >= 30;
 
-  // If it's game day and after 5 PM, apply same day cancel ban
   if (isGameDay() && isAfter5PM) {
     return TIG_BAN_DURATIONS.CANCEL_GAME_DAY;
   }
 
-  // Otherwise, apply cancel ban
   return TIG_BAN_DURATIONS.CANCEL;
 }

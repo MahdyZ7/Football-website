@@ -1,12 +1,12 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import pool from "../../../lib/utils/db";
-import allowed_times from "../../../lib/utils/allowed_times";
-import player_limit_reached from "../../../lib/utils/player_limit";
+import { isRegistrationAllowed } from "../../../lib/utils/allowed_times";
 import verifyLogin from "../../../lib/utils/verify_login";
 import { User } from "../../../types/user";
 import { auth } from "../../../auth";
 import { logAdminAction } from "../../../lib/utils/adminLogger";
+import { getSiteConfig } from "../../../lib/config/server";
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,7 +31,8 @@ async function handlePost(req: NextRequest) {
     return NextResponse.json({ error: "Authentication required. Please sign in to register." }, { status: 401 });
   }
 
-  if (!allowed_times()) {
+  const allowed = await isRegistrationAllowed();
+  if (!allowed) {
     return NextResponse.json({ error: "Registration is not allowed at this time." }, { status: 403 });
   }
   const json = await req.json();
@@ -160,8 +161,9 @@ async function registerUser(user: User, userId: string) {
     const { rows } = await client.query("SELECT name, intra, is_banned FROM players");
 
     // Count only non-banned players toward the limit
+    const config = await getSiteConfig();
     const activePlayers = rows.filter(row => !row.is_banned);
-    if (player_limit_reached(activePlayers.length)) {
+    if (activePlayers.length >= config.maxPlayers) {
       return { error: "Player limit reached", status: 403 };
     }
 

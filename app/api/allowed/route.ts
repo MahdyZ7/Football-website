@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
-import allowed_times from "../../../lib/utils/allowed_times";
+import { isRegistrationAllowed } from "../../../lib/utils/allowed_times";
+import { getSiteConfig } from "../../../lib/config/server";
 
 export async function GET() {
-	const isAllowed = allowed_times();
-	return NextResponse.json({ isAllowed }, { status: 200 });
+	const isAllowed = await isRegistrationAllowed();
+	const config = await getSiteConfig();
+	return NextResponse.json({
+		isAllowed,
+		forceClosed: config.registrationForceClosed,
+	}, { status: 200 });
 }

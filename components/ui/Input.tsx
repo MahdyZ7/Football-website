@@ -64,12 +64,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           className={`
             px-4 py-3 rounded border-2 transition-all duration-200
             focus:outline-none focus:ring-2 focus:border-transparent
-            ${error ? 'border-red-500 focus:ring-red-500' : 'border-transparent focus:ring-ft-primary'}
+            ${error ? 'border-red-500 focus:ring-red-500' : 'focus:ring-ft-primary'}
             ${fullWidth ? 'w-full' : ''}
             ${className}
           `.trim().replace(/\s+/g, ' ')}
           style={{
             backgroundColor: 'var(--input-bg)',
+            borderColor: error ? undefined : 'var(--border-color)',
             color: 'var(--text-primary)'
           }}
           aria-invalid={!!error}
@@ -145,12 +146,13 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           className={`
             px-4 py-3 rounded border-2 transition-all duration-200
             focus:outline-none focus:ring-2 focus:border-transparent resize-none
-            ${error ? 'border-red-500 focus:ring-red-500' : 'border-transparent focus:ring-ft-primary'}
+            ${error ? 'border-red-500 focus:ring-red-500' : 'focus:ring-ft-primary'}
             ${fullWidth ? 'w-full' : ''}
             ${className}
           `.trim().replace(/\s+/g, ' ')}
           style={{
             backgroundColor: 'var(--input-bg)',
+            borderColor: error ? undefined : 'var(--border-color)',
             color: 'var(--text-primary)'
           }}
           aria-invalid={!!error}
