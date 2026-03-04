@@ -4,7 +4,7 @@
  * @jest-environment jsdom
  */
 
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { useCountdown } from '@/hooks/useCountdown';
 import * as allowedTimes from '@/lib/utils/allowed_times';
 

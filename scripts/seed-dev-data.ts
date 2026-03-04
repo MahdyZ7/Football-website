@@ -363,7 +363,7 @@ async function seedDatabase() {
             [feedbackId, users[j + 2].id, voteType]
           );
           totalVotes++;
-        } catch (error) {
+        } catch {
           // Skip if user already voted (shouldn't happen, but just in case)
         }
       }

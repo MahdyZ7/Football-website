@@ -48,7 +48,7 @@ export function QueryWrapper({ children }: QueryWrapperProps) {
  */
 interface AllProvidersProps {
   children: ReactNode;
-  session?: any;
+  session?: { user: { id: string; name: string; email: string; isAdmin: boolean }; expires: string } | null;
 }
 
 export function AllProviders({ children, session = null }: AllProvidersProps) {
@@ -67,7 +67,7 @@ export function AllProviders({ children, session = null }: AllProvidersProps) {
  */
 export function renderWithProviders(
   ui: React.ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'> & { session?: any }
+  options?: Omit<RenderOptions, 'wrapper'> & { session?: AllProvidersProps['session'] }
 ) {
   const { session, ...renderOptions } = options || {};
 

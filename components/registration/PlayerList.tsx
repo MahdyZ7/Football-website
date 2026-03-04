@@ -8,7 +8,7 @@ import { useConfig } from '../../contexts/SiteConfigContext';
 interface PlayerListProps {
   users: User[];
   loading: boolean;
-  error: any;
+  error: Error | null;
   onRemove: (intra: string) => void;
   onEditName: (intra: string, currentName: string) => void;
 }

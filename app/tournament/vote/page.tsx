@@ -452,6 +452,7 @@ export default function TournamentVotePage() {
               className="w-7 h-7 rounded-full overflow-hidden border flex-shrink-0"
               style={{ borderColor: getTeamColor(selection.team) }}
             >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={getTeamLogo(selection.team)} alt={selection.team} className="w-full h-full object-cover" />
             </div>
             <div className="min-w-0">
@@ -493,6 +494,7 @@ export default function TournamentVotePage() {
             className="w-10 h-10 rounded-full overflow-hidden border-2 flex-shrink-0"
             style={{ borderColor: teamColor }}
           >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={getTeamLogo(player.team)} alt={player.team} className="w-full h-full object-cover" />
           </div>
           <div className="flex-1 min-w-0">
@@ -829,6 +831,7 @@ export default function TournamentVotePage() {
                                     className="w-8 h-8 rounded-full overflow-hidden border"
                                     style={{ borderColor: getTeamColor(tally.team) }}
                                   >
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img src={getTeamLogo(tally.team)} alt={tally.team} className="w-full h-full object-cover" />
                                   </div>
                                   <div>
@@ -887,6 +890,7 @@ export default function TournamentVotePage() {
                                     className="w-8 h-8 rounded-full overflow-hidden border"
                                     style={{ borderColor: getTeamColor(tally.team) }}
                                   >
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img src={getTeamLogo(tally.team)} alt={tally.team} className="w-full h-full object-cover" />
                                   </div>
                                   <div>

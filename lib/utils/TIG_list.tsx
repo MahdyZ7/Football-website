@@ -34,12 +34,10 @@ export async function calculateCancelBanDurationAsync(): Promise<number> {
 export function calculateCancelBanDuration(): number {
   const now = new Date();
   const hour = now.getHours();
-  const minutes = now.getMinutes();
   const timeZoneOffset = 4;
   const adjustedHour = (hour + timeZoneOffset) % 24;
 
   const isAfter5PM = adjustedHour >= 17;
-  const isAfter830PM = adjustedHour >= 20 && minutes >= 30;
 
   if (isGameDay() && isAfter5PM) {
     return TIG_BAN_DURATIONS.CANCEL_GAME_DAY;

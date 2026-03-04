@@ -3,18 +3,18 @@
  * Ensures all admin actions are properly logged and auditable
  */
 
-import { getTestPool, createTestUser, createTestPlayer, createBannedUser, cleanupTestData } from '../helpers/testUtils';
+import { getTestPool, createTestUser, cleanupTestData } from '../helpers/testUtils';
 
 describe('Admin Operations and Logging', () => {
-  let adminUser: any;
-  let regularUser: any;
+  let adminUser: Record<string, string>;
+  let _regularUser: Record<string, string>;
 
   beforeEach(async () => {
     await cleanupTestData(['admin_logs', 'banned_users', 'players', 'users']);
 
     // Create admin and regular users for each test
     adminUser = await createTestUser('admin@test.com', 'Admin User', true, '00000000-0000-0000-0000-000000000001');
-    regularUser = await createTestUser('user@test.com', 'Regular User', false, '00000000-0000-0000-0000-000000000002');
+    _regularUser = await createTestUser('user@test.com', 'Regular User', false, '00000000-0000-0000-0000-000000000002');
   });
 
   afterAll(async () => {

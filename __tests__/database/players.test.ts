@@ -50,8 +50,8 @@ describe('Players Database Operations', () => {
       await createTestPlayer('unverified', 'Unverified User', false);
 
       const players = await getAllRecords('players');
-      const verified = players.find((p: any) => p.intra === 'verified');
-      const unverified = players.find((p: any) => p.intra === 'unverified');
+      const verified = players.find((p: { intra: string }) => p.intra === 'verified');
+      const unverified = players.find((p: { intra: string }) => p.intra === 'unverified');
 
       expect(verified.verified).toBe(true);
       expect(unverified.verified).toBe(false);

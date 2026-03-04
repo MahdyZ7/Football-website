@@ -117,7 +117,7 @@ export async function DELETE(req: NextRequest) {
 }
 
 // GET - Get user's votes (for showing which items the user has voted on)
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     const session = await auth();
 

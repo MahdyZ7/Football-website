@@ -36,12 +36,12 @@ async function testCronJob() {
   // Check if server is running
   console.log('🔍 Checking if dev server is running...');
   try {
-    const healthCheck = await fetch(NEXTAUTH_URL, {
+    await fetch(NEXTAUTH_URL, {
       method: 'GET',
       signal: AbortSignal.timeout(2000)
     });
     console.log('✅ Server is running\n');
-  } catch (error) {
+  } catch {
     console.error(`❌ Server is not responding at ${NEXTAUTH_URL}`);
     console.error('\n   Please start your dev server first:');
     console.error('   npm run dev\n');

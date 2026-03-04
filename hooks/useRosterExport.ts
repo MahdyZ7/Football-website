@@ -14,7 +14,7 @@ type Team = {
     secondaryText: string;
   };
   font: string;
-  image: any;
+  image: string;
   players: { number: number; name: string; position: string }[];
   theme: string;
 };

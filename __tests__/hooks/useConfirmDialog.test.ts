@@ -5,7 +5,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { useConfirmDialog, ConfirmDialogState } from '@/hooks/useConfirmDialog';
+import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 
 describe('useConfirmDialog', () => {
   describe('Initial state', () => {

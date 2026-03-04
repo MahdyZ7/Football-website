@@ -57,13 +57,13 @@ const AdminTournamentVotes: React.FC = () => {
   const { data: votesData, isLoading } = useAdminTournamentVotes(filters);
   const deleteMutation = useAdminDeleteTournamentVotes();
 
-  const votes: Vote[] = votesData?.votes || [];
+  const votes: Vote[] | undefined = votesData?.votes;
   const summary = votesData?.summary || { best_player: [], best_goalkeeper: [] };
 
   const groupedVotes = useMemo(() => {
     const groups: Record<string, GroupedVotes> = {};
 
-    votes.forEach(vote => {
+    (votes || []).forEach(vote => {
       const key = `${vote.voter_id}-${vote.award_type}`;
       if (!groups[key]) {
         groups[key] = {
@@ -198,6 +198,7 @@ const AdminTournamentVotes: React.FC = () => {
                         className="w-8 h-8 rounded-full overflow-hidden border-2"
                         style={{ borderColor: getTeamColor(item.playerTeam) }}
                       >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={getTeamLogo(item.playerTeam)}
                           alt={item.playerTeam}
@@ -264,6 +265,7 @@ const AdminTournamentVotes: React.FC = () => {
                         className="w-8 h-8 rounded-full overflow-hidden border-2"
                         style={{ borderColor: getTeamColor(item.playerTeam) }}
                       >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={getTeamLogo(item.playerTeam)}
                           alt={item.playerTeam}
@@ -420,6 +422,7 @@ const AdminTournamentVotes: React.FC = () => {
                             className="w-6 h-6 rounded-full overflow-hidden border"
                             style={{ borderColor: getTeamColor(vote.playerTeam) }}
                           >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={getTeamLogo(vote.playerTeam)}
                               alt={vote.playerTeam}

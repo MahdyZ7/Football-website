@@ -59,7 +59,7 @@ export async function GET() {
 
     // If user is authenticated, get their ranked votes
     type RankedVote = { playerName: string; playerTeam: string };
-    let userVotes: Record<string, { first: RankedVote | null; second: RankedVote | null; third: RankedVote | null }> = {
+    const userVotes: Record<string, { first: RankedVote | null; second: RankedVote | null; third: RankedVote | null }> = {
       best_player: { first: null, second: null, third: null },
       best_goalkeeper: { first: null, second: null, third: null },
     };

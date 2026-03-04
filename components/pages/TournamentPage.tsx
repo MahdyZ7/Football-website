@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Trophy, Star, Award, Zap, Scale, Vote, X } from "lucide-react";
-import Link from "next/link";
+import { motion } from "framer-motion";
+import { Trophy, Star, Award, Zap, Scale } from "lucide-react";
 import Image from "next/image";
 import Navbar from "./Navbar";
 import Footer from "./footer";
@@ -58,7 +57,7 @@ const getTeamForm = (teamName: string, maxMatches: number = 6): Array<'W' | 'D' 
         });     
 }
 
-const NEXT_FIXTURES: any[] = [
+const NEXT_FIXTURES: { homeTeam: string; awayTeam: string; date: string }[] = [
         
 ];
 
@@ -428,10 +427,6 @@ const TournamentPage: React.FC = () => {
   }, []);
 
 
-  const getTeamStyle = (teamKey: string) => ({
-    backgroundColor: TEAMS[teamKey as TeamKey].color,
-    color: teamKey === "Oryx" ? "#000" : "#fff",
-  });
 
   const sortedLeagueTable = [...LEAGUE_TABLE].sort((a, b) => {
         const pointsA = getPoints(a);

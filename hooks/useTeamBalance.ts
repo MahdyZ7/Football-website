@@ -44,7 +44,6 @@ export function useTeamBalance(
   playersPerTeam3Mode: number = 7,
 ): UseTeamBalanceReturn {
   const playersPerTeam = teamMode === 2 ? playersPerTeam2Mode : playersPerTeam3Mode;
-  const totalPlayers = teamMode === 2 ? playersPerTeam * 2 : playersPerTeam * 3;
   /**
    * Auto-balance teams using snake draft algorithm
    *

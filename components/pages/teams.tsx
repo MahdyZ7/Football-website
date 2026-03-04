@@ -93,6 +93,7 @@ const TeamsImproved: React.FC = () => {
     }
 
     restoredRef.current = true;
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- teamManagement setters are stable; including the object would cause a loop
   }, [storedValue, isInitialized, loading, hasStoredValue]);
 
   // Save state whenever teams change (only after initialization)
@@ -116,6 +117,8 @@ const TeamsImproved: React.FC = () => {
     teamManagement.discardedPlayers,
     teamMode,
     isInitialized,
+    loading,
+    setValue,
   ]);
 
   // Auto-balance handler

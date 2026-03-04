@@ -10,7 +10,7 @@ export default async function globalTeardown() {
   try {
     await closeTestPool();
     console.log('✅ Test database pool closed\n');
-  } catch (error) {
+  } catch {
     console.log('⚠️  Pool already closed or not initialized\n');
   }
 }

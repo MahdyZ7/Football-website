@@ -74,8 +74,8 @@ export function usePlayerManagement() {
       setShowRemoveDialog(false);
       setRemoveReason('');
       setTargetIntra("");
-    } catch (error: any) {
-      onSuccess(error.message || "Failed to remove registration", 'error');
+    } catch (error: unknown) {
+      onSuccess(error instanceof Error ? error.message : "Failed to remove registration", 'error');
     }
   }, [removeReason, session, onSuccess]);
 
@@ -108,8 +108,8 @@ export function usePlayerManagement() {
       setShowEditNameDialog(false);
       setEditNameValue("");
       setEditNameIntra("");
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.error || "Failed to update name";
+    } catch (error: unknown) {
+      const errorMessage = (error instanceof Error ? error.message : null) || "Failed to update name";
       onSuccess(errorMessage, 'error');
     }
   }, [editNameValue, editNameIntra, editNameMutation, onSuccess]);

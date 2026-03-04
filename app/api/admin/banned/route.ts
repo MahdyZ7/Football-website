@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import pool from '../../../../lib/utils/db';
 import { auth } from '../../../../auth';
 
-async function getAuthenticatedAdmin(req: NextRequest): Promise<{ userId: string; userName: string } | null> {
+async function getAuthenticatedAdmin(_req: NextRequest): Promise<{ userId: string; userName: string } | null> {
   const session = await auth();
 
   if (!session?.user || !session.user.isAdmin) {

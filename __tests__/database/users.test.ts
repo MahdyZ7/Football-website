@@ -3,7 +3,7 @@
  * Tests user registration, verification, and admin operations
  */
 
-import { getTestPool, createTestUser, createTestPlayer, cleanupTestData, getAllRecords } from '../helpers/testUtils';
+import { getTestPool, createTestUser, createTestPlayer, cleanupTestData } from '../helpers/testUtils';
 
 describe('User Management', () => {
   beforeEach(async () => {
@@ -255,7 +255,7 @@ describe('User Management', () => {
       const waitlistStart = Math.max(0, result.rows.length - 3);
       const waitlistPlayers = result.rows.slice(waitlistStart);
 
-      waitlistPlayers.forEach((player: any, index: number) => {
+      waitlistPlayers.forEach((player: { intra: string }, index: number) => {
         expect(player.intra).toBe(`user${24 - 2 + index}`);
       });
     });

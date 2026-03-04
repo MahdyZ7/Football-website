@@ -256,6 +256,7 @@ export default function Navbar() {
               <>
                 <div className="flex items-center gap-2 px-4 py-2 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
                   {session.user.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img src={session.user.image} alt={session.user.name || 'User'} className="w-8 h-8 rounded-full" />
                   ) : (
                     <User size={20} style={{ color: 'var(--text-primary)' }} />
@@ -329,6 +330,7 @@ export default function Navbar() {
           <div className="mb-4 pb-4 border-b" style={{ borderColor: 'var(--border-color)' }}>
             <div className="flex items-center gap-2 p-3 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
               {session.user.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img src={session.user.image} alt={session.user.name || 'User'} className="w-10 h-10 rounded-full" />
               ) : (
                 <User size={24} style={{ color: 'var(--text-primary)' }} />

@@ -5,8 +5,8 @@ import { SiteConfig } from '../lib/config/defaults';
 // Custom error class that preserves HTTP status and parsed response data
 export class ApiError extends Error {
   status: number;
-  data: any;
-  constructor(message: string, status: number, data?: any) {
+  data: Record<string, unknown>;
+  constructor(message: string, status: number, data?: Record<string, unknown>) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
@@ -21,7 +21,7 @@ const request = async (url: string, options?: RequestInit) => {
     ...options,
   });
   if (!res.ok) {
-    let data: any;
+    let data: Record<string, unknown>;
     try {
       data = await res.json();
     } catch {

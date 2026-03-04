@@ -11,7 +11,6 @@ import Footer from '../../components/pages/footer';
 import { ThumbsUp, ThumbsDown, Plus, X } from 'lucide-react';
 import { Button, IconButton } from '../../components/ui/Button';
 import { Input, Textarea, Select } from '../../components/ui/Input';
-import { Card, CardContent } from '../../components/ui/Card';
 
 interface FeedbackSubmission {
   id: number;

@@ -39,7 +39,7 @@ export function useTeamsFromUrl(defaultTeams: Team[]) {
           const incomingTeam = parsedTeams[index];
 
           // Create player objects with intra as position
-          const players = incomingTeam.players.map((player: any, playerIndex: number) => ({
+          const players = incomingTeam.players.map((player: { name: string; intra: string }, playerIndex: number) => ({
             number: playerIndex + 1,
             name: player.name.toUpperCase(),
             position: player.intra.toUpperCase()

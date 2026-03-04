@@ -15,6 +15,7 @@ const FortyTwoProvider = {
   },
   token: "https://api.intra.42.fr/oauth/token",
   userinfo: "https://api.intra.42.fr/v2/me",
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   profile(profile: any) {
     return {
       id: String(profile.id),
@@ -40,6 +41,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       clientId: process.env.GITHUB_ID!,
       clientSecret: process.env.GITHUB_SECRET!,
     }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     FortyTwoProvider as any,
   ],
   pages: {

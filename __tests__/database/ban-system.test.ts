@@ -183,8 +183,8 @@ describe('Ban System', () => {
       );
 
       expect(result.rows).toHaveLength(2);
-      expect(result.rows.some((r: any) => r.id === 'user1')).toBe(true);
-      expect(result.rows.some((r: any) => r.id === 'user2')).toBe(true);
+      expect(result.rows.some((r: { id: string }) => r.id === 'user1')).toBe(true);
+      expect(result.rows.some((r: { id: string }) => r.id === 'user2')).toBe(true);
     });
 
     it('should efficiently query bans by banned_until date', async () => {
