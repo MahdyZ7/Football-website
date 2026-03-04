@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 /**
  * Custom hook for session storage persistence
@@ -81,27 +81,26 @@ export function useSessionStorage<T>(
    * Update the stored value
    * Supports both direct values and updater functions
    */
-  const setValue = (value: T | ((prev: T) => T)) => {
+  const setValue = useCallback((value: T | ((prev: T) => T)) => {
     try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
+      setStoredValue(value);
     } catch (error) {
       console.error(`Error setting value for key "${key}":`, error);
     }
-  };
+  }, [key]);
 
   /**
    * Clear the stored value from sessionStorage
    * Resets to initial value
    */
-  const clearValue = () => {
+  const clearValue = useCallback(() => {
     try {
       sessionStorage.removeItem(key);
       setStoredValue(initialValue);
     } catch (error) {
       console.error(`Error clearing sessionStorage key "${key}":`, error);
     }
-  };
+  }, [key, initialValue]);
 
   return {
     storedValue,
