@@ -156,15 +156,15 @@ export function useRegistrationForm() {
           if (error instanceof ApiError) {
             const { status, data } = error;
             if (status === 401) {
-              onSuccess(data?.error || "Please sign in to register", 'error');
+              onSuccess(String(data?.error || "Please sign in to register"), 'error');
             } else if (status === 403) {
-              onSuccess(data?.error || "Players limit reached. Better luck next time!", 'error');
+              onSuccess(String(data?.error || "Players limit reached. Better luck next time!"), 'error');
             } else if (status === 409) {
               onSuccess(`A user with the Intra-login ${intra} already exists.`, 'error');
             } else if (status === 404) {
               onSuccess(`User with Intra-login ${intra} not found. Please enter name also`, 'error');
             } else {
-              onSuccess(data?.error || "Registration failed. Please try again.", 'error');
+              onSuccess(String(data?.error || "Registration failed. Please try again."), 'error');
             }
           } else {
             onSuccess("Registration failed. Please try again.", 'error');

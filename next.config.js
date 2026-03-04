@@ -5,6 +5,7 @@ const nextConfig = {
     formats: ['image/webp'],
   },
   turbopack: {
+    root: __dirname,
     rules: {
       '*.svg': {
         loaders: ['@svgr/webpack'],

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { StaticImageData } from 'next/image';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
@@ -14,7 +15,7 @@ type Team = {
     secondaryText: string;
   };
   font: string;
-  image: string;
+  image: StaticImageData;
   players: { number: number; name: string; position: string }[];
   theme: string;
 };

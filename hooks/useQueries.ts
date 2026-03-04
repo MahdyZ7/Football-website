@@ -10,7 +10,7 @@ export class ApiError extends Error {
     super(message);
     this.name = 'ApiError';
     this.status = status;
-    this.data = data;
+    this.data = data ?? {};
   }
 }
 
@@ -28,7 +28,7 @@ const request = async (url: string, options?: RequestInit) => {
       const text = await res.text();
       data = { error: text || res.statusText };
     }
-    throw new ApiError(data?.error || res.statusText, res.status, data);
+    throw new ApiError(String(data?.error || res.statusText), res.status, data);
   }
   return res.json();
 };

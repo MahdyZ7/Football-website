@@ -57,7 +57,7 @@ const getTeamForm = (teamName: string, maxMatches: number = 6): Array<'W' | 'D' 
         });     
 }
 
-const NEXT_FIXTURES: { homeTeam: string; awayTeam: string; date: string }[] = [
+const NEXT_FIXTURES: { home: string; away: string; date: string; time: string }[] = [
         
 ];
 
