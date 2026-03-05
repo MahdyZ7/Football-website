@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
-import { ChevronDown, ChevronUp, Save, RotateCcw, Plus, AlertTriangle, X, Clock } from 'lucide-react';
+import { ChevronDown, ChevronUp, Save, RotateCcw, Plus, AlertTriangle, X } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Input, Textarea, Select } from '../ui/Input';
 import {
@@ -221,42 +221,226 @@ function HourSelect({
   );
 }
 
-// ─── Day Toggle Row (toggle button + clock/time input) ───────────
-function DayToggleRow({
-  dayIndex,
-  active,
-  onToggle,
-  children,
+// ─── Format hour helper ──────────────────────────────────────────
+const formatHour = (h: number) => {
+  if (h === 0) return '12 AM';
+  if (h === 12) return '12 PM';
+  if (h === 23) return '11:59 PM';
+  return h < 12 ? `${h} AM` : `${h - 12} PM`;
+};
+
+// ─── Day Select dropdown ─────────────────────────────────────────
+function DaySelect({
+  value,
+  onChange,
 }: {
-  dayIndex: number;
-  active: boolean;
-  onToggle: (dayIndex: number) => void;
-  children?: React.ReactNode;
+  value: number;
+  onChange: (day: number) => void;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      <button
-        type="button"
-        onClick={() => onToggle(dayIndex)}
-        className={`w-28 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 border-2 ${
-          active
-            ? 'bg-ft-primary text-white border-ft-primary'
-            : 'border-dashed'
-        }`}
-        style={
-          !active
-            ? { borderColor: 'var(--border-color)', color: 'var(--text-secondary)', backgroundColor: 'var(--bg-secondary)' }
-            : undefined
-        }
+    <select
+      value={value}
+      onChange={(e) => onChange(parseInt(e.target.value))}
+      className="px-3 py-2 rounded border text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ft-primary"
+      style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+    >
+      {DAY_NAMES.map((name, i) => (
+        <option key={i} value={i}>{name}</option>
+      ))}
+    </select>
+  );
+}
+
+// ─── Week Timeline visualization ─────────────────────────────────
+function WeekTimeline({
+  regDay,
+  gameDay,
+}: {
+  regDay: number;
+  gameDay: number;
+}) {
+  const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
+  const isInRange = (day: number) => {
+    if (regDay === gameDay) return day === regDay;
+    if (regDay < gameDay) return day >= regDay && day <= gameDay;
+    return day >= regDay || day <= gameDay;
+  };
+
+  return (
+    <div className="flex w-full max-w-xs">
+      {dayLabels.map((label, i) => {
+        const inRange = isInRange(i);
+        const isReg = i === regDay;
+        const isGame = i === gameDay;
+
+        return (
+          <div key={i} className="flex-1 flex flex-col items-center">
+            <span
+              className="text-[11px] font-bold mb-1.5"
+              style={{ color: isReg || isGame ? 'var(--text-primary)' : 'var(--text-secondary)' }}
+            >
+              {label}
+            </span>
+            <div className="relative w-full h-5 flex items-center">
+              <div
+                className="absolute h-1 left-0 right-0 rounded-full"
+                style={{ backgroundColor: inRange ? '#00babc' : 'var(--border-color)', opacity: inRange ? 1 : 0.3 }}
+              />
+              {isReg && (
+                <div
+                  className="absolute left-1/2 -translate-x-1/2 z-10 w-3.5 h-3.5 rounded-full shadow-sm"
+                  style={{ backgroundColor: '#22c55e', border: '2px solid var(--bg-secondary)' }}
+                />
+              )}
+              {isGame && !isReg && (
+                <div
+                  className="absolute left-1/2 -translate-x-1/2 z-10 w-3.5 h-3.5 rounded-full shadow-sm"
+                  style={{ backgroundColor: '#00babc', border: '2px solid var(--bg-secondary)' }}
+                />
+              )}
+              {isGame && isReg && (
+                <div
+                  className="absolute left-1/2 -translate-x-1/2 z-10 w-4 h-4 rounded-full shadow-sm"
+                  style={{
+                    background: 'linear-gradient(135deg, #22c55e 50%, #00babc 50%)',
+                    border: '2px solid var(--bg-secondary)',
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Game Event Card ─────────────────────────────────────────────
+function GameEventCard({
+  index,
+  gameDay,
+  regWindow,
+  onUpdateGameDay,
+  onUpdateRegWindow,
+  onRemove,
+  canRemove,
+}: {
+  index: number;
+  gameDay: GameDayEntry;
+  regWindow: RegistrationWindowEntry;
+  onUpdateGameDay: (updates: Partial<GameDayEntry>) => void;
+  onUpdateRegWindow: (updates: Partial<RegistrationWindowEntry>) => void;
+  onRemove: () => void;
+  canRemove: boolean;
+}) {
+  return (
+    <div
+      className="rounded-lg border overflow-hidden"
+      style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-secondary)' }}
+    >
+      {/* Header */}
+      <div
+        className="px-4 py-3 flex items-center justify-between border-b"
+        style={{ borderColor: 'var(--border-color)' }}
       >
-        {DAY_NAMES[dayIndex]}
-      </button>
-      {active && (
-        <div className="flex items-center gap-2 flex-wrap">
-          <Clock size={16} style={{ color: 'var(--text-secondary)' }} />
-          {children}
+        <h4 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+          Game {index + 1} &mdash; {gameDay.dayName}
+        </h4>
+        {canRemove && (
+          <button
+            type="button"
+            onClick={onRemove}
+            className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+            title="Remove game"
+          >
+            <X size={16} className="text-red-500" />
+          </button>
+        )}
+      </div>
+
+      <div className="p-4 space-y-4">
+        {/* Timeline */}
+        <WeekTimeline regDay={regWindow.day} gameDay={gameDay.day} />
+
+        {/* Legend */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#22c55e' }} />
+            <span>Opens {regWindow.dayName} {formatHour(regWindow.openHour)}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#ef4444' }} />
+            <span>Closes {gameDay.dayName} {formatHour(regWindow.closeHour)}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#00babc' }} />
+            <span>Game {gameDay.dayName} {gameDay.time}</span>
+          </div>
         </div>
-      )}
+
+        {/* Registration Controls */}
+        <div
+          className="rounded-lg border p-3 space-y-3"
+          style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-card)' }}
+        >
+          <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
+            Registration
+          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Opens:</label>
+            <DaySelect
+              value={regWindow.day}
+              onChange={(day) => onUpdateRegWindow({ day, dayName: DAY_NAMES[day] })}
+            />
+            <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>at</span>
+            <HourSelect
+              value={regWindow.openHour}
+              onChange={(h) => onUpdateRegWindow({ openHour: h })}
+            />
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Closes:</label>
+            <span
+              className="text-sm px-3 py-2 rounded"
+              style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}
+            >
+              {gameDay.dayName}
+            </span>
+            <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>at</span>
+            <HourSelect
+              value={regWindow.closeHour}
+              onChange={(h) => onUpdateRegWindow({ closeHour: h })}
+            />
+          </div>
+        </div>
+
+        {/* Game Controls */}
+        <div
+          className="rounded-lg border p-3 space-y-3"
+          style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-card)' }}
+        >
+          <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
+            Game
+          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Day:</label>
+            <DaySelect
+              value={gameDay.day}
+              onChange={(day) => onUpdateGameDay({ day, dayName: DAY_NAMES[day] })}
+            />
+            <label className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Time:</label>
+            <input
+              type="text"
+              value={gameDay.time}
+              onChange={(e) => onUpdateGameDay({ time: e.target.value })}
+              placeholder='e.g. "9 PM"'
+              className="px-3 py-2 rounded border text-sm w-28 focus:outline-none focus:ring-2 focus:ring-ft-primary"
+              style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -314,12 +498,8 @@ export default function AdminSettings() {
     [savedConfig]
   );
 
-  const gameDaysChanged = useMemo(
-    () => sectionHasChanges(['gameDays', 'location', 'timezoneOffset']),
-    [sectionHasChanges]
-  );
-  const registrationChanged = useMemo(
-    () => sectionHasChanges(['registrationWindows', 'registrationForceClosed']),
+  const scheduleChanged = useMemo(
+    () => sectionHasChanges(['gameDays', 'registrationWindows', 'registrationForceClosed', 'location', 'timezoneOffset']),
     [sectionHasChanges]
   );
   const limitsChanged = useMemo(
@@ -406,48 +586,53 @@ export default function AdminSettings() {
     });
   };
 
-  // ─── Game day toggle helpers ───────────────────────────────────
-  const gameDaySet = new Set(localConfig.gameDays.map((g) => g.day));
-
-  const toggleGameDay = (dayIndex: number) => {
-    if (gameDaySet.has(dayIndex)) {
-      update('gameDays', localConfig.gameDays.filter((g: GameDayEntry) => g.day !== dayIndex));
-    } else {
-      const newEntry: GameDayEntry = { day: dayIndex, dayName: DAY_NAMES[dayIndex], time: '9 PM' };
-      const updated = [...localConfig.gameDays, newEntry].sort((a, b) => a.day - b.day);
-      update('gameDays', updated);
+  // ─── Game event helpers (paired gameDays + registrationWindows) ─
+  const addGameEvent = () => {
+    const usedGameDays = new Set(localConfig.gameDays.map((g) => g.day));
+    let nextGameDay = -1;
+    for (let i = 1; i <= 7; i++) {
+      const day = i % 7;
+      if (!usedGameDays.has(day)) { nextGameDay = day; break; }
     }
+    if (nextGameDay === -1) {
+      toast.error('All 7 days already have games scheduled');
+      return;
+    }
+    const regDay = (nextGameDay - 1 + 7) % 7;
+    const newPairs = [
+      ...localConfig.gameDays.map((g, i) => ({ game: g, reg: localConfig.registrationWindows[i] })),
+      {
+        game: { day: nextGameDay, dayName: DAY_NAMES[nextGameDay], time: '9 PM' } as GameDayEntry,
+        reg: { day: regDay, dayName: DAY_NAMES[regDay], openHour: 12, closeHour: 22 } as RegistrationWindowEntry,
+      },
+    ].sort((a, b) => a.game.day - b.game.day);
+    update('gameDays', newPairs.map((p) => p.game));
+    update('registrationWindows', newPairs.map((p) => p.reg));
   };
 
-  const updateGameDayTime = (dayIndex: number, time: string) => {
+  const removeGameEvent = (index: number) => {
+    if (localConfig.gameDays.length <= 1) {
+      toast.error('Must have at least one game');
+      return;
+    }
+    update('gameDays', localConfig.gameDays.filter((_: GameDayEntry, i: number) => i !== index));
+    update('registrationWindows', localConfig.registrationWindows.filter((_: RegistrationWindowEntry, i: number) => i !== index));
+  };
+
+  const updateGameDayByIndex = (index: number, updates: Partial<GameDayEntry>) => {
     update(
       'gameDays',
-      localConfig.gameDays.map((g: GameDayEntry) =>
-        g.day === dayIndex ? { ...g, time } : g
+      localConfig.gameDays.map((g: GameDayEntry, i: number) =>
+        i === index ? { ...g, ...updates } : g
       )
     );
   };
 
-  // ─── Registration window toggle helpers ────────────────────────
-  const regDaySet = new Set(localConfig.registrationWindows.map((r) => r.day));
-
-  const toggleRegDay = (dayIndex: number) => {
-    if (regDaySet.has(dayIndex)) {
-      update('registrationWindows', localConfig.registrationWindows.filter((r: RegistrationWindowEntry) => r.day !== dayIndex));
-    } else {
-      const newEntry: RegistrationWindowEntry = {
-        day: dayIndex, dayName: DAY_NAMES[dayIndex], openHour: 12, closeHour: 22,
-      };
-      const updated = [...localConfig.registrationWindows, newEntry].sort((a, b) => a.day - b.day);
-      update('registrationWindows', updated);
-    }
-  };
-
-  const updateRegWindow = (dayIndex: number, field: 'openHour' | 'closeHour', value: number) => {
+  const updateRegWindowByIndex = (index: number, updates: Partial<RegistrationWindowEntry>) => {
     update(
       'registrationWindows',
-      localConfig.registrationWindows.map((r: RegistrationWindowEntry) =>
-        r.day === dayIndex ? { ...r, [field]: value } : r
+      localConfig.registrationWindows.map((r: RegistrationWindowEntry, i: number) =>
+        i === index ? { ...r, ...updates } : r
       )
     );
   };
@@ -512,87 +697,65 @@ export default function AdminSettings() {
         </p>
       </div>
 
-      {/* ────── Game Days ────── */}
-      <Section title="Game Days" defaultOpen>
+      {/* ────── Game Schedule ────── */}
+      <Section title="Game Schedule" defaultOpen>
         <div className="space-y-4">
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-            Toggle the days games are played and set the time for each day.
+            Each game event defines when registration opens, when it closes, and when the game starts.
+            Registration opens on the specified day and closes on game day.
           </p>
-          <div className="space-y-3">
-            {DAY_NAMES.map((_, i) => (
-              <DayToggleRow key={i} dayIndex={i} active={gameDaySet.has(i)} onToggle={toggleGameDay}>
-                <input
-                  type="text"
-                  value={localConfig.gameDays.find((g) => g.day === i)?.time ?? ''}
-                  onChange={(e) => updateGameDayTime(i, e.target.value)}
-                  placeholder='e.g. "9 PM"'
-                  className="px-3 py-2 rounded border text-sm w-28 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ft-primary"
-                  style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
-                />
-              </DayToggleRow>
-            ))}
-          </div>
-          <Input
-            label="Location"
-            value={localConfig.location}
-            onChange={(e) => update('location', e.target.value)}
-            fullWidth
-          />
-          <Input
-            label="Timezone Offset (hours from UTC)"
-            type="number"
-            value={localConfig.timezoneOffset}
-            onChange={(e) => update('timezoneOffset', parseInt(e.target.value) || 0)}
-          />
-          <div className="flex justify-end">
-            <Button
-              variant="primary"
-              size="sm"
-              icon={<Save size={16} />}
-              loading={updateConfig.isPending}
-              disabled={!gameDaysChanged}
-              onClick={() =>
-                confirmAndSave('Game Days', {
-                  gameDays: localConfig.gameDays,
-                  location: localConfig.location,
-                  timezoneOffset: localConfig.timezoneOffset,
-                })
-              }
-            >
-              Save Game Days
-            </Button>
-          </div>
-        </div>
-      </Section>
 
-      {/* ────── Registration Windows ────── */}
-      <Section title="Registration Windows">
-        <div className="space-y-4">
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-            Toggle the days registration opens and set the opening/closing hours for each day.
-          </p>
-          <div className="space-y-3">
-            {DAY_NAMES.map((_, i) => (
-              <DayToggleRow key={i} dayIndex={i} active={regDaySet.has(i)} onToggle={toggleRegDay}>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Opens</label>
-                  <HourSelect
-                    value={localConfig.registrationWindows.find((r) => r.day === i)?.openHour ?? 12}
-                    onChange={(h) => updateRegWindow(i, 'openHour', h)}
-                  />
-                  <label className="text-xs font-medium ml-2" style={{ color: 'var(--text-secondary)' }}>Closes</label>
-                  <HourSelect
-                    value={localConfig.registrationWindows.find((r) => r.day === i)?.closeHour ?? 22}
-                    onChange={(h) => updateRegWindow(i, 'closeHour', h)}
-                  />
-                </div>
-              </DayToggleRow>
+          {/* Game Event Cards */}
+          <div className="space-y-4">
+            {localConfig.gameDays.map((gameDay, i) => (
+              <GameEventCard
+                key={`${gameDay.day}-${i}`}
+                index={i}
+                gameDay={gameDay}
+                regWindow={localConfig.registrationWindows[i] || {
+                  day: (gameDay.day - 1 + 7) % 7,
+                  dayName: DAY_NAMES[(gameDay.day - 1 + 7) % 7],
+                  openHour: 12,
+                  closeHour: 22,
+                }}
+                onUpdateGameDay={(updates) => updateGameDayByIndex(i, updates)}
+                onUpdateRegWindow={(updates) => updateRegWindowByIndex(i, updates)}
+                onRemove={() => removeGameEvent(i)}
+                canRemove={localConfig.gameDays.length > 1}
+              />
             ))}
+          </div>
+
+          {/* Add Game Button */}
+          <button
+            type="button"
+            onClick={addGameEvent}
+            className="w-full py-3 rounded-lg border-2 border-dashed text-sm font-medium transition-all duration-200 hover:border-ft-primary hover:text-ft-primary"
+            style={{ borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }}
+          >
+            <Plus size={16} className="inline mr-1.5 -mt-0.5" />
+            Add Game
+          </button>
+
+          {/* Location & Timezone */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              label="Location"
+              value={localConfig.location}
+              onChange={(e) => update('location', e.target.value)}
+              fullWidth
+            />
+            <Input
+              label="Timezone Offset (hours from UTC)"
+              type="number"
+              value={localConfig.timezoneOffset}
+              onChange={(e) => update('timezoneOffset', parseInt(e.target.value) || 0)}
+            />
           </div>
 
           {/* Force Close Toggle */}
           <div
-            className="p-4 rounded-lg border-2 mt-4"
+            className="p-4 rounded-lg border-2"
             style={{
               borderColor: localConfig.registrationForceClosed ? '#ef4444' : 'var(--border-color)',
               backgroundColor: localConfig.registrationForceClosed ? 'rgba(239, 68, 68, 0.05)' : 'var(--bg-secondary)',
@@ -629,21 +792,25 @@ export default function AdminSettings() {
             )}
           </div>
 
+          {/* Save Schedule */}
           <div className="flex justify-end">
             <Button
               variant="primary"
               size="sm"
               icon={<Save size={16} />}
               loading={updateConfig.isPending}
-              disabled={!registrationChanged}
+              disabled={!scheduleChanged}
               onClick={() =>
-                confirmAndSave('Registration Windows', {
+                confirmAndSave('Game Schedule', {
+                  gameDays: localConfig.gameDays,
                   registrationWindows: localConfig.registrationWindows,
                   registrationForceClosed: localConfig.registrationForceClosed,
+                  location: localConfig.location,
+                  timezoneOffset: localConfig.timezoneOffset,
                 })
               }
             >
-              Save Registration
+              Save Schedule
             </Button>
           </div>
         </div>
