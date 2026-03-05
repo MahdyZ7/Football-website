@@ -18,7 +18,7 @@ async function listUsers() {
     const result = await client.query(`
       SELECT id, name, email, role, "createdAt"
       FROM users
-      ORDER BY id
+      ORDER BY "createdAt" DESC
     `);
 
     console.log('\n=== All Users ===');
@@ -32,7 +32,25 @@ async function listUsers() {
   }
 }
 
-async function promoteToAdmin(userId: number) {
+async function listAdmins() {
+  const client = await pool.connect();
+  try {
+	const result = await client.query(`
+	  SELECT id, name, email, "createdAt"
+	  FROM users
+	  WHERE role = 'admin'
+	`);
+    console.log('\n=== Admin Users ===');
+    result.rows.forEach((user) => {
+      console.log(`ID: ${user.id} | ${user.name || 'No name'} (${user.email})`);
+    });
+    console.log('');
+  } finally {
+    client.release();
+  }
+}
+
+async function promoteToAdmin(userId: string) {
   const client = await pool.connect();
   try {
     await client.query(`
@@ -47,7 +65,7 @@ async function promoteToAdmin(userId: number) {
   }
 }
 
-async function removeAdmin(userId: number) {
+async function removeAdmin(userId: string) {
   const client = await pool.connect();
   try {
     await client.query(`
@@ -70,9 +88,10 @@ async function main() {
     console.log('1. List all users');
     console.log('2. Promote user to admin');
     console.log('3. Remove admin privileges');
-    console.log('4. Exit');
+    console.log('4. List admin users');
+    console.log('5. Exit');
 
-    const choice = await question('\nChoose an option (1-4): ');
+    const choice = await question('\nChoose an option (1-5): ');
 
     switch (choice.trim()) {
       case '1':
@@ -82,16 +101,20 @@ async function main() {
       case '2':
         await listUsers();
         const promoteId = await question('Enter user ID to promote to admin: ');
-        await promoteToAdmin(parseInt(promoteId));
+        await promoteToAdmin(promoteId);
         break;
 
       case '3':
-        await listUsers();
+        await listAdmins();
         const removeId = await question('Enter user ID to remove admin from: ');
-        await removeAdmin(parseInt(removeId));
+        await removeAdmin(removeId);
         break;
 
       case '4':
+        await listAdmins();
+        break;
+
+      case '5':
         console.log('Goodbye!');
         rl.close();
         await pool.end();
@@ -99,7 +122,7 @@ async function main() {
         break;
 
       default:
-        console.log('Invalid option. Please choose 1-4.\n');
+        console.log('Invalid option. Please choose 1-5.\n');
     }
   }
 }
