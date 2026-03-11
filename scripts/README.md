@@ -42,7 +42,11 @@ npm run db:reset
 | `npm run db:migrate` | Create basic tables | Legacy migration script |
 | `npm run db:migrate:auth` | Add authentication tables | Upgrade from pre-auth version |
 | `npm run db:migrate:feedback` | Add feedback system tables | Add feedback feature |
-| `npm run db:migrate:uuid` | Convert user IDs to UUIDs | Improve security |
+| `npm run db:migrate:ban-status` | Add player ban-state column | Upgrade older registrations |
+| `npm run db:migrate:site-config` | Add site configuration tables | Enable dynamic admin settings |
+| `npm run db:migrate:registration-features` | Add waitlist, reliability, rating history, and notification tables | Upgrade to current registration model |
+| `npm run db:migrate:legacy-user-links` | Backfill legacy `user_id` links on players, bans, and reliability events | Restore ownership/history for older rows |
+| `npm run db:repair:legacy-links` | Report unresolved legacy rows or manually link a player to a user | Safe manual cleanup after migration |
 
 ### Backup & Restore
 
@@ -68,6 +72,8 @@ Comprehensive SQL script that creates all required tables:
 - Authentication tables (users, accounts, sessions, verification_tokens)
 - Football registration tables (players, money, expenses, inventory)
 - Admin & moderation tables (banned_users, admin_logs)
+- Registration history tables (player_reliability_events, team_generation_history, player_rating_history)
+- Notification tables (notification_outbox)
 - Feedback system tables (feedback_submissions, feedback_votes)
 - All indexes, foreign keys, and triggers
 
@@ -94,7 +100,7 @@ Populates the database with realistic dummy data for development.
 
 **What It Creates:**
 - 20 users (1 admin, 1 service account, 18 regular users)
-- 21 player registrations (15 verified, 6 unverified)
+- 21 player registrations with support for confirmed spots and waitlist state
 - 21 payment records (12 paid, 9 unpaid)
 - 5 expense records
 - 6 inventory items
@@ -199,7 +205,11 @@ npm run db:backup
 # Run migrations in order
 npm run db:migrate:auth
 npm run db:migrate:feedback
-npm run db:migrate:uuid
+npm run db:migrate:ban-status
+npm run db:migrate:site-config
+npm run db:migrate:registration-features
+npm run db:migrate:legacy-user-links
+npm run db:repair:legacy-links report
 
 # Check status
 npm run db:status

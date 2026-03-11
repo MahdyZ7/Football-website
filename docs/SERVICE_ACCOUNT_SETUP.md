@@ -10,6 +10,8 @@ The service account system replaces the old `resetuser` secret with a more secur
 - ✅ Allows key rotation without code changes
 - ✅ Follows security best practices
 
+When the reset/removal flow frees a confirmed slot, the app now automatically promotes the next waitlisted player. If email delivery is configured, the promoted player also receives a notification.
+
 ---
 
 ## Initial Setup
@@ -60,6 +62,14 @@ Add the generated values to your `.env` file:
 # Service Account for Automated Tasks
 SERVICE_ACCOUNT_USER_ID=5
 SERVICE_API_KEY=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2
+```
+
+Optional for waitlist promotion emails:
+
+```bash
+RESEND_API_KEY=your-resend-api-key
+NOTIFICATION_FROM_EMAIL=football@example.com
+CRON_SECRET=your-vercel-cron-secret
 ```
 
 ### Step 3: Update Your Cron Job
@@ -337,5 +347,6 @@ The old system will continue to work during the transition period, but you shoul
 If you encounter issues:
 1. Check the troubleshooting section above
 2. Review the admin logs at `/admin-logs`
-3. Check your server/application logs
-4. Verify environment variables are set correctly
+3. If waitlist players existed, confirm that the next player was promoted automatically
+4. Check your server/application logs
+5. Verify environment variables are set correctly

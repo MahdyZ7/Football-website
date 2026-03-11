@@ -1,6 +1,6 @@
 # Authentication Setup Guide
 
-This application uses NextAuth.js v5 with OAuth providers (Google, GitHub, and 42 School) for user authentication.
+This application uses NextAuth.js v5 with OAuth providers (Google, GitHub, and 42 School) for user authentication. Admin access is enforced exclusively through `auth()` and `session.user.isAdmin`.
 
 ## Environment Variables
 
@@ -68,6 +68,19 @@ This will:
 - Add `user_id` foreign key to `banned_users` table
 - Add `performed_by_user_id` to `admin_logs` table
 
+If you are upgrading an already-running instance, also run:
+
+```bash
+npm run db:migrate:registration-features
+```
+
+This adds the current registration model:
+- confirmed spots vs waitlist
+- waitlist promotion metadata
+- reliability history events
+- team-generation rating history tables
+- notification outbox support
+
 ## Admin Management
 
 ### Promoting Users to Admin
@@ -96,6 +109,7 @@ Admins have access to:
 - Admin panel (`/admin`)
 - Admin logs (`/admin-logs`)
 - User management (ban, unban, delete users)
+- Admin-only verification and configuration routes
 - These links only appear in the navbar for admin users
 
 ## User Registration Flow
@@ -103,8 +117,10 @@ Admins have access to:
 1. Users must sign in with one of the OAuth providers
 2. After signing in, they can register for matches
 3. Each registration is linked to their user account
-4. Users with the same email across different providers are consolidated
-5. Users can remove their own registration (applies TIG-based automatic banning)
+4. If confirmed capacity is full, the player is placed on the waitlist
+5. When a confirmed slot opens, the next waitlisted player is automatically promoted
+6. Users with the same email across different providers are consolidated
+7. Users can remove their own registration (applies TIG-based automatic banning after the grace period)
 
 ## Self-Removal and TIG Rules
 
@@ -123,12 +139,8 @@ When users remove their own registration, they are automatically banned accordin
 - All OAuth accounts are associated with a single user record
 
 ### Admin Logging
-- All admin actions are logged with:
-  - Admin user ID and name
-  - Action type (ban, unban, delete, etc.)
-  - Target user
-  - Timestamp
-  - Additional details
+- All admin actions are logged with action metadata and sanitized public output
+- Internal database user IDs are stored server-side but are not exposed through the public logs API
 
 ### Session Management
 - Sessions are stored in the database

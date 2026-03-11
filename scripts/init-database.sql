@@ -71,7 +71,12 @@ CREATE TABLE IF NOT EXISTS players (
   intra VARCHAR(255) PRIMARY KEY,
   verified BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  user_id TEXT REFERENCES users(id) ON DELETE SET NULL
+  user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+  is_banned BOOLEAN DEFAULT FALSE,
+  registration_status VARCHAR(20) NOT NULL DEFAULT 'confirmed' CHECK (registration_status IN ('confirmed', 'waitlisted')),
+  waitlist_position INTEGER,
+  promoted_at TIMESTAMP WITH TIME ZONE,
+  last_notified_at TIMESTAMP WITH TIME ZONE
 );
 
 -- Money table: Payment tracking
@@ -124,6 +129,49 @@ CREATE TABLE IF NOT EXISTS admin_logs (
   performed_by_user_id TEXT REFERENCES users(id) ON DELETE SET NULL
 );
 
+CREATE TABLE IF NOT EXISTS player_reliability_events (
+  id SERIAL PRIMARY KEY,
+  intra VARCHAR(255) NOT NULL,
+  user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+  event_type VARCHAR(50) NOT NULL,
+  reason TEXT,
+  related_ban_until TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS team_generation_history (
+  id SERIAL PRIMARY KEY,
+  created_by_user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+  source VARCHAR(50) NOT NULL DEFAULT 'auto_balance',
+  team_mode INTEGER NOT NULL CHECK (team_mode IN (2, 3)),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS player_rating_history (
+  id SERIAL PRIMARY KEY,
+  team_generation_id INTEGER NOT NULL REFERENCES team_generation_history(id) ON DELETE CASCADE,
+  user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+  intra VARCHAR(255) NOT NULL,
+  player_name VARCHAR(255) NOT NULL,
+  rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  assigned_team VARCHAR(100) NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS notification_outbox (
+  id SERIAL PRIMARY KEY,
+  type VARCHAR(50) NOT NULL,
+  recipient_email VARCHAR(255),
+  recipient_user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+  subject VARCHAR(255) NOT NULL,
+  body TEXT NOT NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'sent', 'failed', 'skipped')),
+  provider_message_id TEXT,
+  error TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  sent_at TIMESTAMP WITH TIME ZONE
+);
+
 -- ============================================================================
 -- FEEDBACK SYSTEM TABLES
 -- ============================================================================
@@ -140,6 +188,7 @@ CREATE TABLE IF NOT EXISTS feedback_submissions (
   downvotes INTEGER DEFAULT 0,
   user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   approved_by_user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+  approved_at TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -167,6 +216,8 @@ CREATE INDEX IF NOT EXISTS sessions_session_token_idx ON sessions("sessionToken"
 -- Football registration indexes
 CREATE INDEX IF NOT EXISTS players_user_id_idx ON players(user_id);
 CREATE INDEX IF NOT EXISTS players_created_at_idx ON players(created_at DESC);
+CREATE INDEX IF NOT EXISTS players_status_idx ON players(registration_status, created_at ASC);
+CREATE INDEX IF NOT EXISTS players_waitlist_position_idx ON players(waitlist_position) WHERE waitlist_position IS NOT NULL;
 
 -- Admin & moderation indexes
 CREATE INDEX IF NOT EXISTS banned_users_user_id_idx ON banned_users(user_id);
@@ -175,6 +226,11 @@ CREATE INDEX IF NOT EXISTS banned_users_banned_at_idx ON banned_users(banned_at)
 CREATE INDEX IF NOT EXISTS admin_logs_performed_by_idx ON admin_logs(performed_by_user_id);
 CREATE INDEX IF NOT EXISTS admin_logs_timestamp_idx ON admin_logs(timestamp DESC);
 CREATE INDEX IF NOT EXISTS admin_logs_admin_user_idx ON admin_logs(admin_user);
+CREATE INDEX IF NOT EXISTS player_reliability_user_idx ON player_reliability_events(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS player_reliability_intra_idx ON player_reliability_events(intra, created_at DESC);
+CREATE INDEX IF NOT EXISTS team_generation_created_idx ON team_generation_history(created_at DESC);
+CREATE INDEX IF NOT EXISTS player_rating_history_user_idx ON player_rating_history(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS notification_outbox_status_idx ON notification_outbox(status, created_at DESC);
 
 -- Feedback system indexes
 CREATE INDEX IF NOT EXISTS feedback_submissions_user_id_idx ON feedback_submissions(user_id);

@@ -9,8 +9,12 @@
 const { Pool } = require('pg');
 require('dotenv').config({ path: '.env.test' });
 
+if (!process.env.TEST_DATABASE_URL) {
+  throw new Error('TEST_DATABASE_URL is required for test database seeding.');
+}
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.TEST_DATABASE_URL,
   ssl: false
 });
 
@@ -24,13 +28,13 @@ async function seedTestDatabase() {
     // Create test users
     console.log('  → Creating test users...');
     const usersResult = await client.query(`
-      INSERT INTO users (id, name, email, is_admin, role, created_at) VALUES
-      ('00000000-0000-0000-0000-000000000001', 'Admin User', 'admin@test.com', true, 'admin', NOW()),
-      ('00000000-0000-0000-0000-000000000002', 'John Doe', 'john@test.com', false, 'user', NOW()),
-      ('00000000-0000-0000-0000-000000000003', 'Jane Smith', 'jane@test.com', false, 'user', NOW()),
-      ('00000000-0000-0000-0000-000000000004', 'Bob Wilson', 'bob@test.com', false, 'user', NOW()),
-      ('00000000-0000-0000-0000-000000000005', 'Alice Brown', 'alice@test.com', false, 'user', NOW()),
-      ('00000000-0000-0000-0000-000000000006', 'Service Account', 'service@test.com', false, 'service', NOW())
+      INSERT INTO users (id, name, email, role, "createdAt") VALUES
+      ('00000000-0000-0000-0000-000000000001', 'Admin User', 'admin@test.com', 'admin', NOW()),
+      ('00000000-0000-0000-0000-000000000002', 'John Doe', 'john@test.com', 'user', NOW()),
+      ('00000000-0000-0000-0000-000000000003', 'Jane Smith', 'jane@test.com', 'user', NOW()),
+      ('00000000-0000-0000-0000-000000000004', 'Bob Wilson', 'bob@test.com', 'user', NOW()),
+      ('00000000-0000-0000-0000-000000000005', 'Alice Brown', 'alice@test.com', 'user', NOW()),
+      ('00000000-0000-0000-0000-000000000006', 'Service Account', 'service@test.com', 'service', NOW())
       RETURNING id
     `);
     console.log(`    ✅ Created ${usersResult.rowCount} users`);

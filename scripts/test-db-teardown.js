@@ -9,8 +9,12 @@
 const { Pool } = require('pg');
 require('dotenv').config({ path: '.env.test' });
 
+if (!process.env.TEST_DATABASE_URL) {
+  throw new Error('TEST_DATABASE_URL is required for test database teardown.');
+}
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.TEST_DATABASE_URL,
   ssl: false
 });
 

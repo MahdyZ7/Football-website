@@ -9,8 +9,12 @@
 const { Pool } = require('pg');
 require('dotenv').config({ path: '.env.test' });
 
+if (!process.env.TEST_DATABASE_URL) {
+  throw new Error('TEST_DATABASE_URL is required for test database setup.');
+}
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.TEST_DATABASE_URL,
   ssl: false
 });
 
@@ -24,6 +28,10 @@ async function setupTestDatabase() {
     await client.query(`
       DROP TABLE IF EXISTS feedback_votes CASCADE;
       DROP TABLE IF EXISTS feedback_submissions CASCADE;
+      DROP TABLE IF EXISTS player_rating_history CASCADE;
+      DROP TABLE IF EXISTS team_generation_history CASCADE;
+      DROP TABLE IF EXISTS player_reliability_events CASCADE;
+      DROP TABLE IF EXISTS notification_outbox CASCADE;
       DROP TABLE IF EXISTS admin_logs CASCADE;
       DROP TABLE IF EXISTS banned_users CASCADE;
       DROP TABLE IF EXISTS inventory CASCADE;
@@ -40,15 +48,14 @@ async function setupTestDatabase() {
     console.log('  → Creating users table...');
     await client.query(`
       CREATE TABLE users (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
         name VARCHAR(255),
-        email VARCHAR(255) UNIQUE,
-        email_verified TIMESTAMP WITH TIME ZONE,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        "emailVerified" TIMESTAMP WITH TIME ZONE,
         image TEXT,
-        is_admin BOOLEAN DEFAULT FALSE,
         role VARCHAR(50) DEFAULT 'user',
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        "updatedAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `);
 
@@ -56,19 +63,21 @@ async function setupTestDatabase() {
     console.log('  → Creating accounts table...');
     await client.query(`
       CREATE TABLE accounts (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        id SERIAL PRIMARY KEY,
+        "userId" TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         type VARCHAR(255) NOT NULL,
         provider VARCHAR(255) NOT NULL,
-        provider_account_id VARCHAR(255) NOT NULL,
+        "providerAccountId" VARCHAR(255) NOT NULL,
         refresh_token TEXT,
         access_token TEXT,
         expires_at BIGINT,
-        token_type VARCHAR(255),
+        token_type TEXT,
         scope TEXT,
         id_token TEXT,
-        session_state VARCHAR(255),
-        UNIQUE(provider, provider_account_id)
+        session_state TEXT,
+        "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        "updatedAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        UNIQUE(provider, "providerAccountId")
       )
     `);
 
@@ -76,10 +85,12 @@ async function setupTestDatabase() {
     console.log('  → Creating sessions table...');
     await client.query(`
       CREATE TABLE sessions (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        session_token VARCHAR(255) UNIQUE NOT NULL,
-        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        expires TIMESTAMP WITH TIME ZONE NOT NULL
+        id SERIAL PRIMARY KEY,
+        "sessionToken" VARCHAR(255) UNIQUE NOT NULL,
+        "userId" TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        expires TIMESTAMP WITH TIME ZONE NOT NULL,
+        "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        "updatedAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `);
 
@@ -102,7 +113,12 @@ async function setupTestDatabase() {
         intra VARCHAR(255) PRIMARY KEY CHECK (intra <> ''),
         verified BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        user_id UUID REFERENCES users(id) ON DELETE SET NULL
+        user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+        is_banned BOOLEAN DEFAULT FALSE,
+        registration_status VARCHAR(20) NOT NULL DEFAULT 'confirmed' CHECK (registration_status IN ('confirmed', 'waitlisted')),
+        waitlist_position INTEGER,
+        promoted_at TIMESTAMP WITH TIME ZONE,
+        last_notified_at TIMESTAMP WITH TIME ZONE
       )
     `);
 
@@ -116,7 +132,7 @@ async function setupTestDatabase() {
         intra VARCHAR(255),
         amount INTEGER,
         paid BOOLEAN,
-        user_id UUID REFERENCES users(id) ON DELETE SET NULL
+        user_id TEXT REFERENCES users(id) ON DELETE SET NULL
       )
     `);
 
@@ -150,7 +166,7 @@ async function setupTestDatabase() {
         reason TEXT NOT NULL,
         banned_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         banned_until TIMESTAMP WITH TIME ZONE NOT NULL,
-        user_id UUID REFERENCES users(id) ON DELETE SET NULL
+        user_id TEXT REFERENCES users(id) ON DELETE SET NULL
       )
     `);
 
@@ -171,7 +187,7 @@ async function setupTestDatabase() {
         target_name VARCHAR(200),
         details TEXT,
         timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        performed_by_user_id UUID REFERENCES users(id) ON DELETE SET NULL
+        performed_by_user_id TEXT REFERENCES users(id) ON DELETE SET NULL
       )
     `);
 
@@ -179,6 +195,61 @@ async function setupTestDatabase() {
     await client.query(`
       CREATE INDEX idx_admin_logs_timestamp ON admin_logs(timestamp DESC);
       CREATE INDEX idx_admin_logs_admin_user ON admin_logs(admin_user);
+    `);
+
+    console.log('  → Creating player_reliability_events table...');
+    await client.query(`
+      CREATE TABLE player_reliability_events (
+        id SERIAL PRIMARY KEY,
+        intra VARCHAR(255) NOT NULL,
+        user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+        event_type VARCHAR(50) NOT NULL,
+        reason TEXT,
+        related_ban_until TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `);
+
+    console.log('  → Creating team_generation_history table...');
+    await client.query(`
+      CREATE TABLE team_generation_history (
+        id SERIAL PRIMARY KEY,
+        created_by_user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+        source VARCHAR(50) NOT NULL DEFAULT 'auto_balance',
+        team_mode INTEGER NOT NULL CHECK (team_mode IN (2, 3)),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `);
+
+    console.log('  → Creating player_rating_history table...');
+    await client.query(`
+      CREATE TABLE player_rating_history (
+        id SERIAL PRIMARY KEY,
+        team_generation_id INTEGER NOT NULL REFERENCES team_generation_history(id) ON DELETE CASCADE,
+        user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+        intra VARCHAR(255) NOT NULL,
+        player_name VARCHAR(255) NOT NULL,
+        rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+        assigned_team VARCHAR(100) NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `);
+
+    console.log('  → Creating notification_outbox table...');
+    await client.query(`
+      CREATE TABLE notification_outbox (
+        id SERIAL PRIMARY KEY,
+        type VARCHAR(50) NOT NULL,
+        recipient_email VARCHAR(255),
+        recipient_user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+        subject VARCHAR(255) NOT NULL,
+        body TEXT NOT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'sent', 'failed', 'skipped')),
+        provider_message_id TEXT,
+        error TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        sent_at TIMESTAMP WITH TIME ZONE
+      )
     `);
 
     // Create feedback_submissions table
@@ -193,8 +264,9 @@ async function setupTestDatabase() {
         is_approved BOOLEAN DEFAULT FALSE,
         upvotes INTEGER DEFAULT 0,
         downvotes INTEGER DEFAULT 0,
-        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-        approved_by_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+        approved_by_user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+        approved_at TIMESTAMP WITH TIME ZONE,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
@@ -206,7 +278,7 @@ async function setupTestDatabase() {
       CREATE TABLE feedback_votes (
         id SERIAL PRIMARY KEY,
         feedback_id INTEGER NOT NULL REFERENCES feedback_submissions(id) ON DELETE CASCADE,
-        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         vote_type VARCHAR(10) NOT NULL CHECK (vote_type IN ('upvote', 'downvote')),
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         UNIQUE(feedback_id, user_id)
