@@ -4,6 +4,13 @@ import { auth } from "../../../auth";
 import { logAdminAction } from "../../../lib/utils/adminLogger";
 import { calculateCancelBanDurationAsync } from "../../../lib/utils/TIG_list";
 import { getSiteConfig } from "../../../lib/config/server";
+import { recordReliabilityEvent } from "../../../lib/utils/playerHistory";
+import { sendRegistrationStatusNotifications } from "../../../lib/utils/notifications";
+import {
+  acquireRegistrationLock,
+  reconcileRegistrationOrder,
+  RegistrationStatusNotification,
+} from "../../../lib/utils/waitlist";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,16 +22,25 @@ export async function POST(req: NextRequest) {
     const json = await req.json();
     const { reason, intra } = json;
 
+    if (!intra || typeof intra !== 'string' || intra.trim().length === 0 || intra.length > 50) {
+      return NextResponse.json({ error: "Intra login is required" }, { status: 400 });
+    }
+
     const client = await pool.connect();
+    let statusNotifications: RegistrationStatusNotification[] = [];
 
     try {
+      await client.query('BEGIN');
+      await acquireRegistrationLock(client);
+
       // Check if the player exists and belongs to the current user
       const playerCheck = await client.query(
-        "SELECT name, intra, user_id, created_at FROM players WHERE intra = $1",
+        "SELECT name, intra, user_id, created_at, registration_status FROM players WHERE intra = $1 FOR UPDATE",
         [intra]
       );
 
       if (playerCheck.rows.length === 0) {
+        await client.query('ROLLBACK');
         return NextResponse.json({ error: "Registration not found" }, { status: 404 });
       }
 
@@ -32,6 +48,7 @@ export async function POST(req: NextRequest) {
 
       // Allow self-removal only (user removing their own registration)
       if (player.user_id !== session.user.id) {
+        await client.query('ROLLBACK');
         return NextResponse.json({ error: "You can only remove your own registration" }, { status: 403 });
       }
 
@@ -44,6 +61,15 @@ export async function POST(req: NextRequest) {
       if (!reason && minutesSinceRegistration <= config.gracePeriodMinutes) {
         // No-ban removal within grace period
         await client.query("DELETE FROM players WHERE intra = $1", [intra]);
+        statusNotifications = await reconcileRegistrationOrder(client);
+        await recordReliabilityEvent(client, {
+          intra,
+          userId: session.user.id,
+          eventType: 'self_cancel',
+          reason: `Removed during ${config.gracePeriodMinutes}-minute grace period`,
+        });
+
+        await client.query('COMMIT');
 
         await logAdminAction(
           session.user.id,
@@ -53,6 +79,8 @@ export async function POST(req: NextRequest) {
           `Self-removed within ${config.gracePeriodMinutes}-minute grace period (no ban applied)`
         );
 
+        await sendRegistrationStatusNotifications(statusNotifications);
+
         return NextResponse.json({
           success: true,
           message: `Registration removed successfully (no ban applied - within ${config.gracePeriodMinutes}-minute grace period)`,
@@ -61,12 +89,14 @@ export async function POST(req: NextRequest) {
 
       // Validate reason is provided for ban removal
       if (!reason) {
+        await client.query('ROLLBACK');
         return NextResponse.json({ error: `Removal reason is required after ${config.gracePeriodMinutes}-minute grace period` }, { status: 400 });
       }
 
       // Validate reason
       const validReasons = ['CANCEL'];
       if (!validReasons.includes(reason)) {
+        await client.query('ROLLBACK');
         return NextResponse.json({ error: "Invalid removal reason for self-removal" }, { status: 400 });
       }
 
@@ -82,6 +112,7 @@ export async function POST(req: NextRequest) {
 
       // Remove player from registered list
       await client.query("DELETE FROM players WHERE intra = $1", [intra]);
+      statusNotifications = await reconcileRegistrationOrder(client);
 
       // Add to banned users
       await client.query(
@@ -95,6 +126,23 @@ export async function POST(req: NextRequest) {
         [intra, player.name, reasonText, bannedUntil, session.user.id]
       );
 
+      await recordReliabilityEvent(client, {
+        intra,
+        userId: session.user.id,
+        eventType: 'self_cancel',
+        reason: reasonText,
+        relatedBanUntil: bannedUntil,
+      });
+      await recordReliabilityEvent(client, {
+        intra,
+        userId: session.user.id,
+        eventType: 'ban_applied',
+        reason: reasonText,
+        relatedBanUntil: bannedUntil,
+      });
+
+      await client.query('COMMIT');
+
       // Log the action
       await logAdminAction(
         session.user.id,
@@ -104,11 +152,16 @@ export async function POST(req: NextRequest) {
         `Self-removed and auto-banned: ${reasonText} (${banDurationDays} days)`
       );
 
+      await sendRegistrationStatusNotifications(statusNotifications);
+
       return NextResponse.json({
         success: true,
         message: `Registration removed. You are banned until ${bannedUntil.toLocaleDateString()}`,
         bannedUntil: bannedUntil.toISOString()
       }, { status: 200 });
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
     } finally {
       client.release();
     }

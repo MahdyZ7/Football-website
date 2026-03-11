@@ -1,19 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '../../../../auth';
 import pool from '../../../../lib/utils/db';
+import { logAdminAction } from '../../../../lib/utils/adminLogger';
+import { getAuthenticatedAdmin } from '../../../../lib/utils/adminAuth';
 
 // GET - Fetch all tournament votes with voter details (admin only)
 export async function GET(req: NextRequest) {
+  const admin = await getAuthenticatedAdmin();
+
+  if (!admin) {
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized - Admin access required' },
+      { status: 401 }
+    );
+  }
+
   try {
-    const session = await auth();
-
-    if (!session?.user?.id || !session.user.isAdmin) {
-      return NextResponse.json(
-        { success: false, error: 'Admin access required' },
-        { status: 403 }
-      );
-    }
-
     const { searchParams } = new URL(req.url);
     const awardType = searchParams.get('awardType');
     const playerName = searchParams.get('playerName');
@@ -129,36 +130,40 @@ export async function GET(req: NextRequest) {
 
 // DELETE - Remove all votes for a user for an award type (admin only, for moderation)
 export async function DELETE(req: NextRequest) {
+  const admin = await getAuthenticatedAdmin();
+
+  if (!admin) {
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized - Admin access required' },
+      { status: 401 }
+    );
+  }
+
+  const { searchParams } = new URL(req.url);
+  const voterId = searchParams.get('voterId');
+  const awardType = searchParams.get('awardType');
+
+  if (!voterId || !awardType) {
+    return NextResponse.json(
+      { success: false, error: 'voterId and awardType are required' },
+      { status: 400 }
+    );
+  }
+
+  if (!['best_player', 'best_goalkeeper'].includes(awardType)) {
+    return NextResponse.json(
+      { success: false, error: 'Invalid award type' },
+      { status: 400 }
+    );
+  }
+
+  const client = await pool.connect();
+
   try {
-    const session = await auth();
-
-    if (!session?.user?.id || !session.user.isAdmin) {
-      return NextResponse.json(
-        { success: false, error: 'Admin access required' },
-        { status: 403 }
-      );
-    }
-
-    const { searchParams } = new URL(req.url);
-    const voterId = searchParams.get('voterId');
-    const awardType = searchParams.get('awardType');
-
-    if (!voterId || !awardType) {
-      return NextResponse.json(
-        { success: false, error: 'voterId and awardType are required' },
-        { status: 400 }
-      );
-    }
-
-    if (!['best_player', 'best_goalkeeper'].includes(awardType)) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid award type' },
-        { status: 400 }
-      );
-    }
+    await client.query('BEGIN');
 
     // Get voter details and their votes for logging
-    const voterResult = await pool.query(
+    const voterResult = await client.query(
       `SELECT u.name as voter_name, u.email as voter_email
        FROM users u
        WHERE u.id = $1`,
@@ -166,6 +171,7 @@ export async function DELETE(req: NextRequest) {
     );
 
     if (voterResult.rows.length === 0) {
+      await client.query('ROLLBACK');
       return NextResponse.json(
         { success: false, error: 'Voter not found' },
         { status: 404 }
@@ -175,7 +181,7 @@ export async function DELETE(req: NextRequest) {
     const voter = voterResult.rows[0];
 
     // Get the votes that will be deleted for logging
-    const votesToDelete = await pool.query(
+    const votesToDelete = await client.query(
       `SELECT player_name, rank FROM tournament_award_votes
        WHERE user_id = $1 AND award_type = $2
        ORDER BY rank`,
@@ -183,6 +189,7 @@ export async function DELETE(req: NextRequest) {
     );
 
     if (votesToDelete.rows.length === 0) {
+      await client.query('ROLLBACK');
       return NextResponse.json(
         { success: false, error: 'No votes found for this user and award type' },
         { status: 404 }
@@ -195,22 +202,25 @@ export async function DELETE(req: NextRequest) {
       .join(', ');
 
     // Delete all votes for this user and award type
-    await pool.query(
+    await client.query(
       'DELETE FROM tournament_award_votes WHERE user_id = $1 AND award_type = $2',
       [voterId, awardType]
     );
 
-    // Log the action
-    await pool.query(
-      `INSERT INTO admin_logs (performed_by_user_id, action, target_info, details)
-       VALUES ($1, $2, $3, $4)`,
-      [
-        session.user.id,
+    await client.query('COMMIT');
+
+    // Log after commit
+    try {
+      await logAdminAction(
+        admin.userId,
         'delete_tournament_votes',
-        `${voter.voter_name} (${voter.voter_email})`,
+        voterId,
+        voter.voter_name || voter.voter_email || 'Unknown voter',
         `Removed all ${awardType.replace('_', ' ')} votes: ${voteDetails}`
-      ]
-    );
+      );
+    } catch (logError) {
+      console.error('Failed to log admin action (votes were deleted):', logError);
+    }
 
     return NextResponse.json({
       success: true,
@@ -218,10 +228,13 @@ export async function DELETE(req: NextRequest) {
     });
 
   } catch (error) {
+    await client.query('ROLLBACK');
     console.error('Error removing tournament votes:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to remove votes' },
       { status: 500 }
     );
+  } finally {
+    client.release();
   }
 }

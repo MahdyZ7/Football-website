@@ -1,19 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '../../../../auth';
 import pool from '../../../../lib/utils/db';
+import { logAdminAction } from '../../../../lib/utils/adminLogger';
+import { getAuthenticatedAdmin } from '../../../../lib/utils/adminAuth';
 
 // GET - Fetch all feedback submissions (admin only, includes pending)
 export async function GET(req: NextRequest) {
+  const admin = await getAuthenticatedAdmin();
+
+  if (!admin) {
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized - Admin access required' },
+      { status: 401 }
+    );
+  }
+
   try {
-    const session = await auth();
-
-    if (!session?.user?.id || !session.user.isAdmin) {
-      return NextResponse.json(
-        { success: false, error: 'Admin access required' },
-        { status: 403 }
-      );
-    }
-
     const { searchParams } = new URL(req.url);
     const status = searchParams.get('status'); // Optional filter
     const type = searchParams.get('type'); // Optional filter
@@ -80,33 +81,38 @@ export async function GET(req: NextRequest) {
 
 // DELETE - Delete a feedback submission (admin only)
 export async function DELETE(req: NextRequest) {
+  const admin = await getAuthenticatedAdmin();
+
+  if (!admin) {
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized - Admin access required' },
+      { status: 401 }
+    );
+  }
+
+  const { searchParams } = new URL(req.url);
+  const feedbackId = searchParams.get('id');
+
+  if (!feedbackId) {
+    return NextResponse.json(
+      { success: false, error: 'Feedback ID is required' },
+      { status: 400 }
+    );
+  }
+
+  const client = await pool.connect();
+
   try {
-    const session = await auth();
-
-    if (!session?.user?.id || !session.user.isAdmin) {
-      return NextResponse.json(
-        { success: false, error: 'Admin access required' },
-        { status: 403 }
-      );
-    }
-
-    const { searchParams } = new URL(req.url);
-    const feedbackId = searchParams.get('id');
-
-    if (!feedbackId) {
-      return NextResponse.json(
-        { success: false, error: 'Feedback ID is required' },
-        { status: 400 }
-      );
-    }
+    await client.query('BEGIN');
 
     // Get feedback details for logging
-    const feedbackResult = await pool.query(
-      'SELECT title, type FROM feedback_submissions WHERE id = $1',
+    const feedbackResult = await client.query(
+      'SELECT title, type FROM feedback_submissions WHERE id = $1 FOR UPDATE',
       [parseInt(feedbackId)]
     );
 
     if (feedbackResult.rows.length === 0) {
+      await client.query('ROLLBACK');
       return NextResponse.json(
         { success: false, error: 'Feedback not found' },
         { status: 404 }
@@ -116,19 +122,22 @@ export async function DELETE(req: NextRequest) {
     const feedback = feedbackResult.rows[0];
 
     // Delete the feedback (cascades to votes)
-    await pool.query('DELETE FROM feedback_submissions WHERE id = $1', [parseInt(feedbackId)]);
+    await client.query('DELETE FROM feedback_submissions WHERE id = $1', [parseInt(feedbackId)]);
 
-    // Log the action
-    await pool.query(
-      `INSERT INTO admin_logs (performed_by_user_id, action, target_info, details)
-       VALUES ($1, $2, $3, $4)`,
-      [
-        session.user.id,
+    await client.query('COMMIT');
+
+    // Log after commit
+    try {
+      await logAdminAction(
+        admin.userId,
         'delete_feedback',
-        `Feedback #${feedbackId}`,
+        `feedback:${feedbackId}`,
+        feedback.title,
         `Deleted ${feedback.type}: "${feedback.title}"`
-      ]
-    );
+      );
+    } catch (logError) {
+      console.error('Failed to log admin action (feedback was deleted):', logError);
+    }
 
     return NextResponse.json({
       success: true,
@@ -136,10 +145,13 @@ export async function DELETE(req: NextRequest) {
     });
 
   } catch (error) {
+    await client.query('ROLLBACK');
     console.error('Error deleting feedback:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to delete feedback' },
       { status: 500 }
     );
+  } finally {
+    client.release();
   }
 }

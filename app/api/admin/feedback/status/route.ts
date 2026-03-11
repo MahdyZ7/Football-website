@@ -1,44 +1,55 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '../../../../../auth';
 import pool from '../../../../../lib/utils/db';
+import { logAdminAction } from '../../../../../lib/utils/adminLogger';
+import { getAuthenticatedAdmin } from '../../../../../lib/utils/adminAuth';
 
 // PATCH - Update feedback status (admin only)
 export async function PATCH(req: NextRequest) {
+  const admin = await getAuthenticatedAdmin();
+
+  if (!admin) {
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized - Admin access required' },
+      { status: 401 }
+    );
+  }
+
+  let body;
   try {
-    const session = await auth();
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ success: false, error: 'Invalid JSON body' }, { status: 400 });
+  }
+  const { feedbackId, status } = body;
 
-    if (!session?.user?.id || !session.user.isAdmin) {
-      return NextResponse.json(
-        { success: false, error: 'Admin access required' },
-        { status: 403 }
-      );
-    }
+  // Validation
+  if (!feedbackId || typeof feedbackId !== 'number') {
+    return NextResponse.json(
+      { success: false, error: 'Valid feedback ID is required' },
+      { status: 400 }
+    );
+  }
 
-    const body = await req.json();
-    const { feedbackId, status } = body;
+  if (!status || !['pending', 'approved', 'rejected', 'in_progress', 'completed'].includes(status)) {
+    return NextResponse.json(
+      { success: false, error: 'Invalid status value' },
+      { status: 400 }
+    );
+  }
 
-    // Validation
-    if (!feedbackId || typeof feedbackId !== 'number') {
-      return NextResponse.json(
-        { success: false, error: 'Valid feedback ID is required' },
-        { status: 400 }
-      );
-    }
+  const client = await pool.connect();
 
-    if (!status || !['pending', 'approved', 'rejected', 'in_progress', 'completed'].includes(status)) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid status value' },
-        { status: 400 }
-      );
-    }
+  try {
+    await client.query('BEGIN');
 
     // Get feedback details
-    const feedbackResult = await pool.query(
-      'SELECT id, title, type, status as old_status FROM feedback_submissions WHERE id = $1',
+    const feedbackResult = await client.query(
+      'SELECT id, title, type, status as old_status FROM feedback_submissions WHERE id = $1 FOR UPDATE',
       [feedbackId]
     );
 
     if (feedbackResult.rows.length === 0) {
+      await client.query('ROLLBACK');
       return NextResponse.json(
         { success: false, error: 'Feedback not found' },
         { status: 404 }
@@ -48,22 +59,25 @@ export async function PATCH(req: NextRequest) {
     const feedback = feedbackResult.rows[0];
 
     // Update the status
-    await pool.query(
+    await client.query(
       'UPDATE feedback_submissions SET status = $1 WHERE id = $2',
       [status, feedbackId]
     );
 
-    // Log the action
-    await pool.query(
-      `INSERT INTO admin_logs (performed_by_user_id, action, target_info, details)
-       VALUES ($1, $2, $3, $4)`,
-      [
-        session.user.id,
+    await client.query('COMMIT');
+
+    // Log after commit
+    try {
+      await logAdminAction(
+        admin.userId,
         'update_feedback_status',
-        `Feedback #${feedbackId}`,
+        `feedback:${feedbackId}`,
+        feedback.title,
         `Changed status from "${feedback.old_status}" to "${status}" for ${feedback.type}: "${feedback.title}"`
-      ]
-    );
+      );
+    } catch (logError) {
+      console.error('Failed to log admin action (status was updated):', logError);
+    }
 
     return NextResponse.json({
       success: true,
@@ -71,10 +85,13 @@ export async function PATCH(req: NextRequest) {
     });
 
   } catch (error) {
+    await client.query('ROLLBACK');
     console.error('Error updating feedback status:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to update status' },
       { status: 500 }
     );
+  } finally {
+    client.release();
   }
 }

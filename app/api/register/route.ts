@@ -7,10 +7,17 @@ import { User } from "../../../types/user";
 import { auth } from "../../../auth";
 import { logAdminAction } from "../../../lib/utils/adminLogger";
 import { getSiteConfig } from "../../../lib/config/server";
+import { recordReliabilityEvent } from "../../../lib/utils/playerHistory";
+import { sendRegistrationStatusNotifications } from "../../../lib/utils/notifications";
+import {
+  acquireRegistrationLock,
+  reconcileRegistrationOrder,
+  RegistrationStatusNotification,
+} from "../../../lib/utils/waitlist";
 
 export async function POST(req: NextRequest) {
   try {
-    return handlePost(req);
+    return await handlePost(req);
   } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
@@ -18,7 +25,7 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    return handleDelete(req);
+    return await handleDelete(req);
   } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
@@ -37,7 +44,6 @@ async function handlePost(req: NextRequest) {
   }
   const json = await req.json();
   const user = json as User;
-  console.log(json);
 
   // Input validation
   if (!user || typeof user !== 'object') {
@@ -57,16 +63,17 @@ async function handlePost(req: NextRequest) {
   if (user.name) {
     user.name = user.name.trim();
   }
-// Basic validation against SQL injection and XSS patterns
-const dangerousPattern = /('|--|;|\/\*|\*\/|<|>|script|select|insert|update|delete|drop|union|exec|xp_)/i;
-if (dangerousPattern.test(user.intra) || (user.name && dangerousPattern.test(user.name))) {
-	return NextResponse.json({ error: "Invalid characters detected in input" }, { status: 400 });
-}
+  if (user.name && user.name.length > 255) {
+    return NextResponse.json({ error: "Name is too long" }, { status: 400 });
+  }
+  if (user.intra.length > 50) {
+    return NextResponse.json({ error: "Invalid intra login" }, { status: 400 });
+  }
 
   const result = await registerUser(user, session.user.id);
 
   if (result.success) {
-    return NextResponse.json({ name: user.name, id: user.intra }, { status: 200 });
+    return NextResponse.json(result, { status: 200 });
   }
   return NextResponse.json(result, { status: result.status || 400 });
 }
@@ -90,6 +97,8 @@ async function handleDelete(req: NextRequest) {
   const json = await req.json();
   const user = json as User;
 
+  let statusNotifications: RegistrationStatusNotification[] = [];
+
   if (user.intra) {
     // Delete individual user
     if (typeof user.intra !== 'string' || user.intra.trim().length === 0) {
@@ -97,6 +106,7 @@ async function handleDelete(req: NextRequest) {
     }
 
     const result = await deleteUser({ ...user, intra: user.intra.trim() });
+    statusNotifications = result.statusNotifications ?? [];
 
     // Log the action
     if (result.success) {
@@ -109,7 +119,10 @@ async function handleDelete(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(result, { status: result.status || 200 });
+    await sendRegistrationStatusNotifications(statusNotifications);
+
+    const { statusNotifications: _sn, ...response } = result;
+    return NextResponse.json(response, { status: result.status || 200 });
   } else {
     // Reset entire list (for scheduled weekly reset)
     const result = await resetList();
@@ -134,6 +147,9 @@ async function registerUser(user: User, userId: string) {
   const client = await pool.connect();
 
   try {
+    await client.query("BEGIN");
+    await acquireRegistrationLock(client);
+
     // Check if user is banned (check both by intra and by user_id)
     const banCheck = await client.query(
       "SELECT banned_until FROM banned_users WHERE (id = $1 OR user_id = $2) AND banned_until > NOW()",
@@ -141,6 +157,7 @@ async function registerUser(user: User, userId: string) {
     );
 
     if (banCheck.rows.length > 0) {
+      await client.query("ROLLBACK");
       return {
         error: "You are currently banned from registering",
         status: 403
@@ -155,39 +172,89 @@ async function registerUser(user: User, userId: string) {
     }
 
     if (!verifiedInfo.verified && !user.name) {
+      await client.query("ROLLBACK");
       return { error: "Intra not found", status: 404 };
     }
 
-    const { rows } = await client.query("SELECT name, intra, is_banned FROM players");
+    // Check for existing registration by intra or user_id while holding the allocation lock
+    const existingPlayer = await client.query(
+      `SELECT intra, is_banned FROM players
+       WHERE intra = $1 OR user_id = $2
+       LIMIT 1`,
+      [user.intra, userId]
+    );
 
-    // Count only non-banned players toward the limit
-    const config = await getSiteConfig();
-    const activePlayers = rows.filter(row => !row.is_banned);
-    if (activePlayers.length >= config.maxPlayers) {
-      return { error: "Player limit reached", status: 403 };
-    }
-
-    const player = rows.find(row => row.intra === user.intra);
-    if (player) {
+    if (existingPlayer.rows.length > 0) {
+      const player = existingPlayer.rows[0];
+      await client.query("ROLLBACK");
       if (player.is_banned) {
         return { error: "You are currently banned from registering", status: 403 };
       }
       return { error: "Player already exists", status: 409 };
     }
 
+    const config = await getSiteConfig();
+    const countResult = await client.query(
+      "SELECT COUNT(*)::int AS total FROM players WHERE COALESCE(is_banned, FALSE) = FALSE"
+    );
+    const currentTotal = countResult.rows[0].total;
+    if (currentTotal >= config.maxPlayers) {
+      await client.query("ROLLBACK");
+      return { error: "Player limit reached", status: 403 };
+    }
+
+    const confirmedResult = await client.query(
+      "SELECT COUNT(*)::int AS total FROM players WHERE registration_status = 'confirmed' AND COALESCE(is_banned, FALSE) = FALSE"
+    );
+    const initialStatus = confirmedResult.rows[0].total < config.guaranteedSpots ? "confirmed" : "waitlisted";
+
     const date = new Date();
     if (!verifiedInfo.verified) {
       date.setSeconds(date.getSeconds() + 10);
     }
 
-    // Link registration to authenticated user
     await client.query(
-      "INSERT INTO players (name, intra, verified, created_at, user_id) VALUES ($1, $2, $3, $4, $5)",
-      [user.name, user.intra, verifiedInfo.verified, date, userId]
+      `INSERT INTO players
+        (name, intra, verified, created_at, user_id, registration_status, waitlist_position)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [user.name, user.intra, verifiedInfo.verified, date, userId, initialStatus, null]
     );
 
-    return { success: true };
+    await reconcileRegistrationOrder(client);
+
+    const insertedPlayerResult = await client.query(
+      `SELECT registration_status, waitlist_position
+       FROM players
+       WHERE intra = $1`,
+      [user.intra]
+    );
+    const insertedPlayer = insertedPlayerResult.rows[0];
+    const registrationStatus = insertedPlayer.registration_status;
+    const waitlistPosition = insertedPlayer.waitlist_position;
+
+    await recordReliabilityEvent(client, {
+      intra: user.intra,
+      userId,
+      eventType: registrationStatus === "confirmed" ? "registration_confirmed" : "registration_waitlisted",
+      reason: registrationStatus === "confirmed"
+        ? "Registered with a confirmed place"
+        : `Added to waitlist at position ${waitlistPosition}`,
+    });
+
+    await client.query("COMMIT");
+
+    return {
+      success: true,
+      name: user.name,
+      id: user.intra,
+      registrationStatus,
+      waitlistPosition,
+      message: registrationStatus === "confirmed"
+        ? "Registration successful. You have a confirmed spot."
+        : `Registration successful. You are on the waitlist at position ${waitlistPosition}.`,
+    };
   } catch (error) {
+    await client.query("ROLLBACK");
     console.error("Error registering user:", error);
     return { error: "Registration failed", status: 500 };
   } finally {
@@ -198,9 +265,13 @@ async function registerUser(user: User, userId: string) {
 async function resetList() {
   const client = await pool.connect();
   try {
+    await client.query("BEGIN");
+    await acquireRegistrationLock(client);
     await client.query("DELETE FROM players");
+    await client.query("COMMIT");
     return { success: true };
   } catch {
+    await client.query("ROLLBACK");
     return { error: "Operation failed", status: 500 };
   } finally {
     client.release();
@@ -210,16 +281,27 @@ async function resetList() {
 async function deleteUser(user: User) {
   const client = await pool.connect();
   try {
-    const { rows } = await client.query("SELECT name, intra FROM players");
-    const player = rows.find(row => row.intra === user.intra);
-    
+    await client.query("BEGIN");
+    await acquireRegistrationLock(client);
+
+    const { rows } = await client.query(
+      "SELECT name, intra FROM players WHERE intra = $1 FOR UPDATE",
+      [user.intra]
+    );
+    const player = rows[0];
+
     if (!player) {
-      return { error: "User does not exist", status: 418 };
+      await client.query("ROLLBACK");
+      return { error: "User does not exist", status: 404 };
     }
     
     await client.query("DELETE FROM players WHERE intra = $1", [user.intra]);
-    return { success: true };
+    const statusNotifications = await reconcileRegistrationOrder(client);
+
+    await client.query("COMMIT");
+    return { success: true, statusNotifications };
   } catch (error) {
+    await client.query("ROLLBACK");
     console.error("Error deleting user:", error);
     return { error: "Delete operation failed", status: 500 };
   } finally {

@@ -1,78 +1,69 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '../../../../../lib/utils/db';
 import { logAdminAction } from '../../../../../lib/utils/adminLogger';
-
-const ADMIN_USERS = ['MahdyZ7'];
-
-async function getAuthenticatedUser(req: NextRequest): Promise<string | null> {
-  // Check for Replit authentication headers first (more reliable)
-  let adminUser = req.headers.get('x-replit-user-name');
-
-  // If no server headers, try client-side approach
-  if (!adminUser) {
-    try {
-      const protocol = req.headers.get('x-forwarded-proto') || 'https';
-      const host = req.headers.get('host');
-      const authUrl = `${protocol}://${host}/__replauthuser`;
-
-      const userInfoResponse = await fetch(authUrl, {
-        headers: {
-          'Cookie': req.headers.get('cookie') || '',
-          'User-Agent': req.headers.get('user-agent') || 'NextJS-Admin',
-          'Referer': req.headers.get('referer') || `${protocol}://${host}/admin`
-        }
-      });
-
-      if (!userInfoResponse.ok) {
-        console.error('Auth request failed:', userInfoResponse.status);
-        return null;
-      }
-
-      const userData = await userInfoResponse.json();
-      adminUser = userData.name;
-    } catch (fetchError) {
-      console.error('Error fetching user info:', fetchError);
-      return null;
-    }
-  }
-
-  return adminUser;
-}
+import { getAuthenticatedAdmin } from '../../../../../lib/utils/adminAuth';
 
 export async function PATCH(req: NextRequest) {
+  const admin = await getAuthenticatedAdmin();
+  if (!admin) {
+    return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 });
+  }
+
+  let body;
   try {
-    const adminUser = await getAuthenticatedUser(req);
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
 
-    if (!adminUser) {
-      return NextResponse.json({ error: 'Unauthorized - Not logged in' }, { status: 401 });
+  const { id, verified } = body;
+  if (!id || typeof id !== 'string') {
+    return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+  }
+  if (typeof verified !== 'boolean') {
+    return NextResponse.json({ error: 'Verified must be a boolean' }, { status: 400 });
+  }
+
+  const client = await pool.connect();
+  let userName = 'Unknown';
+
+  try {
+    await client.query('BEGIN');
+
+    const userResult = await client.query(
+      'SELECT name FROM players WHERE intra = $1 FOR UPDATE',
+      [id]
+    );
+    if (userResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    if (!ADMIN_USERS.includes(adminUser)) {
-      return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 });
-    }
-
-    const { id, verified } = await req.json();
-    const client = await pool.connect();
-
-    // Get user name for logging
-    const userResult = await client.query('SELECT name FROM players WHERE intra = $1', [id]);
-    const userName = userResult.rows[0]?.name || 'Unknown';
+    userName = userResult.rows[0]?.name || 'Unknown';
 
     await client.query('UPDATE players SET verified = $1 WHERE intra = $2', [verified, id]);
-    client.release();
 
-    // Log the action
-    await logAdminAction({
-      adminUser: adminUser,
-      action: verified ? 'user_verified' : 'user_unverified',
-      targetUser: id,
-      targetName: userName,
-      details: `User verification status changed to: ${verified ? 'verified' : 'unverified'}`
-    });
-
-    return NextResponse.json({ message: 'User verification updated' }, { status: 200 });
+    await client.query('COMMIT');
   } catch (error) {
+    await client.query('ROLLBACK');
     console.error('Database error:', error);
     return NextResponse.json({ error: 'Database error' }, { status: 500 });
+  } finally {
+    client.release();
   }
+
+  // Post-commit logging (non-critical)
+  try {
+    await logAdminAction(
+      admin.userId,
+      verified ? 'user_verified' : 'user_unverified',
+      id,
+      userName,
+      `User verification status changed to: ${verified ? 'verified' : 'unverified'}`
+    );
+  } catch (logError) {
+    console.error('Failed to log admin action (verification was updated):', logError);
+  }
+
+  return NextResponse.json({ message: 'User verification updated' }, { status: 200 });
 }

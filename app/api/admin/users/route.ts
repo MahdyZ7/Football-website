@@ -2,40 +2,67 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '../../../../lib/utils/db';
 import { logAdminAction } from '../../../../lib/utils/adminLogger';
-import { auth } from '../../../../auth';
-
-async function getAuthenticatedAdmin(_req: NextRequest): Promise<{ userId: string; userName: string } | null> {
-  const session = await auth();
-
-  if (!session?.user || !session.user.isAdmin) {
-    return null;
-  }
-
-  return {
-    userId: session.user.id,
-    userName: session.user.name || session.user.email || 'Admin'
-  };
-}
+import { getAuthenticatedAdmin } from '../../../../lib/utils/adminAuth';
+import { sendRegistrationStatusNotifications } from '../../../../lib/utils/notifications';
+import {
+  acquireRegistrationLock,
+  reconcileRegistrationOrder,
+  RegistrationStatusNotification,
+} from '../../../../lib/utils/waitlist';
 
 export async function DELETE(req: NextRequest) {
-  const admin = await getAuthenticatedAdmin(req);
+  const admin = await getAuthenticatedAdmin();
 
   if (!admin) {
     return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 });
   }
 
+  let body;
   try {
-    const { id } = await req.json();
-    const client = await pool.connect();
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
 
-    // Get user info before deletion for logging
-    const userResult = await client.query('SELECT name FROM players WHERE intra = $1', [id]);
-    const userName = userResult.rows[0]?.name || 'Unknown';
+  const { id } = body;
+
+  if (!id || typeof id !== 'string' || id.trim().length === 0 || id.length > 50) {
+    return NextResponse.json({ error: 'Valid user ID is required' }, { status: 400 });
+  }
+
+  const client = await pool.connect();
+  let statusNotifications: RegistrationStatusNotification[] = [];
+  let userName = '';
+
+  try {
+    await client.query('BEGIN');
+    await acquireRegistrationLock(client);
+
+    const userResult = await client.query(
+      'SELECT name FROM players WHERE intra = $1 FOR UPDATE',
+      [id]
+    );
+    if (userResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    userName = userResult.rows[0].name;
 
     await client.query('DELETE FROM players WHERE intra = $1', [id]);
-    client.release();
+    statusNotifications = await reconcileRegistrationOrder(client);
 
-    // Log the action
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Database error:', error);
+    return NextResponse.json({ error: 'Database error' }, { status: 500 });
+  } finally {
+    client.release();
+  }
+
+  // Post-commit logging and notifications (non-critical)
+  try {
     await logAdminAction(
       admin.userId,
       'user_deleted',
@@ -43,10 +70,10 @@ export async function DELETE(req: NextRequest) {
       userName,
       'User deleted from system'
     );
-
-    return NextResponse.json({ message: 'User deleted' }, { status: 200 });
-  } catch (error) {
-    console.error('Database error:', error);
-    return NextResponse.json({ error: 'Database error' }, { status: 500 });
+    await sendRegistrationStatusNotifications(statusNotifications);
+  } catch (postCommitError) {
+    console.error('Post-commit operations failed (user was deleted):', postCommitError);
   }
+
+  return NextResponse.json({ message: 'User deleted' }, { status: 200 });
 }
