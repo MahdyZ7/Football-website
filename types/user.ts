@@ -5,7 +5,7 @@ export const MaxPlayers = 40;
 
 export type BannedUser = {
 	intra: string;
-	email: string;
+	email?: string;
 	name: string;
 	reason: string;
 	banned_at: string;
@@ -13,14 +13,18 @@ export type BannedUser = {
 	user_id?: string;
 }
 
+export type RegistrationStatus = 'confirmed' | 'waitlisted';
+
 export type User = {
 	name:		string;
-	email:		string;
 	intra:		string;
 	verified:	boolean;
 	created_at:	string;
-	user_id?:	string;
 	is_banned?:	boolean;
+	registration_status?: RegistrationStatus;
+	waitlist_position?: number | null;
+	promoted_at?: string | null;
+	owned_by_current_user?: boolean;
 }
 
 export type MoneyRecord = {
@@ -39,4 +43,28 @@ export type AdminLog = {
   target_name?: string;
   details?: string;
   timestamp: string;
+};
+
+export type PlayerReliabilityEvent = {
+  id: number;
+  event_type: string;
+  reason?: string | null;
+  related_ban_until?: string | null;
+  created_at: string;
+};
+
+export type PlayerHistoryResponse = {
+  currentRegistration: {
+    intra: string;
+    name: string;
+    registration_status: RegistrationStatus;
+    waitlist_position: number | null;
+    created_at: string;
+    promoted_at: string | null;
+  } | null;
+  activeBan: {
+    reason: string;
+    banned_until: string;
+  } | null;
+  reliabilityEvents: PlayerReliabilityEvent[];
 };

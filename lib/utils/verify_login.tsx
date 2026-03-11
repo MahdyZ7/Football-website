@@ -16,7 +16,6 @@ const createEmptyUser = (): User => ({
 	intra: "",
 	verified: false,
 	created_at: "",
-	email: ""
 });
 
 
@@ -60,7 +59,7 @@ export default async function verifyLogin(intra: string): Promise<User> {
 		if (data.length === 0)
 			return createEmptyUser();
 		if (response.status === 200 && data.length > 0)
-		  return {name: data[0].usual_full_name, intra: intra, verified: true, created_at: data[0].created_at, email: data[0].email};
+		  return {name: data[0].usual_full_name, intra: intra, verified: true, created_at: data[0].created_at};
       return createEmptyUser();
 	} catch (error) {
 		console.error('Error retrieving access token', error);
