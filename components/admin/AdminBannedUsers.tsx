@@ -13,13 +13,13 @@ const AdminBannedUsers: React.FC = () => {
   const { data: bannedUsers = [], isLoading: bannedLoading, error: bannedError } = useAdminBanned();
   const unbanUserMutation = useUnbanUser();
 
-  const handleUnban = (userId: string, userName: string) => {
+  const handleUnban = (intra: string, userName: string) => {
     showConfirm({
       title: 'Unban User',
       message: `Are you sure you want to unban "${userName}"? They will be able to register again.`,
       type: 'warning',
       onConfirm: () => {
-        unbanUserMutation.mutate(userId, {
+        unbanUserMutation.mutate(intra, {
           onSuccess: () => toast.success('User unbanned successfully'),
           onError: () => toast.error('Failed to unban user'),
         });
@@ -97,11 +97,10 @@ const AdminBannedUsers: React.FC = () => {
                     </td>
                     <td className="px-4 py-3">
                       <Button
-                        onClick={() => user.user_id && handleUnban(user.user_id, user.name)}
+                        onClick={() => handleUnban(user.intra, user.name)}
                         variant="success"
                         size="sm"
                         loading={unbanUserMutation.isPending}
-                        disabled={!user.user_id}
                       >
                         Unban
                       </Button>
@@ -139,11 +138,10 @@ const AdminBannedUsers: React.FC = () => {
                   <span>Expires: {new Date(user.banned_until).toLocaleDateString()}</span>
                 </div>
                 <Button
-                  onClick={() => user.user_id && handleUnban(user.user_id, user.name)}
+                  onClick={() => handleUnban(user.intra, user.name)}
                   variant="success"
                   size="sm"
                   loading={unbanUserMutation.isPending}
-                  disabled={!user.user_id}
                   fullWidth
                 >
                   Unban

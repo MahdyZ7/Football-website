@@ -34,26 +34,29 @@ export function PlayerCard({
     : Infinity;
   const withinGracePeriod = isOwnRegistration && !user.verified && minutesSinceRegistration <= config.gracePeriodMinutes;
 
-  const isGuaranteedSpot = index < config.guaranteedSpots;
+  const isWaitlisted = (user.registration_status ?? 'confirmed') === 'waitlisted';
+  const waitlistPosition = user.waitlist_position ?? null;
 
   return (
     <div
       className={`p-4 rounded-lg border-l-4 flex items-center justify-between transition-all duration-200 ${
-        isGuaranteedSpot ? 'hover:scale-[1.02]' : ''
+        !isWaitlisted ? 'hover:scale-[1.02]' : ''
       }`}
       style={{
-        backgroundColor: isGuaranteedSpot ? 'var(--paid-bg)' : 'var(--unpaid-bg)',
-        borderLeftColor: isGuaranteedSpot ? '#16a34a' : 'var(--ft-accent)',
-        color: isGuaranteedSpot ? 'var(--registered-txt)' : 'var(--waitlist-txt)'
+        backgroundColor: !isWaitlisted ? 'var(--paid-bg)' : 'var(--unpaid-bg)',
+        borderLeftColor: !isWaitlisted ? '#16a34a' : 'var(--ft-accent)',
+        color: !isWaitlisted ? 'var(--registered-txt)' : 'var(--waitlist-txt)'
       }}
     >
       <div className="flex items-center gap-3 flex-1">
         <span className="font-bold text-lg min-w-[2rem]">
-          {index + 1}
+          {!isWaitlisted ? index + 1 : `W${waitlistPosition ?? '?'}`}
         </span>
         <div className="flex flex-col flex-1">
           <span className="font-semibold">{user.name}</span>
-          <span className="text-sm opacity-80">{user.intra}</span>
+          <span className="text-sm opacity-80">
+            {user.intra} {!isWaitlisted ? "• Confirmed" : `• Waitlist #${waitlistPosition ?? '?'}`}
+          </span>
         </div>
       </div>
       <div className="flex items-center gap-2">

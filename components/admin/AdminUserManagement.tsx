@@ -71,13 +71,13 @@ const AdminUserManagement: React.FC = () => {
     });
   };
 
-  const handleUnban = (user: { name: string; intra: string; user_id?: string }) => {
+  const handleUnban = (user: { name: string; intra: string }) => {
     showConfirm({
       title: 'Unban User',
       message: `Are you sure you want to unban "${user.name}" (${user.intra})?`,
       type: 'info',
       onConfirm: () => {
-        unbanUserMutation.mutate(user.user_id || user.intra, {
+        unbanUserMutation.mutate(user.intra, {
           onSuccess: () => toast.success('User unbanned successfully'),
           onError: () => toast.error('Failed to unban user'),
         });
@@ -149,6 +149,10 @@ const AdminUserManagement: React.FC = () => {
                       <span className="px-2 py-1 text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded">
                         Banned
                       </span>
+                    ) : user.registration_status === 'waitlisted' ? (
+                      <span className="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 rounded">
+                        Waitlist #{user.waitlist_position ?? '-'}
+                      </span>
                     ) : (
                       <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded">
                         Active
@@ -172,7 +176,7 @@ const AdminUserManagement: React.FC = () => {
                     <div className="flex flex-wrap gap-2">
                       {user.is_banned ? (
                         <Button
-                          onClick={() => handleUnban({ name: user.name, intra: user.intra, user_id: user.user_id })}
+                          onClick={() => handleUnban({ name: user.name, intra: user.intra })}
                           variant="success"
                           size="sm"
                           loading={unbanUserMutation.isPending}
@@ -252,7 +256,7 @@ const AdminUserManagement: React.FC = () => {
               <div className="flex gap-2 flex-wrap">
                 {user.is_banned ? (
                   <Button
-                    onClick={() => handleUnban({ name: user.name, intra: user.intra, user_id: user.user_id })}
+                    onClick={() => handleUnban({ name: user.name, intra: user.intra })}
                     variant="success"
                     size="sm"
                     loading={unbanUserMutation.isPending}

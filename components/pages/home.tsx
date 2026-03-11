@@ -13,6 +13,7 @@ import { BanNotificationBanner } from "../registration/BanNotificationBanner";
 import { RemovalDialog } from "../registration/dialogs/RemovalDialog";
 import { EditNameDialog } from "../registration/dialogs/EditNameDialog";
 import { AnnouncementPopup } from "../AnnouncementPopup";
+import { MyPlayerHistory } from "../player/MyPlayerHistory";
 
 const Home: React.FC = () => {
   // Data fetching
@@ -57,6 +58,8 @@ const Home: React.FC = () => {
           {/* Ban Rules Table */}
           <BanRulesTable />
 
+          <MyPlayerHistory />
+
           {/* Player List */}
           <PlayerList
             users={registeredUsers}
@@ -99,4 +102,3 @@ const Home: React.FC = () => {
 };
 
 export default Home;
-

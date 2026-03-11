@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { User, BannedUser } from '../types/user';
+import { User, BannedUser, PlayerHistoryResponse } from '../types/user';
 import { SiteConfig } from '../lib/config/defaults';
 
 // Custom error class that preserves HTTP status and parsed response data
@@ -39,7 +39,13 @@ const api = {
     getAll: async (): Promise<User[]> => {
 	  return await request('/api/users');
     },
-    register: async (userData: { name: string; intra: string }): Promise<{ name: string; id: string }> => {
+    register: async (userData: { name: string; intra: string }): Promise<{
+      name: string;
+      id: string;
+      registrationStatus: 'confirmed' | 'waitlisted';
+      waitlistPosition: number | null;
+      message: string;
+    }> => {
       return await request('/api/register', { method: 'POST', body: JSON.stringify(userData) });
     },
     delete: async (intra: string) => {
@@ -66,6 +72,11 @@ const api = {
       return await request('/api/moneyDb');
     },
   },
+  me: {
+    history: async (): Promise<PlayerHistoryResponse> => {
+      return await request('/api/me/history');
+    },
+  },
   admin: {
     auth: async (): Promise<{ authenticated: boolean; user?: string }> => {
       return await request('/api/admin/auth');
@@ -79,8 +90,8 @@ const api = {
     banUser: async (banData: { userId: string; reason: string; duration: string }) => {
       return await request('/api/admin/ban', { method: 'POST', body: JSON.stringify(banData) });
     },
-    unbanUser: async (userId: string) => {
-      return await request('/api/admin/ban', { method: 'DELETE', body: JSON.stringify({ user_id: userId }) });
+    unbanUser: async (intra: string) => {
+      return await request('/api/admin/ban', { method: 'DELETE', body: JSON.stringify({ intra }) });
     },
     deleteUser: async (userId: string) => {
       return await request('/api/admin/users', { method: 'DELETE', body: JSON.stringify({ id: userId }) });
@@ -190,6 +201,7 @@ export const queryKeys = {
   verify: ['verify'] as const,
   bannedUsers: ['bannedUsers'] as const,
   money: ['money'] as const,
+  playerHistory: ['playerHistory'] as const,
   adminAuth: ['adminAuth'] as const,
   adminLogs: ['adminLogs'] as const,
   adminBanned: ['adminBanned'] as const,
@@ -246,6 +258,17 @@ export const useAdminAuth = () => {
   });
 };
 
+export const usePlayerHistory = (enabled = true) => {
+  return useQuery({
+    queryKey: queryKeys.playerHistory,
+    queryFn: api.me.history,
+    staleTime: 1000 * 30,
+    retry: 1,
+    retryDelay: 2000,
+    enabled,
+  });
+};
+
 export const useAdminLogs = () => {
   return useQuery({
     queryKey: queryKeys.adminLogs,
@@ -278,6 +301,7 @@ export const useRegisterUser = () => {
     mutationFn: api.users.register,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.users });
+      queryClient.invalidateQueries({ queryKey: queryKeys.playerHistory });
     },
   });
 };
@@ -289,6 +313,7 @@ export const useDeleteUser = () => {
     mutationFn: api.users.delete,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.users });
+      queryClient.invalidateQueries({ queryKey: queryKeys.playerHistory });
     },
   });
 };
@@ -303,6 +328,7 @@ export const useBanUser = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.bannedUsers });
       queryClient.invalidateQueries({ queryKey: queryKeys.adminBanned });
       queryClient.invalidateQueries({ queryKey: queryKeys.adminLogs });
+      queryClient.invalidateQueries({ queryKey: queryKeys.playerHistory });
     },
   });
 };
@@ -317,6 +343,7 @@ export const useUnbanUser = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.bannedUsers });
       queryClient.invalidateQueries({ queryKey: queryKeys.adminBanned });
       queryClient.invalidateQueries({ queryKey: queryKeys.adminLogs });
+      queryClient.invalidateQueries({ queryKey: queryKeys.playerHistory });
     },
   });
 };
@@ -329,6 +356,7 @@ export const useAdminDeleteUser = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.users });
       queryClient.invalidateQueries({ queryKey: queryKeys.adminLogs });
+      queryClient.invalidateQueries({ queryKey: queryKeys.playerHistory });
     },
   });
 };
@@ -341,6 +369,7 @@ export const useVerifyUser = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.users });
       queryClient.invalidateQueries({ queryKey: queryKeys.adminLogs });
+      queryClient.invalidateQueries({ queryKey: queryKeys.playerHistory });
     },
   });
 };

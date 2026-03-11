@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useEditName } from './useQueries';
 import { toast } from 'sonner';
 
@@ -10,6 +11,7 @@ type RemovalReason = '' | 'CANCEL' | 'CANCEL_GAME_DAY' | 'NOT_READY' | 'LATE' | 
  * Single Responsibility: Handle player modification operations
  */
 export function usePlayerManagement() {
+  const queryClient = useQueryClient();
   const onSuccess = useCallback((message: string, type: 'success' | 'error' | 'info') => {
     if (type === 'success') toast.success(message);
     else if (type === 'error') toast.error(message);
@@ -71,13 +73,19 @@ export function usePlayerManagement() {
         onSuccess(data.message, 'success');
       }
 
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['playerHistory'] });
+      queryClient.invalidateQueries({ queryKey: ['bannedUsers'] });
+      queryClient.invalidateQueries({ queryKey: ['adminBanned'] });
+      queryClient.invalidateQueries({ queryKey: ['adminLogs'] });
+
       setShowRemoveDialog(false);
       setRemoveReason('');
       setTargetIntra("");
     } catch (error: unknown) {
       onSuccess(error instanceof Error ? error.message : "Failed to remove registration", 'error');
     }
-  }, [removeReason, session, onSuccess]);
+  }, [removeReason, session, onSuccess, queryClient]);
 
   const closeRemovalDialog = useCallback(() => {
     setShowRemoveDialog(false);
@@ -105,6 +113,7 @@ export function usePlayerManagement() {
       });
 
       onSuccess('Name updated successfully!', 'success');
+      queryClient.invalidateQueries({ queryKey: ['playerHistory'] });
       setShowEditNameDialog(false);
       setEditNameValue("");
       setEditNameIntra("");
@@ -112,7 +121,7 @@ export function usePlayerManagement() {
       const errorMessage = (error instanceof Error ? error.message : null) || "Failed to update name";
       onSuccess(errorMessage, 'error');
     }
-  }, [editNameValue, editNameIntra, editNameMutation, onSuccess]);
+  }, [editNameValue, editNameIntra, editNameMutation, onSuccess, queryClient]);
 
   const closeEditNameDialog = useCallback(() => {
     setShowEditNameDialog(false);

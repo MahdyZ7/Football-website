@@ -144,8 +144,9 @@ export function useRegistrationForm() {
     registerUserMutation.mutate(
       { name, intra },
       {
-        onSuccess: () => {
-          onSuccess('Registration successful!', 'success');
+        onSuccess: (data) => {
+          const message = typeof data?.message === 'string' ? data.message : 'Registration successful!';
+          onSuccess(message, 'success');
           setName("");
           setIntra("");
           setErrors({ name: "", intra: "" });

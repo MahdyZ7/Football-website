@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import Navbar from './Navbar';
 import Footer from './footer';
 import { Button } from '../ui/Button';
@@ -12,6 +13,7 @@ import { useConfig } from '../../contexts/SiteConfigContext';
 import { useTeamManagement } from '../../hooks/useTeamManagement';
 import { useTeamBalance } from '../../hooks/useTeamBalance';
 import { usePlayerRating } from '../../hooks/usePlayerRating';
+import { toast } from 'sonner';
 import { useSessionStorage } from '../../hooks/useSessionStorage';
 import { PlayerCard } from '../teams/PlayerCard';
 import { TeamRoster } from '../teams/TeamRoster';
@@ -35,6 +37,7 @@ import { TeamRoster } from '../teams/TeamRoster';
 
 const TeamsImproved: React.FC = () => {
   const router = useRouter();
+  const { status: sessionStatus } = useSession();
   const { config } = useConfig();
   const [teamMode, setTeamMode] = useState<2 | 3>(config.defaultTeamMode);
   const { data: registeredUsers = [], isLoading: loading, error: usersError } = useUsers();
@@ -133,6 +136,22 @@ const TeamsImproved: React.FC = () => {
     teamManagement.setTeam2(result.team2);
     teamManagement.setTeam3(result.team3);
     teamManagement.setAvailablePlayers(result.remaining);
+
+    // Fire-and-forget snapshot save (non-blocking)
+    if (sessionStatus === 'authenticated') {
+      fetch('/api/team-snapshots', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          teamMode,
+          source: 'auto_balance',
+          teams: [result.team1, result.team2, ...(teamMode === 3 ? [result.team3] : [])],
+        }),
+      }).catch((error) => {
+        console.error('Failed to save team snapshot:', error);
+        toast.error('Failed to save team snapshot');
+      });
+    }
   };
 
   // Toggle team mode (2 or 3 teams)

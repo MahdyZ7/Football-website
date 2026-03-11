@@ -37,7 +37,7 @@ export function RemovalDialog({
   const targetUser = users.find(u => u.intra === targetIntra);
   if (!targetUser) return null;
 
-  const isAdminAction: boolean = !!(session?.user?.isAdmin && targetUser.user_id !== session.user.id);
+  const isAdminAction: boolean = !!(session?.user?.isAdmin && !targetUser.owned_by_current_user);
 
   // Check if within grace period for self-removal
   const registrationTime = targetUser.created_at ? new Date(targetUser.created_at) : null;

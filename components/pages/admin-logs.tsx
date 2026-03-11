@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import Navbar from './Navbar';
@@ -10,7 +12,7 @@ import { AdminLog } from '../../types/user';
 
 /**
  * AdminLogs Component
- * Single Responsibility: Display public admin action logs
+ * Single Responsibility: Display admin action logs for admins
  *
  * Business logic extracted to custom hooks:
  * - useAdminLogsFormatter: Format timestamps and action colors
@@ -30,7 +32,7 @@ const AdminLogs: React.FC = () => {
             Admin Action Logs
           </h1>
           <p className="text-center mb-8" style={{ color: 'var(--text-secondary)' }}>
-            Public log of all administrative actions performed on the system
+            Review the most recent administrative actions performed on the system
           </p>
 
           {/* Back Link */}
@@ -191,8 +193,8 @@ const AdminLogs: React.FC = () => {
                 backgroundColor: 'var(--bg-card)',
                 color: 'var(--text-secondary)'
               }}>
-                <strong>Note:</strong> This page shows the last 100 admin actions for transparency.
-                All administrative actions are automatically logged and publicly viewable.
+                <strong>Note:</strong> This page shows the last 100 admin actions.
+                All administrative actions are automatically logged for audit purposes.
               </div>
             </>
           )}

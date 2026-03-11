@@ -30,6 +30,7 @@ export function PlayerList({
 
   // Filter out banned players — they don't appear and don't count toward spots
   const visibleUsers = users.filter(u => !u.is_banned);
+  const confirmedUsers = visibleUsers.filter(u => (u.registration_status ?? 'confirmed') === 'confirmed');
 
   return (
     <div className="max-w-4xl mx-auto mb-12">
@@ -42,17 +43,17 @@ export function PlayerList({
         bg-gradient-to-b from-stone-700 to-zinc-700">
         <div className="bg-white/20 backdrop-blur-sm text-center rounded-lg px-4 py-2 text-white">
           <div className="text-2xl font-bold">{visibleUsers.length}/{guaranteedSpots}</div>
-          <div className="text-xs">Spots Filled</div>
+          <div className="text-xs">{confirmedUsers.length} confirmed, {visibleUsers.length - confirmedUsers.length} waitlisted</div>
         </div>
         <div className="bg-black/50 h-2 mb-6">
           <div
             className="bg-white/50 h-full transition-all duration-500 ease-out"
-            style={{ width: `${Math.min((visibleUsers.length / guaranteedSpots) * 100, 100)}%` }}
+            style={{ width: `${Math.min((confirmedUsers.length / guaranteedSpots) * 100, 100)}%` }}
             role="progressbar"
-            aria-valuenow={visibleUsers.length}
+            aria-valuenow={confirmedUsers.length}
             aria-valuemin={0}
             aria-valuemax={guaranteedSpots}
-            aria-label={`${visibleUsers.length} out of ${guaranteedSpots} spots filled`}
+            aria-label={`${confirmedUsers.length} out of ${guaranteedSpots} confirmed spots filled`}
           />
         </div>
       </div>
@@ -72,7 +73,7 @@ export function PlayerList({
             </div>
           ) : (
             visibleUsers.map((user, index) => {
-              const isOwnRegistration = session && user.user_id && user.user_id === session.user.id;
+              const isOwnRegistration = !!session && !!user.owned_by_current_user;
               const isAdmin = session?.user?.isAdmin || false;
 
               return (

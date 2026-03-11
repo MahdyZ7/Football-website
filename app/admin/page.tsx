@@ -1,15 +1,21 @@
-'use client';
-
 import React, { Suspense } from "react";
+import { redirect } from "next/navigation";
 import AdminDashboard from "../../components/admin/AdminDashboard";
+import { auth } from "../../auth";
 
 function AdminPageContent() {
   return <AdminDashboard />;
 }
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  const session = await auth();
+
+  if (!session?.user?.isAdmin) {
+    redirect("/");
+  }
+
   return (
-    <Suspense>
+    <Suspense fallback={<div>Loading admin dashboard...</div>}>
       <AdminPageContent />
     </Suspense>
   );
