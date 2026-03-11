@@ -124,8 +124,8 @@ describe('User Management', () => {
       const pool = getTestPool();
 
       const result = await pool.query(
-        `INSERT INTO users (email, name, role, is_admin) VALUES ($1, $2, $3, $4) RETURNING role, is_admin`,
-        ['admin@example.com', 'Admin', 'admin', true]
+        `INSERT INTO users (email, name, role) VALUES ($1, $2, $3) RETURNING role, (role = 'admin') AS is_admin`,
+        ['admin@example.com', 'Admin', 'admin']
       );
 
       expect(result.rows[0].role).toBe('admin');

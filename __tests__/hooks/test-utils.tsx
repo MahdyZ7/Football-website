@@ -48,7 +48,10 @@ export function QueryWrapper({ children }: QueryWrapperProps) {
  */
 interface AllProvidersProps {
   children: ReactNode;
-  session?: { user: { id: string; name: string; email: string; isAdmin: boolean }; expires: string } | null;
+  session?: {
+    user: { id: string; name: string; email: string; isAdmin: boolean; role: string };
+    expires: string;
+  } | null;
 }
 
 export function AllProviders({ children, session = null }: AllProvidersProps) {
@@ -88,6 +91,7 @@ export const mockSession = {
     name: 'Test User',
     email: 'test@example.com',
     isAdmin: false,
+    role: 'user',
   },
   expires: new Date(Date.now() + 86400000).toISOString(), // 24 hours from now
 };
@@ -98,6 +102,7 @@ export const mockAdminSession = {
     name: 'Admin User',
     email: 'admin@example.com',
     isAdmin: true,
+    role: 'admin',
   },
   expires: new Date(Date.now() + 86400000).toISOString(),
 };

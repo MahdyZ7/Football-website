@@ -289,7 +289,7 @@ describe('Admin Operations and Logging', () => {
       );
 
       const logs = await pool.query(
-        `SELECT al.*, u.is_admin, u.email
+        `SELECT al.*, (u.role = 'admin') AS is_admin, u.email
          FROM admin_logs al
          JOIN users u ON al.performed_by_user_id = u.id`
       );

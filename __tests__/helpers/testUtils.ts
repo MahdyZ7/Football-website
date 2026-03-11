@@ -15,12 +15,12 @@ let testPool: Pool | null = null;
 
 // Validate that we're using a test database
 function validateTestDatabase(): string {
-  const databaseUrl = process.env.TEST_DATABASE_URL || process.env.DATABASE_URL;
+  const databaseUrl = process.env.TEST_DATABASE_URL;
 
   if (!databaseUrl) {
     throw new Error(
       'TEST DATABASE ERROR: No database URL configured.\n' +
-      'Please ensure .env.test exists with TEST_DATABASE_URL or DATABASE_URL'
+      'Please ensure .env.test exists with TEST_DATABASE_URL'
     );
   }
 
@@ -133,10 +133,12 @@ export async function createTestUser(
 
   try {
     const result = await client.query(
-      `INSERT INTO users (id, email, name, is_admin, created_at)
+      `INSERT INTO users (id, email, name, role, "createdAt")
        VALUES ($1, $2, $3, $4, NOW())
-       RETURNING *`,
-      [userId, email, name, isAdmin]
+       RETURNING *,
+                 "createdAt" AS created_at,
+                 (role = 'admin') AS is_admin`,
+      [userId, email, name, isAdmin ? 'admin' : 'user']
     );
 
     return result.rows[0];

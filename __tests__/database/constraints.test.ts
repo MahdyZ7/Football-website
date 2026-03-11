@@ -243,15 +243,15 @@ describe('Database Constraints and Relationships', () => {
       expect(result.rows[0].status).toBe('pending');
     });
 
-    it('should default user is_admin to false', async () => {
+    it('should default user role to user', async () => {
       const pool = getTestPool();
 
       const result = await pool.query(
-        `INSERT INTO users (email, name) VALUES ($1, $2) RETURNING is_admin`,
+        `INSERT INTO users (email, name) VALUES ($1, $2) RETURNING role`,
         ['test@test.com', 'Test']
       );
 
-      expect(result.rows[0].is_admin).toBe(false);
+      expect(result.rows[0].role).toBe('user');
     });
   });
 

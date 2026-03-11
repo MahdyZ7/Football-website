@@ -6,11 +6,51 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { useCountdown } from '@/hooks/useCountdown';
-import * as allowedTimes from '@/lib/utils/allowed_times';
+import * as registrationHelpers from '@/lib/utils/registration-helpers';
 
-// Mock the getNextRegistration function
-jest.mock('@/lib/utils/allowed_times', () => ({
-  getNextRegistration: jest.fn(),
+jest.mock('@/contexts/SiteConfigContext', () => ({
+  useConfig: () => ({
+    config: {
+      gameDays: [],
+      location: '',
+      timezoneOffset: 0,
+      registrationWindows: [],
+      registrationForceClosed: false,
+      guaranteedSpots: 21,
+      maxPlayers: 40,
+      gracePeriodMinutes: 15,
+      defaultTeamMode: 3,
+      playersPerTeam2Mode: 10,
+      playersPerTeam3Mode: 7,
+      banDurations: {
+        NOT_READY: 4,
+        CANCEL: 8,
+        CANCEL_GAME_DAY: 15,
+        LATE: 8,
+        NO_SHOW: 30,
+      },
+      gameDayBanThresholdHour: 17,
+      lateThresholdMinutes: 15,
+      announcement: {
+        enabled: false,
+        title: '',
+        message: '',
+        type: 'info',
+        dismissible: true,
+      },
+      gameRules: {
+        timeAndScore: '',
+        teams: '',
+        referee: '',
+        lateTig: '',
+        conduct: '',
+      },
+    },
+  }),
+}));
+
+jest.mock('@/lib/utils/registration-helpers', () => ({
+  getNextRegistrationFromConfig: jest.fn(),
 }));
 
 describe('useCountdown', () => {
@@ -36,7 +76,7 @@ describe('useCountdown', () => {
         30 * 1000                  // 30 seconds
       );
 
-      jest.spyOn(allowedTimes, 'getNextRegistration').mockReturnValue(futureDate);
+      jest.spyOn(registrationHelpers, 'getNextRegistrationFromConfig').mockReturnValue(futureDate);
 
       const { result } = renderHook(() => useCountdown());
 
@@ -58,7 +98,7 @@ describe('useCountdown', () => {
         45 * 1000             // 45 seconds
       );
 
-      jest.spyOn(allowedTimes, 'getNextRegistration').mockReturnValue(futureDate);
+      jest.spyOn(registrationHelpers, 'getNextRegistrationFromConfig').mockReturnValue(futureDate);
 
       const { result } = renderHook(() => useCountdown());
 
@@ -76,7 +116,7 @@ describe('useCountdown', () => {
       const pastDate = new Date();
       pastDate.setTime(pastDate.getTime() - 1000); // 1 second ago
 
-      jest.spyOn(allowedTimes, 'getNextRegistration').mockReturnValue(pastDate);
+      jest.spyOn(registrationHelpers, 'getNextRegistrationFromConfig').mockReturnValue(pastDate);
 
       const { result } = renderHook(() => useCountdown());
 
@@ -95,7 +135,7 @@ describe('useCountdown', () => {
       const futureDate = new Date();
       futureDate.setTime(futureDate.getTime() + 10 * 1000);
 
-      jest.spyOn(allowedTimes, 'getNextRegistration').mockReturnValue(futureDate);
+      jest.spyOn(registrationHelpers, 'getNextRegistrationFromConfig').mockReturnValue(futureDate);
 
       const { result } = renderHook(() => useCountdown());
 
@@ -124,7 +164,7 @@ describe('useCountdown', () => {
       const futureDate = new Date();
       futureDate.setTime(futureDate.getTime() + 2000);
 
-      jest.spyOn(allowedTimes, 'getNextRegistration').mockReturnValue(futureDate);
+      jest.spyOn(registrationHelpers, 'getNextRegistrationFromConfig').mockReturnValue(futureDate);
 
       const { result } = renderHook(() => useCountdown());
 
@@ -149,7 +189,7 @@ describe('useCountdown', () => {
       const futureDate = new Date();
       futureDate.setTime(futureDate.getTime() + 60000);
 
-      jest.spyOn(allowedTimes, 'getNextRegistration').mockReturnValue(futureDate);
+      jest.spyOn(registrationHelpers, 'getNextRegistrationFromConfig').mockReturnValue(futureDate);
 
       const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
 
@@ -164,7 +204,7 @@ describe('useCountdown', () => {
   describe('Edge cases', () => {
     it('should handle exactly 0 time remaining', async () => {
       const now = new Date();
-      jest.spyOn(allowedTimes, 'getNextRegistration').mockReturnValue(now);
+      jest.spyOn(registrationHelpers, 'getNextRegistrationFromConfig').mockReturnValue(now);
 
       const { result } = renderHook(() => useCountdown());
 
@@ -180,7 +220,7 @@ describe('useCountdown', () => {
       const futureDate = new Date();
       futureDate.setTime(futureDate.getTime() + 10 * 24 * 60 * 60 * 1000);
 
-      jest.spyOn(allowedTimes, 'getNextRegistration').mockReturnValue(futureDate);
+      jest.spyOn(registrationHelpers, 'getNextRegistrationFromConfig').mockReturnValue(futureDate);
 
       const { result } = renderHook(() => useCountdown());
 
@@ -199,7 +239,7 @@ describe('useCountdown', () => {
       const futureDate = new Date();
       futureDate.setTime(futureDate.getTime() + 61 * 1000);
 
-      jest.spyOn(allowedTimes, 'getNextRegistration').mockReturnValue(futureDate);
+      jest.spyOn(registrationHelpers, 'getNextRegistrationFromConfig').mockReturnValue(futureDate);
 
       const { result } = renderHook(() => useCountdown());
 

@@ -1,6 +1,6 @@
 # 42 Football Club Registration Website
 
-A comprehensive football club management system built with Next.js 15, featuring time-based registration, team management, admin controls, and a feedback system.
+A football registration and match-organization webapp built with Next.js. Players sign in, register for a specific game window, get placed into confirmed spots or a waitlist, and can be penalized for cancellations, lateness, or no-shows. Admins manage bans, settings, logs, feedback, and team organization.
 
 ## Live Demo
 
@@ -10,10 +10,11 @@ A comprehensive football club management system built with Next.js 15, featuring
 
 ### User Features
 - **Time-Based Registration** - Register only during allowed time windows (Sunday/Wednesday 12 PM - 8 PM next day)
-- **Player Limit System** - 21 guaranteed spots with automatic waitlist management
+- **Confirmed Spots + Waitlist** - Players are either confirmed immediately or placed on a real waitlist with automatic promotion when slots open
 - **OAuth Authentication** - Secure login via 42 Intra, Google, or GitHub
-- **Team Selection** - View and join teams with drag-and-drop interface
-- **Player Roster** - View all registered players and their verification status
+- **Team Selection** - Create teams, rate players, and save rating snapshots whenever auto-balance runs
+- **Player History** - Players can see their current registration status, active ban, and reliability history
+- **Player Roster** - View confirmed players and waitlist order without leaking internal user IDs
 - **Rules Page** - Clear guidelines to minimize disputes
 - **Feedback System** - Submit feature requests, bug reports, and general feedback
 - **Voting System** - Vote on approved feedback submissions (upvote/downvote)
@@ -24,11 +25,12 @@ A comprehensive football club management system built with Next.js 15, featuring
 ### Admin Features
 - **User Management** - View all registered users with verification toggles
 - **Ban System** - Ban/unban users with predefined durations and custom reasons
-- **Action Logging** - Comprehensive audit trail of all admin actions
+- **Action Logging** - Sanitized public audit trail plus full admin-side moderation tools
 - **Feedback Moderation** - Approve/reject feedback submissions before public visibility
 - **Status Management** - Update feedback status (pending, in_progress, completed)
 - **User Deletion** - Remove users with full cascade handling
 - **Verification Control** - Toggle user verification status
+- **Centralized Admin Auth** - All admin routes use the authenticated session role
 - **Admin Role Management** - Interactive CLI tool to promote/demote admins
 
 ### Financial Management
@@ -43,7 +45,8 @@ A comprehensive football club management system built with Next.js 15, featuring
 - **Error Boundaries** - Graceful error handling throughout the app
 - **Skeleton Screens** - Professional loading states for all pages
 - **Service Account System** - Automated tasks via secure API key authentication
-- **Database Migrations** - Automated schema updates and data migration
+- **Transactional Registration Flows** - Registration, bans, removals, and waitlist promotion run inside DB transactions
+- **Database Migrations** - Automated schema updates for auth, feedback, site config, ban state, and registration features
 - **CI/CD Pipeline** - Automated testing and deployment via GitHub Actions
 - **Comprehensive Test Suite** - Unit and integration tests with dummy data
 
@@ -253,6 +256,21 @@ These will be generated automatically when you run `npm run service:setup`:
 ```bash
 SERVICE_ACCOUNT_USER_ID=auto-generated-by-setup
 SERVICE_API_KEY=auto-generated-by-setup
+```
+
+#### Optional Email Notifications
+
+Used for waitlist promotion notifications:
+
+```bash
+RESEND_API_KEY=your-resend-api-key
+NOTIFICATION_FROM_EMAIL=football@example.com
+```
+
+#### Cron / Automation
+
+```bash
+CRON_SECRET=your-vercel-cron-secret
 ```
 
 #### Timezone Configuration
@@ -790,3 +808,30 @@ For questions or issues:
 
 - **GitHub Issues**: [Report a bug](https://github.com/MahdyZ7/Football-website/issues)
 - **Email**: Contact the maintainers
+### Existing Database Upgrade
+
+If your database already exists, run the relevant migrations after pulling the latest code:
+
+```bash
+npm run db:migrate:auth
+npm run db:migrate:feedback
+npm run db:migrate:ban-status
+npm run db:migrate:site-config
+npm run db:migrate:registration-features
+npm run db:migrate:legacy-user-links
+```
+
+`db:migrate:registration-features` adds:
+- confirmed vs waitlisted registration state
+- waitlist position and promotion timestamps
+- player reliability events
+- team generation and player rating history tables
+- notification outbox records for emails
+
+`db:migrate:legacy-user-links` backfills `user_id` on legacy player, ban, and reliability-event rows when it can identify an unambiguous match.
+It intentionally avoids display-name matching. Any unresolved rows should be reviewed with:
+
+```bash
+npm run db:repair:legacy-links report
+npm run db:repair:legacy-links link-player <intra> <userId>
+```
