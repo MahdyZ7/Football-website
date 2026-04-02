@@ -176,12 +176,12 @@ async function registerUser(user: User, userId: string) {
       return { error: "Intra not found", status: 404 };
     }
 
-    // Check for existing registration by intra or user_id while holding the allocation lock
+    // Check for existing registration by intra while holding the allocation lock
     const existingPlayer = await client.query(
       `SELECT intra, is_banned FROM players
-       WHERE intra = $1 OR user_id = $2
+       WHERE intra = $1
        LIMIT 1`,
-      [user.intra, userId]
+      [user.intra]
     );
 
     if (existingPlayer.rows.length > 0) {
