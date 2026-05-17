@@ -294,7 +294,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
     return styles[index];
   };
 
-  const ExportPreview = () => (
+  const exportPreview = (
     <div
       ref={exportRef}
       className="export-preview"
@@ -632,7 +632,7 @@ const TeamExporter: React.FC<TeamExporterProps> = ({ team1, team2, team3 }) => {
 
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
-      <ExportPreview />
+      {exportPreview}
       
       <button
         className="px-6 py-3 bg-ft-primary hover:bg-ft-secondary text-white font-medium rounded

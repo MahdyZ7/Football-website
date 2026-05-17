@@ -1,7 +1,6 @@
-
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useSyncExternalStore } from 'react';
 
 type Theme = 'light' | 'dark';
 
@@ -20,24 +19,48 @@ export const useTheme = () => {
   return context;
 };
 
+const themeListeners = new Set<() => void>();
+
+const subscribeTheme = (callback: () => void) => {
+  themeListeners.add(callback);
+  const onStorage = (e: StorageEvent) => {
+    if (e.key === 'theme') callback();
+  };
+  window.addEventListener('storage', onStorage);
+  return () => {
+    themeListeners.delete(callback);
+    window.removeEventListener('storage', onStorage);
+  };
+};
+
+const getThemeSnapshot = (): Theme => {
+  try {
+    const saved = localStorage.getItem('theme');
+    return saved === 'dark' ? 'dark' : 'light';
+  } catch {
+    return 'light';
+  }
+};
+
+const getThemeServerSnapshot = (): Theme => 'light';
+
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setTheme] = useState<Theme>('light');
+  const theme = useSyncExternalStore(subscribeTheme, getThemeSnapshot, getThemeServerSnapshot);
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as Theme;
-    if (savedTheme) {
-      setTheme(savedTheme);
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('theme', theme);
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
-  };
+  const toggleTheme = useCallback(() => {
+    try {
+      const current = getThemeSnapshot();
+      const next: Theme = current === 'light' ? 'dark' : 'light';
+      localStorage.setItem('theme', next);
+      themeListeners.forEach((cb) => cb());
+    } catch (error) {
+      console.error('Failed to persist theme:', error);
+    }
+  }, []);
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>

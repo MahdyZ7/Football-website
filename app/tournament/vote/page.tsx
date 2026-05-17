@@ -1,6 +1,10 @@
 'use client';
 
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, useSyncExternalStore } from 'react';
+
+const emptySubscribe = () => () => {};
+const getTrue = () => true;
+const getFalse = () => false;
 import { useSession, signIn } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import { Trophy, Star, Award, User, Shield, ArrowLeft, X, Clock, AlertTriangle, Info, Medal, Check } from 'lucide-react';
@@ -41,27 +45,42 @@ const RANK_INFO: Record<RankKey, { label: string; shortLabel: string; points: nu
 
 const RANKS: RankKey[] = ['first', 'second', 'third'];
 
+const TimeBlock = ({ value, label }: { value: number; label: string }) => (
+  <div className="flex flex-col items-center">
+    <div
+      className="w-14 h-14 md:w-16 md:h-16 rounded-xl flex items-center justify-center text-xl md:text-2xl font-bold"
+      style={{
+        background: 'linear-gradient(145deg, rgba(255,215,0,0.2), rgba(255,215,0,0.05))',
+        border: '1px solid rgba(255,215,0,0.3)',
+        color: '#ffd700',
+      }}
+    >
+      {value.toString().padStart(2, '0')}
+    </div>
+    <span className="text-xs text-gray-400 mt-1">{label}</span>
+  </div>
+);
+
 // Countdown Timer Component
 const CountdownTimer = ({ onExpire }: { onExpire: () => void }) => {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(emptySubscribe, getTrue, getFalse);
   const [timeLeft, setTimeLeft] = useState<ReturnType<typeof getTimeRemaining> | null>(null);
 
   useEffect(() => {
-    setMounted(true);
-    setTimeLeft(getTimeRemaining());
-
-    const timer = setInterval(() => {
+    if (!mounted) return;
+    const tick = () => {
       const remaining = getTimeRemaining();
       setTimeLeft(remaining);
-
       if (remaining.isExpired) {
         clearInterval(timer);
         onExpire();
       }
-    }, 1000);
+    };
+    const timer = setInterval(tick, 1000);
+    tick();
 
     return () => clearInterval(timer);
-  }, [onExpire]);
+  }, [mounted, onExpire]);
 
   if (!mounted || !timeLeft) {
     return (
@@ -99,22 +118,6 @@ const CountdownTimer = ({ onExpire }: { onExpire: () => void }) => {
       </div>
     );
   }
-
-  const TimeBlock = ({ value, label }: { value: number; label: string }) => (
-    <div className="flex flex-col items-center">
-      <div
-        className="w-14 h-14 md:w-16 md:h-16 rounded-xl flex items-center justify-center text-xl md:text-2xl font-bold"
-        style={{
-          background: 'linear-gradient(145deg, rgba(255,215,0,0.2), rgba(255,215,0,0.05))',
-          border: '1px solid rgba(255,215,0,0.3)',
-          color: '#ffd700',
-        }}
-      >
-        {value.toString().padStart(2, '0')}
-      </div>
-      <span className="text-xs text-gray-400 mt-1">{label}</span>
-    </div>
-  );
 
   return (
     <div className="text-center">
@@ -227,7 +230,8 @@ const HowItWorksSection = () => (
 
 export default function TournamentVotePage() {
   const { data: session, status: sessionStatus } = useSession();
-  const [votingExpired, setVotingExpired] = useState(false);
+  // The countdown can mark voting expired client-side; combine with server state below.
+  const [countdownExpired, setCountdownExpired] = useState(false);
 
   // Local selections (before submitting)
   const [localBestPlayer, setLocalBestPlayer] = useState<LocalSelections>({ first: null, second: null, third: null });
@@ -269,45 +273,39 @@ export default function TournamentVotePage() {
     best_goalkeeper: { first: null, second: null, third: null },
   };
   const votingOpen = votesData?.votingOpen ?? true;
+  const votingExpired = countdownExpired || (votesData ? !votesData.votingOpen : false);
 
   // Check if user has submitted votes (from server)
   const hasSubmittedBestPlayer = userVotes.best_player.first !== null;
   const hasSubmittedGoalkeeper = userVotes.best_goalkeeper.first !== null;
 
-  useEffect(() => {
-    if (votesData && !votesData.votingOpen) {
-      setVotingExpired(true);
-    }
-  }, [votesData]);
-
   // Stringify user votes for stable dependency comparison
   const bestPlayerVotesJson = JSON.stringify(userVotes.best_player);
   const goalkeeperVotesJson = JSON.stringify(userVotes.best_goalkeeper);
 
-  // Initialize local selections from server data when available
-  useEffect(() => {
-    if (hasSubmittedBestPlayer) {
-      const votes = userVotes.best_player;
-      setLocalBestPlayer({
-        first: votes.first ? { name: votes.first.playerName, team: votes.first.playerTeam as TeamKey } : null,
-        second: votes.second ? { name: votes.second.playerName, team: votes.second.playerTeam as TeamKey } : null,
-        third: votes.third ? { name: votes.third.playerName, team: votes.third.playerTeam as TeamKey } : null,
-      });
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasSubmittedBestPlayer, bestPlayerVotesJson]);
+  // Sync server-submitted votes into local editing state during render
+  // (React's "adjust state when a prop changes" pattern).
+  const [seenBestPlayerVotes, setSeenBestPlayerVotes] = useState<string | null>(null);
+  if (hasSubmittedBestPlayer && bestPlayerVotesJson !== seenBestPlayerVotes) {
+    setSeenBestPlayerVotes(bestPlayerVotesJson);
+    const votes = userVotes.best_player;
+    setLocalBestPlayer({
+      first: votes.first ? { name: votes.first.playerName, team: votes.first.playerTeam as TeamKey } : null,
+      second: votes.second ? { name: votes.second.playerName, team: votes.second.playerTeam as TeamKey } : null,
+      third: votes.third ? { name: votes.third.playerName, team: votes.third.playerTeam as TeamKey } : null,
+    });
+  }
 
-  useEffect(() => {
-    if (hasSubmittedGoalkeeper) {
-      const votes = userVotes.best_goalkeeper;
-      setLocalGoalkeeper({
-        first: votes.first ? { name: votes.first.playerName, team: votes.first.playerTeam as TeamKey } : null,
-        second: votes.second ? { name: votes.second.playerName, team: votes.second.playerTeam as TeamKey } : null,
-        third: votes.third ? { name: votes.third.playerName, team: votes.third.playerTeam as TeamKey } : null,
-      });
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasSubmittedGoalkeeper, goalkeeperVotesJson]);
+  const [seenGoalkeeperVotes, setSeenGoalkeeperVotes] = useState<string | null>(null);
+  if (hasSubmittedGoalkeeper && goalkeeperVotesJson !== seenGoalkeeperVotes) {
+    setSeenGoalkeeperVotes(goalkeeperVotesJson);
+    const votes = userVotes.best_goalkeeper;
+    setLocalGoalkeeper({
+      first: votes.first ? { name: votes.first.playerName, team: votes.first.playerTeam as TeamKey } : null,
+      second: votes.second ? { name: votes.second.playerName, team: votes.second.playerTeam as TeamKey } : null,
+      third: votes.third ? { name: votes.third.playerName, team: votes.third.playerTeam as TeamKey } : null,
+    });
+  }
 
   const handleSelectRank = (
     awardType: 'best_player' | 'best_goalkeeper',
@@ -403,7 +401,7 @@ export default function TournamentVotePage() {
   };
 
   const handleExpire = useCallback(() => {
-    setVotingExpired(true);
+    setCountdownExpired(true);
   }, []);
 
   const getTeamColor = (teamName: string) => {

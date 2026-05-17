@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -77,27 +77,18 @@ const TeamsImproved: React.FC = () => {
     }
   );
 
-  // Load saved state once the session storage hook has initialized.
-  // Use a ref to ensure we only apply the persisted state once to avoid
-  // repeatedly re-applying it and causing a render loop.
-  const restoredRef = useRef(false);
-
-  useEffect(() => {
-    // Only apply a persisted storedValue if it actually came from sessionStorage.
-    if (!isInitialized || loading || restoredRef.current || !hasStoredValue) return;
-
-    if (storedValue) {
-      teamManagement.setTeam1(storedValue.team1);
-      teamManagement.setTeam2(storedValue.team2);
-      teamManagement.setTeam3(storedValue.team3);
-      teamManagement.setAvailablePlayers(storedValue.availablePlayers);
-      // Note: discardedPlayers is managed internally by useTeamManagement
-      if (storedValue.teamMode) setTeamMode(storedValue.teamMode);
-    }
-
-    restoredRef.current = true;
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- teamManagement setters are stable; including the object would cause a loop
-  }, [storedValue, isInitialized, loading, hasStoredValue]);
+  // Restore the previous session's team arrangement once, during render.
+  // Setting state during render is the React-recommended alternative to
+  // "load-from-external-on-mount" effects (avoids cascading re-renders).
+  const [hasRestored, setHasRestored] = useState(false);
+  if (!hasRestored && isInitialized && !loading && hasStoredValue && storedValue) {
+    setHasRestored(true);
+    teamManagement.setTeam1(storedValue.team1);
+    teamManagement.setTeam2(storedValue.team2);
+    teamManagement.setTeam3(storedValue.team3);
+    teamManagement.setAvailablePlayers(storedValue.availablePlayers);
+    if (storedValue.teamMode) setTeamMode(storedValue.teamMode);
+  }
 
   // Save state whenever teams change (only after initialization)
   useEffect(() => {

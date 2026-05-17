@@ -1,21 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useSyncExternalStore } from 'react';
 
-/**
- * Custom hook for session storage persistence
- * Single Responsibility: Manage state persistence in sessionStorage
- *
- * Handles:
- * - Loading state from sessionStorage on mount
- * - Saving state to sessionStorage on changes
- * - JSON serialization/deserialization
- * - Initialization tracking to prevent premature saves
- * - Clear functionality to remove stored data
- *
- * This is a REUSABLE hook that can be used across the entire app
- * for any data that needs to persist across page refreshes.
- *
- * Extracted from TeamsImproved component to create a generic utility
- */
+const emptySubscribe = () => () => {};
+const getTrue = () => true;
+const getFalse = () => false;
 
 interface UseSessionStorageReturn<T> {
   storedValue: T;
@@ -25,99 +12,109 @@ interface UseSessionStorageReturn<T> {
   hasStoredValue: boolean;
 }
 
-/**
- * Generic session storage hook with TypeScript support
- *
- * @param key - The sessionStorage key to use
- * @param initialValue - Default value if no stored value exists
- * @returns Tuple of [storedValue, setValue, clearValue, isInitialized]
- *
- * @example
- * const { storedValue, setValue, clearValue } = useSessionStorage('myKey', { count: 0 });
- *
- * // Update value
- * setValue({ count: 1 });
- *
- * // Clear storage
- * clearValue();
- */
+const keyListeners = new Map<string, Set<() => void>>();
+
+function subscribeToKey(key: string, callback: () => void) {
+  let set = keyListeners.get(key);
+  if (!set) {
+    set = new Set();
+    keyListeners.set(key, set);
+  }
+  set.add(callback);
+
+  const onStorage = (e: StorageEvent) => {
+    if (e.key === key && e.storageArea === sessionStorage) callback();
+  };
+  window.addEventListener('storage', onStorage);
+
+  return () => {
+    set!.delete(callback);
+    window.removeEventListener('storage', onStorage);
+  };
+}
+
+function notifyKey(key: string) {
+  keyListeners.get(key)?.forEach((cb) => cb());
+}
+
+function readRaw(key: string): string | null {
+  try {
+    return sessionStorage.getItem(key);
+  } catch (error) {
+    console.error(`Error reading sessionStorage key "${key}":`, error);
+    return null;
+  }
+}
+
 export function useSessionStorage<T>(
   key: string,
   initialValue: T
 ): UseSessionStorageReturn<T> {
-  const [storedValue, setStoredValue] = useState<T>(initialValue);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [hasStoredValue, setHasStoredValue] = useState(false);
+  const subscribe = useCallback(
+    (callback: () => void) => subscribeToKey(key, callback),
+    [key]
+  );
+  const getSnapshot = useCallback(() => readRaw(key), [key]);
+  const getServerSnapshot = useCallback(() => null, []);
 
-  // Load from sessionStorage on mount
-  useEffect(() => {
+  const rawItem = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+
+  let storedValue: T = initialValue;
+  if (rawItem != null) {
     try {
-      const item = sessionStorage.getItem(key);
-      if (item) {
-        const parsed = JSON.parse(item) as T;
-        setStoredValue(parsed);
-        setHasStoredValue(true);
+      storedValue = JSON.parse(rawItem) as T;
+    } catch (error) {
+      console.error(`Error parsing sessionStorage key "${key}":`, error);
+    }
+  }
+
+  // `useSyncExternalStore` with a constant getServerSnapshot returns false during
+  // SSR/initial hydration render and true after commit — no effect needed.
+  const isInitialized = useSyncExternalStore(emptySubscribe, getTrue, getFalse);
+
+  const setValue = useCallback(
+    (value: T | ((prev: T) => T)) => {
+      try {
+        const current = (() => {
+          const raw = readRaw(key);
+          if (raw == null) return initialValue;
+          try {
+            return JSON.parse(raw) as T;
+          } catch {
+            return initialValue;
+          }
+        })();
+        const next =
+          typeof value === 'function'
+            ? (value as (prev: T) => T)(current)
+            : value;
+        sessionStorage.setItem(key, JSON.stringify(next));
+        notifyKey(key);
+      } catch (error) {
+        console.error(`Error setting sessionStorage key "${key}":`, error);
       }
-      setIsInitialized(true);
-    } catch (error) {
-      console.error(`Error loading sessionStorage key "${key}":`, error);
-      setIsInitialized(true);
-    }
-  }, [key]);
+    },
+    [key, initialValue]
+  );
 
-  // Save to sessionStorage whenever value changes (only after initialization)
-  useEffect(() => {
-    if (!isInitialized) return;
-
-    try {
-      const valueToStore = JSON.stringify(storedValue);
-      sessionStorage.setItem(key, valueToStore);
-    } catch (error) {
-      console.error(`Error saving to sessionStorage key "${key}":`, error);
-    }
-  }, [key, storedValue, isInitialized]);
-
-  /**
-   * Update the stored value
-   * Supports both direct values and updater functions
-   */
-  const setValue = useCallback((value: T | ((prev: T) => T)) => {
-    try {
-      setStoredValue(value);
-    } catch (error) {
-      console.error(`Error setting value for key "${key}":`, error);
-    }
-  }, [key]);
-
-  /**
-   * Clear the stored value from sessionStorage
-   * Resets to initial value
-   */
   const clearValue = useCallback(() => {
     try {
       sessionStorage.removeItem(key);
-      setStoredValue(initialValue);
+      notifyKey(key);
     } catch (error) {
       console.error(`Error clearing sessionStorage key "${key}":`, error);
     }
-  }, [key, initialValue]);
+  }, [key]);
 
   return {
     storedValue,
     setValue,
     clearValue,
     isInitialized,
-    hasStoredValue,
+    hasStoredValue: rawItem != null,
   };
 }
 
-/**
- * Alternative API that matches React.useState signature more closely
- * Returns a tuple instead of an object
- *
- * @example
- * const [value, setValue, clearValue] = useSessionStorageTuple('myKey', 0);
- */
 export function useSessionStorageTuple<T>(
   key: string,
   initialValue: T

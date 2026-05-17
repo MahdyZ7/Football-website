@@ -1,4 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useSyncExternalStore } from "react";
+
+const emptySubscribe = () => () => {};
+const getTrue = () => true;
+const getFalse = () => false;
 import { motion } from "framer-motion";
 import { Trophy, Star, Award, Zap, Scale } from "lucide-react";
 import Image from "next/image";
@@ -81,52 +85,64 @@ const TOP_SCORERS = [
 
 type TeamKey = keyof typeof TEAMS;
 
-const FloatingParticle = ({ delay, color }: { delay: number; color: string }) => (
-  <motion.div
-    className="absolute w-2 h-2 rounded-full opacity-60"
-    style={{ backgroundColor: color }}
-    initial={{ y: "100vh", x: Math.random() * 100 + "vw", opacity: 0 }}
-    animate={{
-      y: "-10vh",
-      opacity: [0, 1, 1, 0],
-      scale: [0.5, 1, 1, 0.5],
-    }}
-    transition={{
-      duration: 8 + Math.random() * 4,
-      delay: delay,
-      repeat: Infinity,
-      ease: "linear",
-    }}
-  />
-);
+const FloatingParticle = ({ delay, color }: { delay: number; color: string }) => {
+  const [config] = useState(() => ({
+    x: Math.random() * 100,
+    duration: 8 + Math.random() * 4,
+  }));
+  return (
+    <motion.div
+      className="absolute w-2 h-2 rounded-full opacity-60"
+      style={{ backgroundColor: color }}
+      initial={{ y: "100vh", x: config.x + "vw", opacity: 0 }}
+      animate={{
+        y: "-10vh",
+        opacity: [0, 1, 1, 0],
+        scale: [0.5, 1, 1, 0.5],
+      }}
+      transition={{
+        duration: config.duration,
+        delay: delay,
+        repeat: Infinity,
+        ease: "linear",
+      }}
+    />
+  );
+};
+
+const CONFETTI_COLORS = ["#ffd700", "#ffaa00", "#424242", "#666666", "#888888", "#ffc107"];
 
 const ConfettiPiece = ({ delay, index }: { delay: number; index: number }) => {
-  const colors = ["#ffd700", "#ffaa00", "#424242", "#666666", "#888888", "#ffc107"];
-  const randomColor = colors[index % colors.length];
-  const randomX = Math.random() * 100;
-  const randomRotate = Math.random() * 360;
-  const size = 6 + Math.random() * 8;
+  const [config] = useState(() => ({
+    randomX: Math.random() * 100,
+    randomRotate: Math.random() * 360,
+    size: 6 + Math.random() * 8,
+    xOffset1: (Math.random() - 0.5) * 100,
+    xOffset2: (Math.random() - 0.5) * 50,
+    duration: 4 + Math.random() * 2,
+  }));
+  const randomColor = CONFETTI_COLORS[index % CONFETTI_COLORS.length];
   const isSquare = index % 3 === 0;
-  
+
   return (
     <motion.div
       className={`absolute ${isSquare ? '' : 'rounded-full'}`}
       style={{
         backgroundColor: randomColor,
-        width: size,
-        height: isSquare ? size * 0.6 : size,
-        left: `${randomX}%`,
+        width: config.size,
+        height: isSquare ? config.size * 0.6 : config.size,
+        left: `${config.randomX}%`,
         top: -20,
       }}
       initial={{ y: -20, opacity: 1, rotate: 0 }}
       animate={{
         y: "100vh",
         opacity: [1, 1, 0.8, 0],
-        rotate: randomRotate + 720,
-        x: [0, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 50],
+        rotate: config.randomRotate + 720,
+        x: [0, config.xOffset1, config.xOffset2],
       }}
       transition={{
-        duration: 4 + Math.random() * 2,
+        duration: config.duration,
         delay: delay,
         repeat: Infinity,
         ease: "linear",
@@ -168,7 +184,14 @@ const CrownIcon = () => (
 
 const ChampionBanner = ({ mounted }: { mounted: boolean }) => {
   const confettiCount = 40;
-  
+  const [sparkles] = useState(() =>
+    Array.from({ length: 6 }, () => ({
+      top: 20 + Math.random() * 60,
+      left: 10 + Math.random() * 80,
+      duration: 1.5 + Math.random(),
+    }))
+  );
+
   return (
     <motion.div
       initial={{ opacity: 0, y: -50 }}
@@ -344,20 +367,20 @@ const ChampionBanner = ({ mounted }: { mounted: boolean }) => {
       </div>
 
       {/* Sparkle Effects */}
-      {mounted && [...Array(6)].map((_, i) => (
+      {mounted && sparkles.map((s, i) => (
         <motion.div
           key={`sparkle-${i}`}
           className="absolute w-1 h-1 md:w-2 md:h-2 bg-yellow-400 rounded-full"
           style={{
-            top: `${20 + Math.random() * 60}%`,
-            left: `${10 + Math.random() * 80}%`,
+            top: `${s.top}%`,
+            left: `${s.left}%`,
           }}
           animate={{
             opacity: [0, 1, 0],
             scale: [0, 1.5, 0],
           }}
           transition={{
-            duration: 1.5 + Math.random(),
+            duration: s.duration,
             repeat: Infinity,
             delay: i * 0.4,
           }}
@@ -392,7 +415,7 @@ const GlowingOrb = ({ color, size, top, left, delay }: { color: string; size: nu
 
 const TournamentPage: React.FC = () => {
   const [selectedTeam, setSelectedTeam] = useState<TeamKey | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(emptySubscribe, getTrue, getFalse);
   const { startAudio, hasStarted } = useTournamentAudio();
 
   // Play Bundesliga hymn once on first user interaction
@@ -422,9 +445,6 @@ const TournamentPage: React.FC = () => {
     };
   }, [hasStarted, startAudio]);
 
-  useEffect(() => {
-    setMounted(true);    
-  }, []);
 
 
 

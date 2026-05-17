@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Button } from '../ui/Button';
 import { Input, Select } from '../ui/Input';
 import { useConfig } from '../../contexts/SiteConfigContext';
@@ -11,14 +11,13 @@ interface BanTarget {
 }
 
 interface BanDialogProps {
-  isOpen: boolean;
-  targetUser: BanTarget | null;
+  targetUser: BanTarget;
   onConfirm: (banData: { userId: string; reason: string; duration: string }) => void;
   onCancel: () => void;
   isPending: boolean;
 }
 
-const BanDialog: React.FC<BanDialogProps> = ({ isOpen, targetUser, onConfirm, onCancel, isPending }) => {
+const BanDialog: React.FC<BanDialogProps> = ({ targetUser, onConfirm, onCancel, isPending }) => {
   const { config } = useConfig();
   const banReasons = useMemo(() => [
     { label: 'Select a reason...', value: '', duration: 7 },
@@ -33,18 +32,6 @@ const BanDialog: React.FC<BanDialogProps> = ({ isOpen, targetUser, onConfirm, on
   const [customReason, setCustomReason] = useState('');
   const [duration, setDuration] = useState(7);
   const [isCustom, setIsCustom] = useState(false);
-
-  // Reset form when dialog opens with a new target
-  useEffect(() => {
-    if (isOpen) {
-      setReason('');
-      setCustomReason('');
-      setDuration(7);
-      setIsCustom(false);
-    }
-  }, [isOpen, targetUser?.intra]);
-
-  if (!isOpen || !targetUser) return null;
 
   const handleReasonChange = (value: string) => {
     const selected = banReasons.find(r => r.value === value);

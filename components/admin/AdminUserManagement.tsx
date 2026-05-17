@@ -300,13 +300,14 @@ const AdminUserManagement: React.FC = () => {
         </div>
       </div>
 
-      <BanDialog
-        isOpen={banTarget !== null}
-        targetUser={banTarget}
-        onConfirm={handleBanConfirm}
-        onCancel={() => setBanTarget(null)}
-        isPending={banUserMutation.isPending}
-      />
+      {banTarget && (
+        <BanDialog
+          targetUser={banTarget}
+          onConfirm={handleBanConfirm}
+          onCancel={() => setBanTarget(null)}
+          isPending={banUserMutation.isPending}
+        />
+      )}
 
       <ConfirmDialog
         isOpen={confirmDialog.isOpen}

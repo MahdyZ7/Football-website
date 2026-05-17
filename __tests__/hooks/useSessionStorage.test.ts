@@ -140,21 +140,24 @@ describe('useSessionStorage', () => {
       expect(result.current.storedValue).toBe(6);
     });
 
-    it('should save initial value to sessionStorage after initialization', async () => {
+    it('should not write to sessionStorage until setValue is called', async () => {
       const { result } = renderHook(() => useSessionStorage('test-key', 'initial'));
 
-      // Wait for initialization to complete
       await waitFor(() => {
         expect(result.current.isInitialized).toBe(true);
       });
 
-      // After initialization, the hook should save the initial value to sessionStorage
-      await waitFor(() => {
-        expect(sessionStorage.setItem).toHaveBeenCalledWith(
-          'test-key',
-          JSON.stringify('initial')
-        );
+      // Storage stays untouched on mount — sessionStorage is the source of truth.
+      expect(sessionStorage.setItem).not.toHaveBeenCalled();
+
+      act(() => {
+        result.current.setValue('changed');
       });
+
+      expect(sessionStorage.setItem).toHaveBeenCalledWith(
+        'test-key',
+        JSON.stringify('changed')
+      );
     });
   });
 
@@ -231,8 +234,8 @@ describe('useSessionStorage', () => {
         result.current.setValue('new-value');
       });
 
-      // Value should still update in state
-      expect(result.current.storedValue).toBe('new-value');
+      // The write failed, so storage (the source of truth) is unchanged.
+      expect(result.current.storedValue).toBe('initial');
       expect(consoleErrorSpy).toHaveBeenCalled();
 
       consoleErrorSpy.mockRestore();

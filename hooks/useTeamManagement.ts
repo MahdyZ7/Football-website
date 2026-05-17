@@ -92,6 +92,11 @@ export function useTeamManagement({
       );
     });
 
+  /* eslint-disable react-hooks/set-state-in-effect --
+     Reconciles internal team membership with the external `registeredUsers` source.
+     Each setter is guarded by `playersEqual` to break the dep loop on internal state.
+     A cleaner fix requires storing only intras + ratings and deriving team rosters
+     via useMemo — that's a larger refactor tracked separately. */
   useEffect(() => {
     const activePlayers = registeredUsers.filter(u => !('is_banned' in u && u.is_banned));
     const ratingMap = new Map<string, number>();
@@ -163,6 +168,7 @@ export function useTeamManagement({
       setWaitingListPlayers(waitingPlayers);
     }
   }, [registeredUsers, guaranteedSpot, availablePlayers, discardedPlayers, team1.players, team2.players, team3.players, waitingListPlayers]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   /**
    * Add a player to a specific team

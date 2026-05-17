@@ -1,26 +1,51 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useSyncExternalStore } from 'react';
 import { useConfig } from '../contexts/SiteConfigContext';
 import { Button } from './ui/Button';
 
+const dismissListeners = new Set<() => void>();
+
+function subscribeDismiss(callback: () => void) {
+  dismissListeners.add(callback);
+  const onStorage = (e: StorageEvent) => {
+    if (e.key?.startsWith('announcement_dismissed_v')) callback();
+  };
+  window.addEventListener('storage', onStorage);
+  return () => {
+    dismissListeners.delete(callback);
+    window.removeEventListener('storage', onStorage);
+  };
+}
+
+function readDismissed(version: number): boolean {
+  try {
+    return sessionStorage.getItem(`announcement_dismissed_v${version}`) === 'true';
+  } catch {
+    return true;
+  }
+}
+
+const dismissedByServer = () => true;
+
 export function AnnouncementPopup() {
   const { config, version } = useConfig();
-  const [dismissed, setDismissed] = useState(true);
+  const dismissed = useSyncExternalStore(
+    subscribeDismiss,
+    useCallback(() => readDismissed(version), [version]),
+    dismissedByServer
+  );
 
-  useEffect(() => {
-    if (!config.announcement.enabled || !config.announcement.message) return;
-    const dismissedKey = `announcement_dismissed_v${version}`;
-    const wasDismissed = sessionStorage.getItem(dismissedKey) === 'true';
-    setDismissed(wasDismissed);
-  }, [config.announcement.enabled, config.announcement.message, version]);
+  const handleDismiss = useCallback(() => {
+    try {
+      sessionStorage.setItem(`announcement_dismissed_v${version}`, 'true');
+      dismissListeners.forEach((cb) => cb());
+    } catch (error) {
+      console.error('Failed to persist dismissal:', error);
+    }
+  }, [version]);
 
   if (!config.announcement.enabled || !config.announcement.message || dismissed) return null;
-
-  const handleDismiss = () => {
-    sessionStorage.setItem(`announcement_dismissed_v${version}`, 'true');
-    setDismissed(true);
-  };
 
   const borderColors: Record<string, string> = {
     info: '#3b82f6',

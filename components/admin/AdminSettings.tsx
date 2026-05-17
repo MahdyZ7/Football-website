@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 import { ChevronDown, ChevronUp, Save, RotateCcw, Plus, AlertTriangle, X } from 'lucide-react';
 import { Button } from '../ui/Button';
@@ -465,13 +465,15 @@ export default function AdminSettings() {
     onConfirm: () => void;
   } | null>(null);
 
-  useEffect(() => {
-    if (data?.config) {
-      setLocalConfig(data.config);
-      setSavedConfig(data.config);
-      setVersion(data.version);
-    }
-  }, [data]);
+  // Sync external `data` into local form state during render (React's recommended
+  // pattern for "adjust state when a prop changes" — avoids a cascading effect).
+  const [seenDataVersion, setSeenDataVersion] = useState<number | null>(null);
+  if (data?.config && data.version !== seenDataVersion) {
+    setSeenDataVersion(data.version);
+    setLocalConfig(data.config);
+    setSavedConfig(data.config);
+    setVersion(data.version);
+  }
 
   // ─── Change detection ──────────────────────────────────────────
   const sectionHasChanges = useCallback(

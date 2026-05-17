@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { StaticImageData } from 'next/image';
 
@@ -26,39 +26,26 @@ type Team = {
  */
 export function useTeamsFromUrl(defaultTeams: Team[]) {
   const searchParams = useSearchParams();
-  const [teams, setTeams] = useState<Team[]>(defaultTeams);
+  const teamsData = searchParams.get('teams');
 
-  useEffect(() => {
-    const teamsData = searchParams.get('teams');
-    if (teamsData) {
-      try {
-        const parsedTeams = JSON.parse(decodeURIComponent(teamsData));
-
-        // Map the incoming teams to the roster format
-        const updatedTeams = defaultTeams.slice(0, parsedTeams.length).map((defaultTeam: Team, index: number) => {
-          const incomingTeam = parsedTeams[index];
-
-          // Create player objects with intra as position
-          const players = incomingTeam.players.map((player: { name: string; intra: string }, playerIndex: number) => ({
+  return useMemo<Team[]>(() => {
+    if (!teamsData) return defaultTeams;
+    try {
+      const parsedTeams = JSON.parse(decodeURIComponent(teamsData));
+      return defaultTeams.slice(0, parsedTeams.length).map((defaultTeam: Team, index: number) => {
+        const incomingTeam = parsedTeams[index];
+        const players = incomingTeam.players.map(
+          (player: { name: string; intra: string }, playerIndex: number) => ({
             number: playerIndex + 1,
             name: player.name.toUpperCase(),
-            position: player.intra.toUpperCase()
-          }));
-
-          return {
-            ...defaultTeam,
-            players: players
-            // Keep the original team name from defaultTeams, not from incoming data
-          };
-        });
-
-        setTeams(updatedTeams);
-      } catch (error) {
-        console.error("Failed to parse teams data:", error);
-        // Keep default teams on parse error
-      }
+            position: player.intra.toUpperCase(),
+          })
+        );
+        return { ...defaultTeam, players };
+      });
+    } catch (error) {
+      console.error('Failed to parse teams data:', error);
+      return defaultTeams;
     }
-  }, [searchParams, defaultTeams]);
-
-  return teams;
+  }, [teamsData, defaultTeams]);
 }
