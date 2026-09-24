@@ -97,5 +97,11 @@
   "bugs": {
     "url": "https://github.com/MahdyZ7/Football-website/issues"
   },
-  "homepage": "https://github.com/MahdyZ7/Football-website#readme"
+  "homepage": "https://github.com/MahdyZ7/Football-website#readme",
+  "allowScripts": {
+    "@parcel/watcher@2.6.0": true,
+    "core-js@3.50.0": true,
+    "esbuild@0.28.2": true,
+    "unrs-resolver@1.12.2": true
+  }
 }
