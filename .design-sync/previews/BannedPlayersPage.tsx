@@ -1,0 +1,10 @@
+import { BannedPlayersPage, DesignSandbox } from 'football-ds';
+
+// Full page (Navbar is position:fixed; the transformed frame keeps it inside the card).
+export const Default = () => (
+  <DesignSandbox session="player" pathname="/banned-players" search="">
+    <div className="relative w-[1200px] h-[900px] overflow-hidden" style={{ transform: 'translateZ(0)' }}>
+      <BannedPlayersPage />
+    </div>
+  </DesignSandbox>
+);

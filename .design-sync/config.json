@@ -1,0 +1,260 @@
+{
+  "projectId": "82174d6d-e5cd-43d9-b04b-55ffc2b0a5b0",
+  "shape": "package",
+  "pkg": "football-ds",
+  "globalName": "FootballDS",
+  "buildCmd": "node .design-sync/prepare.mjs",
+  "tsconfig": "tsconfig.json",
+  "cssEntry": ".cache/ds.css",
+  "extraFonts": [
+    "fonts/fonts.css"
+  ],
+  "provider": {
+    "component": "DesignSandbox"
+  },
+  "componentSrcMap": {
+    "DesignSandbox": "sandbox/DesignSandbox.tsx",
+    "Button": "../components/ui/Button.tsx",
+    "IconButton": "../components/ui/Button.tsx",
+    "Card": "../components/ui/Card.tsx",
+    "CardHeader": "../components/ui/Card.tsx",
+    "CardContent": "../components/ui/Card.tsx",
+    "CardFooter": "../components/ui/Card.tsx",
+    "Input": "../components/ui/Input.tsx",
+    "Textarea": "../components/ui/Input.tsx",
+    "Select": "../components/ui/Input.tsx",
+    "StarRating": "../components/ui/StarRating.tsx",
+    "StarRatingCompact": "../components/ui/StarRating.tsx",
+    "DropdownMenu": "../components/ui/dropdown-menu.tsx",
+    "Skeleton": "../components/Skeleton.tsx",
+    "UserListSkeleton": "../components/Skeleton.tsx",
+    "TableRowSkeleton": "../components/Skeleton.tsx",
+    "FeedbackCardSkeleton": "../components/Skeleton.tsx",
+    "TeamCardSkeleton": "../components/Skeleton.tsx",
+    "StatsCardSkeleton": "../components/Skeleton.tsx",
+    "FormSkeleton": "../components/Skeleton.tsx",
+    "PageSkeleton": "../components/Skeleton.tsx",
+    "PlayerListSkeleton": "../components/Skeleton.tsx",
+    "LoadingSpinner": "../components/LoadingSpinner.tsx",
+    "ConfirmDialog": "../components/ConfirmDialog.tsx",
+    "ErrorBoundary": "../components/ErrorBoundary.tsx",
+    "SpecialEventToast": "../components/SpecialEventToast.tsx",
+    "AnnouncementPopup": "../components/AnnouncementPopup.tsx",
+    "ThemeToggle": "../components/ThemeToggle.tsx",
+    "Navbar": "../components/pages/Navbar.tsx",
+    "Footer": "../components/pages/footer.tsx",
+    "RegistrationForm": "../components/registration/RegistrationForm.tsx",
+    "PlayerList": "../components/registration/PlayerList.tsx",
+    "PlayerCard": "../components/registration/PlayerCard.tsx",
+    "BanRulesTable": "../components/registration/BanRulesTable.tsx",
+    "BannedPlayersCard": "../components/registration/BannedPlayersCard.tsx",
+    "BanNotificationBanner": "../components/registration/BanNotificationBanner.tsx",
+    "RemovalDialog": "../components/registration/dialogs/RemovalDialog.tsx",
+    "EditNameDialog": "../components/registration/dialogs/EditNameDialog.tsx",
+    "MyPlayerHistory": "../components/player/MyPlayerHistory.tsx",
+    "TeamPlayerCard": "../components/teams/PlayerCard.tsx",
+    "TeamRoster": "../components/teams/TeamRoster.tsx",
+    "TeamExporter": "../components/TeamExporter.tsx",
+    "AdminDashboard": "../components/admin/AdminDashboard.tsx",
+    "AdminUserManagement": "../components/admin/AdminUserManagement.tsx",
+    "AdminBannedUsers": "../components/admin/AdminBannedUsers.tsx",
+    "AdminFeedback": "../components/admin/AdminFeedback.tsx",
+    "AdminLogsTab": "../components/admin/AdminLogs.tsx",
+    "AdminSettings": "../components/admin/AdminSettings.tsx",
+    "AdminTournamentVotes": "../components/admin/AdminTournamentVotes.tsx",
+    "BanDialog": "../components/admin/BanDialog.tsx",
+    "HomePage": "../components/pages/home.tsx",
+    "TeamsPage": "../components/pages/teams.tsx",
+    "RosterPage": "../components/pages/roster.tsx",
+    "TournamentPage": "../components/pages/TournamentPage.tsx",
+    "AdminLogsPage": "../components/pages/admin-logs.tsx",
+    "BannedPlayersPage": "../components/pages/banned-players.tsx",
+    "DropdownMenuTrigger": null,
+    "DropdownMenuContent": null,
+    "DropdownMenuItem": null,
+    "DropdownMenuCheckboxItem": null,
+    "DropdownMenuRadioItem": null,
+    "DropdownMenuLabel": null,
+    "DropdownMenuSeparator": null,
+    "DropdownMenuShortcut": null,
+    "DropdownMenuGroup": null,
+    "DropdownMenuPortal": null,
+    "DropdownMenuSub": null,
+    "DropdownMenuSubContent": null,
+    "DropdownMenuSubTrigger": null,
+    "DropdownMenuRadioGroup": null,
+    "Icons": null
+  },
+  "guidelinesGlob": [],
+  "docsDir": "docs",
+  "srcDir": "../components",
+  "dtsPropsFor": {
+    "PlayerCard": "  /** Registered player (shape of GET /api/users rows) */\n  user: { name: string; intra: string; verified: boolean; created_at: string; registration_status?: \"confirmed\" | \"waitlisted\"; waitlist_position?: number | null; is_banned?: boolean; promoted_at?: string | null; owned_by_current_user?: boolean };\n  /** 0-based position in the confirmed list; rendered as index + 1 (waitlisted rows show W<position>) */\n  index: number;\n  /** Shows the remove button (and the edit button within the grace period) */\n  isOwnRegistration: boolean;\n  /** Shows the admin remove button on every row */\n  isAdmin: boolean;\n  onRemove: (intra: string) => void;\n  onEditName: (intra: string, currentName: string) => void;",
+    "PlayerList": "  users: Array<{ name: string; intra: string; verified: boolean; created_at: string; registration_status?: \"confirmed\" | \"waitlisted\"; waitlist_position?: number | null; is_banned?: boolean; promoted_at?: string | null; owned_by_current_user?: boolean }>;\n  loading: boolean;\n  error: Error | null;\n  onRemove: (intra: string) => void;\n  onEditName: (intra: string, currentName: string) => void;",
+    "RemovalDialog": "  isOpen: boolean;\n  /** intra login of the player being removed */\n  targetIntra: string;\n  removeReason: \"\" | \"CANCEL\" | \"CANCEL_GAME_DAY\" | \"NOT_READY\" | \"LATE\" | \"NO_SHOW\" | \"NO_BAN\";\n  users: Array<{ name: string; intra: string; verified: boolean; created_at: string; registration_status?: \"confirmed\" | \"waitlisted\"; waitlist_position?: number | null; is_banned?: boolean; promoted_at?: string | null; owned_by_current_user?: boolean }>;\n  onReasonChange: (reason: \"\" | \"CANCEL\" | \"CANCEL_GAME_DAY\" | \"NOT_READY\" | \"LATE\" | \"NO_SHOW\" | \"NO_BAN\") => void;\n  onConfirm: (intra: string, isAdminAction: boolean) => void;\n  onCancel: () => void;",
+    "BanDialog": "  targetUser: { name: string; intra: string };\n  onConfirm: (banData: { userId: string; reason: string; duration: string }) => void;\n  onCancel: () => void;\n  isPending: boolean;",
+    "TeamExporter": "  team1: { name: string; players: Array<{ name: string; intra: string; verified: boolean; created_at: string; rating?: number }> };\n  team2: { name: string; players: Array<{ name: string; intra: string; verified: boolean; created_at: string; rating?: number }> };\n  team3: { name: string; players: Array<{ name: string; intra: string; verified: boolean; created_at: string; rating?: number }> };",
+    "TeamPlayerCard": "  /** The player to display */\n  player: { name: string; intra: string; verified: boolean; created_at: string; rating?: number };\n  /** Position in available players list (1-indexed) */\n  index: number;\n  onDiscard: (player: { name: string; intra: string; verified: boolean; created_at: string; rating?: number }) => void;\n  onAddToTeam: (player: { name: string; intra: string; verified: boolean; created_at: string; rating?: number }, teamNumber: 1 | 2 | 3) => void;\n  /** Called with the player's intra and the new 1-5 rating */\n  onRatingChange: (playerId: string, rating: number) => void;\n  /** Current team mode (2 or 3 teams) */\n  teamMode: 2 | 3;\n  /** Disables the matching \"add to team\" button */\n  teamsFull: { team1: boolean; team2: boolean; team3: boolean };",
+    "TeamRoster": "  team: { name: string; players: Array<{ name: string; intra: string; verified: boolean; created_at: string; rating?: number }> };\n  /** Team number (1, 2, or 3) */\n  teamNumber: 1 | 2 | 3;\n  /** Maximum players allowed in team */\n  maxPlayers: number;\n  /** Team colour: 1 = blue, 2 = green, 3 = orange */\n  color: \"blue\" | \"green\" | \"orange\";\n  onRemovePlayer: (player: { name: string; intra: string; verified: boolean; created_at: string; rating?: number }, teamNumber: 1 | 2 | 3) => void;\n  onUpdateName: (teamNumber: 1 | 2 | 3, name: string) => void;\n  /** Average team rating, preformatted (e.g. \"3.4\") */\n  avgRating: string;",
+    "DesignSandbox": "  children?: React.ReactNode;\n  /** Who is signed in: \"player\" (John Doe, default), \"admin\", \"guest\" (signed out), \"banned\", or a custom session object. */\n  session?: \"player\" | \"admin\" | \"guest\" | \"banned\" | { expires: string; user: { id?: string; name?: string | null; email?: string | null; image?: string | null; isAdmin?: boolean; role?: string; isBanned?: boolean; bannedUntil?: string | null; banReason?: string | null } };\n  /** Force the color theme for this subtree. Omit to follow the saved preference (light by default). */\n  theme?: \"light\" | \"dark\";\n  /** Current route for Navbar highlighting and usePathname(). Default \"/\". */\n  pathname?: string;\n  /** Query string for useSearchParams(), e.g. \"tab=logs\". */\n  search?: string;\n  /** Whether registration is open (drives RegistrationForm / HomePage). Default true. */\n  registrationOpen?: boolean;\n  /** Overrides merged into the default site config, e.g. { guaranteedSpots: 14, announcement: { enabled: true, title, message, type: \"info\" | \"warning\" | \"success\" | \"error\", dismissible } } */\n  config?: { guaranteedSpots?: number; maxPlayers?: number; location?: string; gracePeriodMinutes?: number; defaultTeamMode?: 2 | 3; registrationForceClosed?: boolean; gameDays?: Array<{ day: number; dayName: string; time: string }>; announcement?: { enabled: boolean; title: string; message: string; type: \"info\" | \"warning\" | \"success\" | \"error\"; dismissible: boolean }; [key: string]: unknown };\n  /** Serve demo data for /api/* requests. Default true. */\n  mockApi?: boolean;",
+    "Button": "  /** Visual style variant (default \"primary\" = brand teal) */\n  variant?: \"primary\" | \"secondary\" | \"danger\" | \"ghost\" | \"success\" | \"outline\";\n  /** Size variant (default \"md\") */\n  size?: \"sm\" | \"md\" | \"lg\";\n  /** Full width button */\n  fullWidth?: boolean;\n  /** Shows a spinner and disables the button */\n  loading?: boolean;\n  /** Icon rendered before the label, e.g. <Icons.Save size={16} /> */\n  icon?: React.ReactNode;\n  children: React.ReactNode;\n  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;\n  type?: \"button\" | \"submit\" | \"reset\";\n  disabled?: boolean;\n  title?: string;\n  \"aria-label\"?: string;\n  className?: string;\n  style?: React.CSSProperties;\n  id?: string;\n  /** ...plus any other native <button> attribute (forwarded) */",
+    "IconButton": "  /** Icon to display, e.g. <Icons.X size={16} /> */\n  icon: React.ReactNode;\n  /** Accessible label (aria-label) */\n  label: string;\n  /** Default \"ghost\" */\n  variant?: \"primary\" | \"secondary\" | \"danger\" | \"ghost\" | \"success\" | \"outline\";\n  /** sm = 32px, md = 40px, lg = 48px circle */\n  size?: \"sm\" | \"md\" | \"lg\";\n  loading?: boolean;\n  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;\n  type?: \"button\" | \"submit\" | \"reset\";\n  disabled?: boolean;\n  title?: string;\n  \"aria-label\"?: string;\n  className?: string;\n  style?: React.CSSProperties;\n  id?: string;\n  /** ...plus any other native <button> attribute (forwarded) */",
+    "Input": "  /** Label rendered above the field */\n  label?: string;\n  /** Error message; turns the border red and replaces helperText */\n  error?: string;\n  /** Helper text below the field */\n  helperText?: string;\n  /** Stretch to container width */\n  fullWidth?: boolean;\n  name?: string;\n  disabled?: boolean;\n  required?: boolean;\n  className?: string;\n  style?: React.CSSProperties;\n  id?: string;\n  type?: string;\n  value?: string | number;\n  defaultValue?: string | number;\n  placeholder?: string;\n  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;\n  /** ...plus any other native <input> attribute (forwarded) */",
+    "Textarea": "  /** Label rendered above the field */\n  label?: string;\n  /** Error message; turns the border red and replaces helperText */\n  error?: string;\n  /** Helper text below the field */\n  helperText?: string;\n  /** Stretch to container width */\n  fullWidth?: boolean;\n  name?: string;\n  disabled?: boolean;\n  required?: boolean;\n  className?: string;\n  style?: React.CSSProperties;\n  id?: string;\n  value?: string;\n  defaultValue?: string;\n  placeholder?: string;\n  rows?: number;\n  onChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;\n  /** ...plus any other native <textarea> attribute (forwarded) */",
+    "Select": "  /** Label rendered above the field */\n  label?: string;\n  /** Error message; turns the border red and replaces helperText */\n  error?: string;\n  /** Helper text below the field */\n  helperText?: string;\n  /** Stretch to container width */\n  fullWidth?: boolean;\n  name?: string;\n  disabled?: boolean;\n  required?: boolean;\n  className?: string;\n  style?: React.CSSProperties;\n  id?: string;\n  /** Options to render; alternatively pass <option> children */\n  options?: { value: string; label: string }[];\n  value?: string;\n  defaultValue?: string;\n  onChange?: (event: React.ChangeEvent<HTMLSelectElement>) => void;\n  children?: React.ReactNode;\n  /** ...plus any other native <select> attribute (forwarded) */",
+    "Card": "  children: React.ReactNode;\n  /** Inner padding: none | sm (16px) | md (24px, default) | lg (32px) */\n  padding?: \"none\" | \"sm\" | \"md\" | \"lg\";\n  /** Remove the shadow */\n  noShadow?: boolean;\n  /** Lift + scale on hover */\n  hoverable?: boolean;\n  className?: string;\n  style?: React.CSSProperties;\n  onClick?: (event: React.MouseEvent<HTMLDivElement>) => void;\n  /** ...plus any other native <div> attribute (forwarded). Background is var(--bg-card). */",
+    "ErrorBoundary": "  children: React.ReactNode;\n  /** Rendered instead of children after a render error. Default: full-screen \"Something went wrong\" card with Try Again / Reload buttons. */\n  fallback?: React.ReactNode;"
+  },
+  "overrides": {
+    "DropdownMenu": {
+      "cardMode": "single",
+      "viewport": "480x320"
+    },
+    "ConfirmDialog": {
+      "cardMode": "single",
+      "primaryStory": "Danger"
+    },
+    "AnnouncementPopup": {
+      "cardMode": "single",
+      "primaryStory": "Info"
+    },
+    "TeamCardSkeleton": {
+      "cardMode": "column"
+    },
+    "PageSkeleton": {
+      "cardMode": "column"
+    },
+    "StatsCardSkeleton": {
+      "cardMode": "column"
+    },
+    "ErrorBoundary": {
+      "cardMode": "column"
+    },
+    "SpecialEventToast": {
+      "cardMode": "single",
+      "primaryStory": "OnMount"
+    },
+    "RegistrationForm": {
+      "cardMode": "column"
+    },
+    "PlayerList": {
+      "cardMode": "column"
+    },
+    "EditNameDialog": {
+      "cardMode": "single",
+      "primaryStory": "Open"
+    },
+    "RemovalDialog": {
+      "cardMode": "single",
+      "viewport": "900x960",
+      "primaryStory": "AdminRemoval"
+    },
+    "TeamRoster": {
+      "cardMode": "column"
+    },
+    "TeamExporter": {
+      "cardMode": "single",
+      "primaryStory": "Default"
+    },
+    "MyPlayerHistory": {
+      "cardMode": "column"
+    },
+    "BanRulesTable": {
+      "cardMode": "column"
+    },
+    "BannedPlayersCard": {
+      "cardMode": "column"
+    },
+    "BanNotificationBanner": {
+      "cardMode": "column"
+    },
+    "Navbar": {
+      "cardMode": "single",
+      "viewport": "1280x1000",
+      "primaryStory": "Player"
+    },
+    "Footer": {
+      "cardMode": "column",
+      "viewport": "1280x1000"
+    },
+    "AdminDashboard": {
+      "cardMode": "single",
+      "viewport": "1280x1000",
+      "primaryStory": "UsersTab"
+    },
+    "AdminUserManagement": {
+      "cardMode": "column",
+      "viewport": "1280x1000"
+    },
+    "AdminBannedUsers": {
+      "cardMode": "column",
+      "viewport": "1280x1000"
+    },
+    "AdminFeedback": {
+      "cardMode": "column",
+      "viewport": "1280x1000"
+    },
+    "AdminLogsTab": {
+      "cardMode": "column",
+      "viewport": "1280x1000"
+    },
+    "AdminSettings": {
+      "cardMode": "column",
+      "viewport": "1280x1000"
+    },
+    "AdminTournamentVotes": {
+      "cardMode": "column",
+      "viewport": "1280x1000"
+    },
+    "BanDialog": {
+      "cardMode": "single",
+      "primaryStory": "Open"
+    },
+    "HomePage": {
+      "cardMode": "single",
+      "viewport": "1280x1000",
+      "primaryStory": "Default"
+    },
+    "TeamsPage": {
+      "cardMode": "single",
+      "viewport": "1280x1000",
+      "primaryStory": "Default"
+    },
+    "RosterPage": {
+      "cardMode": "column",
+      "viewport": "1280x1000"
+    },
+    "TournamentPage": {
+      "cardMode": "single",
+      "viewport": "1280x1000",
+      "primaryStory": "Default"
+    },
+    "AdminLogsPage": {
+      "cardMode": "single",
+      "viewport": "1280x1000",
+      "primaryStory": "Default"
+    },
+    "BannedPlayersPage": {
+      "cardMode": "single",
+      "viewport": "1280x1000",
+      "primaryStory": "Default"
+    },
+    "ThemeToggle": {
+      "cardMode": "single",
+      "primaryStory": "Light"
+    },
+    "Skeleton": {
+      "cardMode": "column"
+    },
+    "Textarea": {
+      "cardMode": "column"
+    },
+    "DesignSandbox": {
+      "cardMode": "column"
+    },
+    "TeamPlayerCard": {
+      "cardMode": "column"
+    }
+  },
+  "readmeHeader": ".design-sync/conventions.md"
+}

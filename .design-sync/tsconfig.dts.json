@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "noEmitOnError": false,
+    "rootDir": "..",
+    "outDir": "./.cache/types",
+    "strict": false,
+    "incremental": false,
+    "types": []
+  },
+  "files": [
+    "./entry.ts",
+    "./types-extra.d.ts"
+  ]
+}

@@ -1,0 +1,47 @@
+/* Design-sync stylesheet source - compiled by build-css.mjs into .cache/ds.css.
+   Same Tailwind v4 pipeline as the app (styles/globals.css), scanned against the
+   component sources plus the sync previews/sandbox. */
+@import "../styles/globals.css";
+@source "../components";
+@source "../hooks";
+@source "../contexts";
+@source "./sandbox";
+@source "./previews";
+/* Safelist for designs built on this system (the design agent writes its own layout glue):
+   core layout / spacing / typography utilities, with sm/md/lg variants for layout. */
+@source inline("{,sm:,md:,lg:}{flex,grid,block,hidden,inline-flex,flex-col,flex-row,flex-wrap,items-{start,center,end,stretch},justify-{start,center,end,between,around},grid-cols-{1,2,3,4,5,6},col-span-{1,2,3,4},gap-{0,1,2,3,4,5,6,8,10,12},w-{full,auto,1/2,1/3,2/3},text-{left,center,right}}");
+@source inline("{p,px,py,pt,pb,m,mx,my,mt,mb,space-y,space-x}-{0,1,2,3,4,5,6,8,10,12,16,20,24}");
+@source inline("{text-{xs,sm,base,lg,xl,2xl,3xl,4xl,5xl},font-{normal,medium,semibold,bold},rounded{,-md,-lg,-xl,-full},shadow{,-sm,-md,-lg,-xl},max-w-{sm,md,lg,xl,2xl,3xl,4xl,5xl,6xl,7xl},min-h-screen,h-full,overflow-{hidden,auto,x-auto},border,border-{b,t,l-4},mx-auto,truncate,uppercase,tracking-wide,leading-relaxed,opacity-{50,75,90}}");
+@source inline("{bg,text,border}-{ft-primary,ft-secondary,ft-accent,ft-dark,white,red-600,green-600,blue-600,orange-500,gray-100,gray-200,gray-600,gray-800} hover:bg-{ft-primary,ft-secondary,red-700,green-700,gray-700}");
+
+
+/* next/font sets these on <html> in app/layout.tsx; fonts/fonts.css ships the faces. */
+:root {
+  --font-display: "Rajdhani";
+  --font-body: "DM Sans";
+}
+body {
+  font-family: var(--font-body), "DM Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* The theme variables are keyed on [data-theme]; ThemeProvider sets it on <html>
+   after mount. Default to light until then so nothing renders unstyled. */
+:root:not([data-theme]) {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f9fc;
+  --bg-card: #fff0d4;
+  --text-primary: #525f7f;
+  --text-secondary: #424f6f;
+  --border-color: #ccd4da;
+  --button-primary: var(--ft-primary);
+  --button-hover: var(--ft-secondary);
+  --nav-bg: #f6f9fc;
+  --nav-hover: #e3ebf6;
+  --table-bg: #ffffff;
+  --input-bg: #ffffff;
+  --shadow: rgba(50, 50, 93, 0.11);
+  --paid-bg: #e8f5f9;
+  --unpaid-bg: #ffe0b080;
+  --waitlist-txt: #744525;
+  --registered-txt: #306030;
+}

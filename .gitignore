@@ -49,3 +49,10 @@ database-backups/
 # generated/temp artifacts
 /cache
 /attached_assets
+
+# design-sync (claude.ai/design) - generated/machine state
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules

@@ -1,0 +1,56 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "jsx": "react-jsx",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "baseUrl": "..",
+    "paths": {
+      "next/link": [
+        "./.design-sync/shims/next-link.tsx"
+      ],
+      "next/navigation": [
+        "./.design-sync/shims/next-navigation.ts"
+      ],
+      "next/image": [
+        "./.design-sync/shims/next-image.tsx"
+      ],
+      "next-auth/react": [
+        "./.design-sync/shims/next-auth-react.tsx"
+      ],
+      "../../assets/soccer_player_in_red_kit.png": [
+        "./.design-sync/shims/kit-red-img.ts"
+      ],
+      "../../assets/soccer_player_in_blue_kit.png": [
+        "./.design-sync/shims/kit-blue-img.ts"
+      ],
+      "../../assets/soccer_player_in_white_kit.png": [
+        "./.design-sync/shims/kit-white-img.ts"
+      ],
+      "../../lib/constants/tournament": [
+        "./.design-sync/shims/tournament-constants.ts"
+      ]
+    },
+    "ignoreDeprecations": "6.0",
+    "allowImportingTsExtensions": true
+  },
+  "include": [
+    "../components",
+    "../contexts",
+    "../hooks",
+    "../lib",
+    "../types",
+    "."
+  ]
+}
