@@ -1,22 +1,25 @@
-
 import React from 'react';
+import { Moon, Sun } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
-const ThemeToggle: React.FC = () => {
+/** Inline light/dark switch, sized to sit in the navbar. */
+const ThemeToggle: React.FC<{ className?: string }> = ({ className = '' }) => {
   const { theme, toggleTheme } = useTheme();
+  const next = theme === 'light' ? 'dark' : 'light';
 
   return (
     <button
-      className="fixed top-5 right-5 w-12 h-12 rounded-full bg-ft-primary hover:bg-ft-secondary
-                 border-none text-2xl cursor-pointer z-[1000] transition-all duration-300
-                 flex items-center justify-center hover:scale-110 shadow-md"
+      type="button"
+      className={`inline-flex items-center justify-center w-10 h-10 rounded-full border-[1.5px]
+                  border-[var(--border-color)] hover:border-[var(--text-primary)] transition-colors ${className}`}
+      style={{ color: 'var(--text-primary)' }}
       onClick={toggleTheme}
       role="switch"
       aria-checked={theme === 'dark'}
-      aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-      title={`Currently ${theme} mode. Click to switch to ${theme === 'light' ? 'dark' : 'light'} mode.`}
+      aria-label="Dark mode"
+      title={`Switch to ${next} mode`}
     >
-      {theme === 'light' ? '🌙' : '☀️'}
+      {theme === 'light' ? <Moon size={18} aria-hidden="true" /> : <Sun size={18} aria-hidden="true" />}
     </button>
   );
 };

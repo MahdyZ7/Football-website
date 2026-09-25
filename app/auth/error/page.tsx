@@ -1,7 +1,8 @@
 'use client';
 
 import { Suspense } from 'react';
-import Link from 'next/link';
+import Link from 'next/link'
+import { AlertTriangle } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
 function AuthErrorContent() {
@@ -27,13 +28,13 @@ function AuthErrorContent() {
     const errorMessage = error ? (errorMessages[error] ?? errorMessages.Default) : errorMessages.Default
 
 	  return (
-		<div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)' }}>
+		<div className="min-h-screen flex items-center justify-center paper">
       <div className="max-w-md w-full mx-4">
-        <div className="rounded-lg shadow-lg p-8" style={{ backgroundColor: 'var(--bg-card)' }}>
-          <div className="text-center">
-            <div className="text-6xl mb-4">⚠️</div>
-            <h1 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
-              Authentication Error
+        <div className="rounded-lg border p-8" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
+          <div>
+            <AlertTriangle size={32} aria-hidden="true" style={{ color: 'var(--danger)' }} />
+            <h1 className="ds-title text-[2.5rem] mt-4">
+              Sign-in didn&apos;t work
             </h1>
             <p className="mb-6" style={{ color: 'var(--text-secondary)' }}>
               {errorMessage}
@@ -41,17 +42,17 @@ function AuthErrorContent() {
             <div className="space-y-3">
               <Link
                 href="/auth/signin"
-                className="block w-full px-6 py-3 bg-ft-primary hover:bg-ft-secondary text-white
-                           font-medium rounded-lg transition-all duration-200 transform hover:scale-105"
+                className="block w-full text-center px-6 py-3 bg-ft-primary hover:bg-ft-secondary text-white
+                           font-semibold rounded-md transition-colors"
               >
-                Try Again
+                Try again
               </Link>
               <Link
                 href="/"
-                className="block w-full px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white
-                           font-medium rounded-lg transition-all duration-200"
+                className="block w-full text-center px-6 py-3 rounded-md font-semibold transition-colors
+                           border-[1.5px] border-[var(--border-color)] hover:border-[var(--text-primary)] text-[var(--text-primary)]"
               >
-                Back to Home
+                Back to home
               </Link>
             </div>
           </div>

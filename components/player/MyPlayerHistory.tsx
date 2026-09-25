@@ -27,7 +27,7 @@ export function MyPlayerHistory() {
 
   return (
     <section
-      className="max-w-4xl mx-auto mb-12 rounded-lg shadow-md overflow-hidden"
+      className="max-w-4xl mx-auto mb-12 rounded-lg shadow-[0_1px_2px_var(--shadow)] overflow-hidden"
       style={{ backgroundColor: 'var(--bg-card)' }}
     >
       <div className="px-6 py-4 border-b" style={{ borderColor: 'var(--border-color)' }}>

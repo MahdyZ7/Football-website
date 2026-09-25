@@ -10,18 +10,15 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)' }}>
+    <div className="min-h-screen flex items-center justify-center paper">
       <div className="max-w-md w-full mx-4">
-        <div className="rounded-lg shadow-lg p-8" style={{ backgroundColor: 'var(--bg-card)' }}>
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-              Welcome to Football Club
+        <div className="rounded-lg border p-8" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
+          <div className="mb-8">
+            <h1 className="ds-title text-[2.75rem]">
+              Sign in
             </h1>
-            <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>
-              Sign in or create an account to register for matches
-            </p>
-            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-              New users will automatically have an account created
+            <p className="mt-2" style={{ color: 'var(--text-secondary)' }}>
+              Sign in to take a shirt for the next game. First time here? Pick a provider and your account is created automatically.
             </p>
           </div>
 
@@ -29,9 +26,8 @@ export default function SignInPage() {
             {/* Google Sign In */}
             <button
               onClick={() => handleSignIn('google')}
-              className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-white hover:bg-gray-50
-                         text-gray-800 font-medium rounded-lg border border-gray-300
-                         transition-all duration-200 transform hover:scale-[1.02] shadow-sm"
+              className="w-full flex items-center justify-center gap-3 px-6 py-3 rounded-md font-semibold transition-colors
+                         border-[1.5px] border-[var(--border-color)] hover:border-[var(--text-primary)] text-[var(--text-primary)]"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
@@ -45,8 +41,8 @@ export default function SignInPage() {
             {/* GitHub Sign In */}
             <button
               onClick={() => handleSignIn('github')}
-              className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-gray-900 hover:bg-gray-800
-                         text-white font-medium rounded-lg transition-all duration-200 transform hover:scale-[1.02] shadow-sm"
+              className="w-full flex items-center justify-center gap-3 px-6 py-3 rounded-md font-semibold transition-opacity
+                         bg-[var(--text-primary)] text-[var(--bg-card)] hover:opacity-90"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.56v-1.95c-3.2.69-3.87-1.54-3.87-1.54-.52-1.32-1.28-1.67-1.28-1.67-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.47.11-3.05 0 0 .97-.31 3.18 1.18a11.07 11.07 0 0 1 5.79 0c2.21-1.49 3.18-1.18 3.18-1.18.63 1.58.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.39-5.27 5.68.41.36.78 1.06.78 2.13v3.16c0 .31.21.67.8.55C20.21 21.38 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5z"/>
@@ -58,7 +54,7 @@ export default function SignInPage() {
             <button
               onClick={() => handleSignIn('42-school')}
               className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-ft-primary hover:bg-ft-secondary
-                         text-white font-medium rounded-lg transition-all duration-200 transform hover:scale-[1.02] shadow-sm"
+                         text-white font-medium rounded-lg transition-all duration-200 shadow-sm"
             >
               <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M24 12.42L23.998 0L0 0.002V24h11.996v-5.868H6.13v-5.796h5.865V6.572h5.866v5.764h-5.866v5.796H24V12.42z"/>
@@ -67,25 +63,15 @@ export default function SignInPage() {
             </button> */}
           </div>
 
-          <div className="mt-6 text-center">
-            <Link
-              href="/"
-              className="text-sm hover:underline"
-              style={{ color: 'var(--text-secondary)' }}
-            >
-              ← Back to Home
-            </Link>
-          </div>
+          <p className="mt-6 text-sm" style={{ color: 'var(--text-secondary)' }}>
+            Using both Google and GitHub with the same email? They&apos;re linked to one account.
+          </p>
 
-          <div className="mt-6 p-4 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-            <p className="text-xs text-center font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
-              ℹ️ First time here?
-            </p>
-            <p className="text-xs text-center" style={{ color: 'var(--text-secondary)' }}>
-              Choose any provider above to create your account automatically.
-              If you use multiple providers with the same email, they will be linked to one account.
-            </p>
-          </div>
+          <p className="mt-4 text-sm">
+            <Link href="/" className="underline underline-offset-4" style={{ color: 'var(--text-primary)' }}>
+              Back to home
+            </Link>
+          </p>
         </div>
       </div>
     </div>

@@ -45,17 +45,17 @@ export function Card({
   };
 
   const classes = `
-    rounded-lg
-    ${!noShadow ? 'shadow-md' : ''}
+    rounded-lg border
+    ${!noShadow ? 'shadow-[0_1px_2px_var(--shadow)]' : ''}
     ${paddingClasses[padding]}
-    ${hoverable ? 'transition-all duration-200 hover:shadow-lg hover:scale-[1.02]' : ''}
+    ${hoverable ? 'transition-colors duration-150 hover:border-[var(--text-secondary)]' : ''}
     ${className}
   `.trim().replace(/\s+/g, ' ');
 
   return (
     <div
       className={classes}
-      style={{ backgroundColor: 'var(--bg-card)', ...props.style }}
+      style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)', ...props.style }}
       {...props}
     >
       {children}
@@ -80,7 +80,7 @@ export function CardHeader({ children, actions }: CardHeaderProps) {
       className="px-6 py-4 border-b flex items-center justify-between"
       style={{ borderColor: 'var(--border-color)' }}
     >
-      <h3 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
+      <h3 className="text-2xl" style={{ color: 'var(--text-primary)' }}>
         {children}
       </h3>
       {actions && <div className="flex items-center gap-2">{actions}</div>}

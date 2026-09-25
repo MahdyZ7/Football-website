@@ -130,7 +130,7 @@ const AdminTournamentVotes: React.FC = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="rounded-lg shadow-md p-4" style={{ backgroundColor: 'var(--bg-card)' }}>
+        <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] p-4" style={{ backgroundColor: 'var(--bg-card)' }}>
           <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
             Total Ballot Submissions
           </p>
@@ -138,7 +138,7 @@ const AdminTournamentVotes: React.FC = () => {
             {groupedVotes.length}
           </p>
         </div>
-        <div className="rounded-lg shadow-md p-4" style={{ backgroundColor: 'var(--bg-card)' }}>
+        <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] p-4" style={{ backgroundColor: 'var(--bg-card)' }}>
           <div className="flex items-center gap-2 mb-1">
             <Award className="w-4 h-4 text-yellow-400" />
             <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
@@ -149,7 +149,7 @@ const AdminTournamentVotes: React.FC = () => {
             {groupedVotes.filter(g => g.awardType === 'best_player').length}
           </p>
         </div>
-        <div className="rounded-lg shadow-md p-4" style={{ backgroundColor: 'var(--bg-card)' }}>
+        <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] p-4" style={{ backgroundColor: 'var(--bg-card)' }}>
           <div className="flex items-center gap-2 mb-1">
             <Shield className="w-4 h-4 text-yellow-400" />
             <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
@@ -165,7 +165,7 @@ const AdminTournamentVotes: React.FC = () => {
       {/* Vote Standings */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Best Player Standings */}
-        <div className="rounded-lg shadow-md overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
+        <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
           <div className="px-6 py-4 border-b flex items-center gap-2" style={{ borderColor: 'var(--border-color)' }}>
             <Award className="w-5 h-5 text-yellow-400" />
             <h3 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -232,7 +232,7 @@ const AdminTournamentVotes: React.FC = () => {
         </div>
 
         {/* Best Goalkeeper Standings */}
-        <div className="rounded-lg shadow-md overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
+        <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
           <div className="px-6 py-4 border-b flex items-center gap-2" style={{ borderColor: 'var(--border-color)' }}>
             <Shield className="w-5 h-5 text-yellow-400" />
             <h3 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -300,7 +300,7 @@ const AdminTournamentVotes: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div className="mb-6 rounded-lg shadow-md p-4" style={{ backgroundColor: 'var(--bg-card)' }}>
+      <div className="mb-6 rounded-lg shadow-[0_1px_2px_var(--shadow)] p-4" style={{ backgroundColor: 'var(--bg-card)' }}>
         <div className="flex items-center gap-2 mb-4">
           <Filter className="w-5 h-5" style={{ color: 'var(--text-secondary)' }} />
           <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Filters</h3>
@@ -349,7 +349,7 @@ const AdminTournamentVotes: React.FC = () => {
       </div>
 
       {/* Votes by User */}
-      <div className="rounded-lg shadow-md overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
+      <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
         <div className="px-6 py-4 border-b flex items-center gap-2" style={{ borderColor: 'var(--border-color)' }}>
           <User className="w-5 h-5" style={{ color: 'var(--text-secondary)' }} />
           <h3 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>

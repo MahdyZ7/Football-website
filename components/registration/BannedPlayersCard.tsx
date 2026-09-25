@@ -8,7 +8,7 @@ import Link from 'next/link';
 export function BannedPlayersCard() {
   return (
     <div
-      className="max-w-4xl mx-auto mb-12 rounded-lg shadow-md overflow-hidden"
+      className="max-w-4xl mx-auto mb-12 rounded-lg shadow-[0_1px_2px_var(--shadow)] overflow-hidden"
       style={{ backgroundColor: 'var(--bg-card)' }}
     >
       <div className="px-6 py-4 border-b" style={{ borderColor: 'var(--border-color)' }}>
@@ -24,7 +24,7 @@ export function BannedPlayersCard() {
           <Link
             href="/banned-players"
             className="inline-block px-6 py-3 bg-ft-primary hover:bg-ft-secondary text-white
-                       font-semibold rounded transition-all duration-200 transform hover:scale-105"
+                       font-semibold rounded transition-all duration-200"
           >
             View Banned Players List
           </Link>

@@ -8,7 +8,7 @@ const SpecialEventToast: React.FC = () => {
     const toastId = toast.custom(
       (id) => (
         <div
-          className="w-full max-w-md rounded-xl shadow-lg overflow-hidden cursor-pointer"
+          className="w-full max-w-md rounded-lg shadow-[0_1px_2px_var(--shadow)] overflow-hidden cursor-pointer"
           onClick={() => toast.dismiss(id)}
           role="alert"
           aria-live="polite"

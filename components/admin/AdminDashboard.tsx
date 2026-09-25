@@ -41,11 +41,11 @@ const AdminDashboard: React.FC = () => {
   // Loading state
   if (sessionStatus === 'loading') {
     return (
-      <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--bg-primary)' }}>
+      <div className="min-h-screen flex flex-col paper">
         <Navbar />
         <main className="flex-1 pt-24 pb-8 px-4 md:px-8">
           <div className="max-w-7xl mx-auto">
-            <div className="rounded-lg shadow-md p-8" style={{ backgroundColor: 'var(--bg-card)' }}>
+            <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] p-8" style={{ backgroundColor: 'var(--bg-card)' }}>
               <div className="space-y-4">
                 <Skeleton width="60%" height={32} />
                 <Skeleton width="100%" height={48} />
@@ -62,11 +62,11 @@ const AdminDashboard: React.FC = () => {
   // Not authorized
   if (!session?.user?.isAdmin) {
     return (
-      <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--bg-primary)' }}>
+      <div className="min-h-screen flex flex-col paper">
         <Navbar />
         <main className="flex-1 pt-24 pb-8 px-4 md:px-8">
           <div className="max-w-2xl mx-auto">
-            <div className="rounded-lg shadow-md p-8 text-center" style={{ backgroundColor: 'var(--bg-card)' }}>
+            <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] p-8 text-center" style={{ backgroundColor: 'var(--bg-card)' }}>
               <h1 className="text-3xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
                 Admin Access Required
               </h1>
@@ -87,7 +87,7 @@ const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--bg-primary)' }}>
+    <div className="min-h-screen flex flex-col paper">
       <Navbar />
 
       <main className="flex-1 pt-24 pb-8 px-4 md:px-8">

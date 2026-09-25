@@ -20,7 +20,7 @@ const BannedPlayersPage: React.FC = () => {
   const { activeBans, expiredBans, formatDate } = useBannedPlayersFilter(bannedUsers);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--bg-primary)' }}>
+    <div className="min-h-screen flex flex-col paper">
       <Navbar />
 
       {/* Main Content Area */}
@@ -38,7 +38,7 @@ const BannedPlayersPage: React.FC = () => {
           </div>
 
           {loading ? (
-            <div className="rounded-lg shadow-md overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
+            <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead style={{ backgroundColor: 'var(--bg-secondary)' }}>
@@ -57,13 +57,13 @@ const BannedPlayersPage: React.FC = () => {
               </div>
             </div>
           ) : error ? (
-            <div className="rounded-lg shadow-md p-8 text-center" style={{ backgroundColor: 'var(--bg-card)' }}>
+            <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] p-8 text-center" style={{ backgroundColor: 'var(--bg-card)' }}>
               <p className="text-red-600 font-medium">Error loading banned users</p>
             </div>
           ) : (
             <>
               {/* Active Bans */}
-              <div className="rounded-lg shadow-md overflow-hidden mb-8" style={{ backgroundColor: 'var(--bg-card)' }}>
+              <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] overflow-hidden mb-8" style={{ backgroundColor: 'var(--bg-card)' }}>
                 <div className="px-6 py-4 border-b" style={{ borderColor: 'var(--border-color)' }}>
                   <h3 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
                     Currently Banned Players ({activeBans.length})
@@ -164,7 +164,7 @@ const BannedPlayersPage: React.FC = () => {
 
               {/* Expired Bans */}
               {expiredBans.length > 0 && (
-                <div className="rounded-lg shadow-md overflow-hidden opacity-75" style={{ backgroundColor: 'var(--bg-card)' }}>
+                <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] overflow-hidden opacity-75" style={{ backgroundColor: 'var(--bg-card)' }}>
                   <div className="px-6 py-4 border-b" style={{ borderColor: 'var(--border-color)' }}>
                     <h3 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
                       Recently Expired Bans ({expiredBans.length})

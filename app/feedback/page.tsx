@@ -95,7 +95,7 @@ export default function FeedbackPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--bg-primary)' }}>
+    <div className="min-h-screen flex flex-col paper">
       <Navbar />
       <main className="flex-1 pt-24 pb-8 px-4 md:px-8">
         <div className="max-w-6xl mx-auto">
@@ -123,7 +123,7 @@ export default function FeedbackPage() {
           )}
 
           {!session && sessionStatus !== 'loading' && (
-            <div className="mb-6 rounded-lg shadow-md p-6" style={{ backgroundColor: 'var(--bg-card)' }}>
+            <div className="mb-6 rounded-lg shadow-[0_1px_2px_var(--shadow)] p-6" style={{ backgroundColor: 'var(--bg-card)' }}>
               <p style={{ color: 'var(--text-primary)' }}>
                 Please sign in to submit feedback and vote on suggestions.
               </p>
@@ -132,7 +132,7 @@ export default function FeedbackPage() {
 
           {/* Submit Form */}
           {showSubmitForm && (
-            <div className="mb-6 rounded-lg shadow-md p-6" style={{ backgroundColor: 'var(--bg-card)' }}>
+            <div className="mb-6 rounded-lg shadow-[0_1px_2px_var(--shadow)] p-6" style={{ backgroundColor: 'var(--bg-card)' }}>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
                   Submit New Feedback
@@ -223,7 +223,7 @@ export default function FeedbackPage() {
           {feedbackLoading ? (
             <FeedbackCardSkeleton count={4} />
           ) : submissions.length === 0 ? (
-            <div className="rounded-lg shadow-md p-8 text-center" style={{ backgroundColor: 'var(--bg-card)' }}>
+            <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] p-8 text-center" style={{ backgroundColor: 'var(--bg-card)' }}>
               <p className="text-lg" style={{ color: 'var(--text-secondary)' }}>
                 No {selectedType === 'all' ? '' : selectedType} feedback yet. Be the first to contribute!
               </p>
@@ -233,7 +233,7 @@ export default function FeedbackPage() {
               {submissions.map((submission) => (
                 <div
                   key={submission.id}
-                  className="rounded-lg shadow-md p-6"
+                  className="rounded-lg shadow-[0_1px_2px_var(--shadow)] p-6"
                   style={{ backgroundColor: 'var(--bg-card)' }}
                 >
                   <div className="flex gap-4">

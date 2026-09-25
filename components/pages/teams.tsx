@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/react';
 import Navbar from './Navbar';
 import Footer from './footer';
 import { Button } from '../ui/Button';
+import { Scale, Trash2, ClipboardList, Undo2 } from 'lucide-react';
 import { TeamCardSkeleton } from '../Skeleton';
 import { useUsers } from '../../hooks/useQueries';
 import { useConfig } from '../../contexts/SiteConfigContext';
@@ -180,8 +181,7 @@ const TeamsImproved: React.FC = () => {
   if (loading) {
     return (
       <div
-        className="min-h-screen flex flex-col"
-        style={{ backgroundColor: 'var(--bg-primary)' }}
+        className="min-h-screen flex flex-col paper"
       >
         <Navbar />
         <main className="flex-1 pt-24 pb-8 px-4 md:px-8">
@@ -204,8 +204,7 @@ const TeamsImproved: React.FC = () => {
   if (usersError) {
     return (
       <div
-        className="min-h-screen flex flex-col"
-        style={{ backgroundColor: 'var(--bg-primary)' }}
+        className="min-h-screen flex flex-col paper"
       >
         <Navbar />
         <main className="flex-1 pt-24 pb-8 px-4 md:px-8">
@@ -216,7 +215,7 @@ const TeamsImproved: React.FC = () => {
             >
               Team Selection
             </h1>
-            <div className="rounded-lg shadow-md p-6 text-center bg-red-500 text-white">
+            <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] p-6 text-center bg-red-500 text-white">
               <p className="font-medium">Error loading players. Please refresh the page.</p>
             </div>
           </div>
@@ -228,8 +227,7 @@ const TeamsImproved: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen flex flex-col"
-      style={{ backgroundColor: 'var(--bg-primary)' }}
+      className="min-h-screen flex flex-col paper"
     >
       <Navbar />
 
@@ -293,14 +291,14 @@ const TeamsImproved: React.FC = () => {
 
             {/* Action Buttons */}
             <div className="flex flex-wrap gap-3 justify-center">
-              <Button onClick={handleAutoBalance} variant="primary" size="lg">
-                ⚖️ Auto Balance
+              <Button onClick={handleAutoBalance} variant="primary" size="lg" icon={<Scale size={18} />}>
+                Auto balance
               </Button>
-              <Button onClick={teamManagement.clearTeams} variant="secondary" size="lg">
-                🗑️ Clear All
+              <Button onClick={teamManagement.clearTeams} variant="outline" size="lg" icon={<Trash2 size={18} />}>
+                Clear teams
               </Button>
-              <Button onClick={navigateToRoster} variant="primary" size="lg">
-                📋 View Roster
+              <Button onClick={navigateToRoster} variant="accent" size="lg" icon={<ClipboardList size={18} />}>
+                View roster
               </Button>
             </div>
           </div>
@@ -391,7 +389,7 @@ const TeamsImproved: React.FC = () => {
           {/* Waiting List */}
           {teamManagement.waitingListPlayers.length > 0 && (
             <div
-              className="rounded-lg shadow-md p-6 mb-8"
+              className="rounded-lg shadow-[0_1px_2px_var(--shadow)] p-6 mb-8"
               style={{ backgroundColor: 'var(--bg-card)' }}
             >
               <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
@@ -422,11 +420,11 @@ const TeamsImproved: React.FC = () => {
           {/* Discarded Players Section */}
           {teamManagement.discardedPlayers.length > 0 && (
             <div
-              className="rounded-lg shadow-md p-6 mb-8"
+              className="rounded-lg shadow-[0_1px_2px_var(--shadow)] p-6 mb-8"
               style={{ backgroundColor: 'var(--bg-card)' }}
             >
               <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-                🗑️ Discarded Players ({teamManagement.discardedPlayers.length})
+                Discarded players ({teamManagement.discardedPlayers.length})
               </h3>
               <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
                 Players who did not show up
@@ -448,11 +446,12 @@ const TeamsImproved: React.FC = () => {
                     </div>
                     <button
                       onClick={() => teamManagement.reAddPlayer(player)}
-                      className="ml-3 w-10 h-10 rounded-full bg-green-500 hover:bg-green-600 text-white font-bold
+                      className="ml-3 w-10 h-10 rounded-full bg-ft-primary hover:bg-ft-secondary text-white
                                  transition-colors flex items-center justify-center"
                       title="Re-add player to available list"
+                      aria-label={`Re-add ${player.name} to available players`}
                     >
-                      ↩️
+                      <Undo2 size={18} aria-hidden="true" />
                     </button>
                   </div>
                 ))}

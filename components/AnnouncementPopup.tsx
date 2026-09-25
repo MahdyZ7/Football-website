@@ -48,23 +48,23 @@ export function AnnouncementPopup() {
   if (!config.announcement.enabled || !config.announcement.message || dismissed) return null;
 
   const borderColors: Record<string, string> = {
-    info: '#3b82f6',
-    warning: '#f97316',
-    success: '#22c55e',
-    error: '#ef4444',
+    info: 'var(--text-primary)',
+    warning: 'var(--ft-accent)',
+    success: 'var(--ft-primary)',
+    error: 'var(--danger)',
   };
 
   return (
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998]"
+        className="fixed inset-0 bg-[var(--overlay)] backdrop-blur-sm z-[9998]"
         onClick={config.announcement.dismissible ? handleDismiss : undefined}
       />
       {/* Popup */}
       <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
         <div
-          className="rounded-xl shadow-2xl max-w-lg w-full border-l-4"
+          className="rounded-lg shadow-[0_24px_48px_var(--shadow)] max-w-lg w-full border-l-4"
           style={{
             backgroundColor: 'var(--bg-card)',
             borderLeftColor: borderColors[config.announcement.type] || borderColors.info,
@@ -72,7 +72,7 @@ export function AnnouncementPopup() {
           onClick={(e) => e.stopPropagation()}
         >
           <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
+            <h2 className="ds-title text-[2rem]">
               {config.announcement.title || 'Announcement'}
             </h2>
             <p className="mb-6 whitespace-pre-line" style={{ color: 'var(--text-secondary)' }}>

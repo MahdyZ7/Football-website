@@ -27,7 +27,7 @@ export function EditNameDialog({
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 z-[1000] flex items-center justify-center p-4"
+      className="fixed inset-0 bg-[var(--overlay)] z-[1000] flex items-center justify-center p-4"
       onClick={onCancel}
       role="dialog"
       aria-labelledby="edit-name-dialog-title"
@@ -35,23 +35,22 @@ export function EditNameDialog({
       aria-modal="true"
     >
       <div
-        className="rounded-lg shadow-2xl p-4 md:p-8 max-w-md w-full"
-        style={{ backgroundColor: 'var(--bg-card)' }}
+        className="rounded-lg border shadow-[0_24px_48px_var(--shadow)] p-6 md:p-8 max-w-md w-full"
+        style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}
         onClick={(e) => e.stopPropagation()}
       >
         <h2
           id="edit-name-dialog-title"
-          className="text-2xl font-bold mb-4"
-          style={{ color: 'var(--text-primary)' }}
+          className="ds-title text-[2rem]"
         >
-          Edit Name
+          Edit your name
         </h2>
         <p
           id="edit-name-dialog-description"
           className="mb-6 text-sm"
           style={{ color: 'var(--text-secondary)' }}
         >
-          You can edit your name within 15 minutes of registration. This option is only available for unverified accounts.
+          You can change your name for 15 minutes after signing up, as long as your intra hasn&apos;t been verified yet.
         </p>
 
         <Input
@@ -77,7 +76,7 @@ export function EditNameDialog({
         <div className="flex gap-3 mt-6">
           <Button
             onClick={onCancel}
-            variant="secondary"
+            variant="outline"
             size="lg"
             fullWidth
             disabled={isPending}
@@ -92,7 +91,7 @@ export function EditNameDialog({
             disabled={!nameValue.trim()}
             loading={isPending}
           >
-            Update Name
+            Save name
           </Button>
         </div>
       </div>

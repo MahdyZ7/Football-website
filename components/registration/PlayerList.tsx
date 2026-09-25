@@ -39,13 +39,13 @@ export function PlayerList({
       </h2>
 
       {/* Progress Indicator */}
-      <div className="max-w-2xl mx-auto mb-6 rounded-xl shadow-lg overflow-hidden transition-all duration-300
+      <div className="max-w-2xl mx-auto mb-6 rounded-lg shadow-[0_1px_2px_var(--shadow)] overflow-hidden transition-all duration-300
         bg-gradient-to-b from-stone-700 to-zinc-700">
         <div className="bg-white/20 backdrop-blur-sm text-center rounded-lg px-4 py-2 text-white">
           <div className="text-2xl font-bold">{visibleUsers.length}/{guaranteedSpots}</div>
           <div className="text-xs">{confirmedUsers.length} confirmed, {visibleUsers.length - confirmedUsers.length} waitlisted</div>
         </div>
-        <div className="bg-black/50 h-2 mb-6">
+        <div className="bg-[var(--overlay)] h-2 mb-6">
           <div
             className="bg-white/50 h-full transition-all duration-500 ease-out"
             style={{ width: `${Math.min((confirmedUsers.length / guaranteedSpots) * 100, 100)}%` }}

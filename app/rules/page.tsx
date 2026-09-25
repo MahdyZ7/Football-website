@@ -42,7 +42,7 @@ function RuleSection({
   const lines = content.split('\n').filter((l) => l.trim());
 
   return (
-    <div className="rounded-lg shadow-md p-6 mb-6" style={{ backgroundColor: 'var(--bg-card)' }}>
+    <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] p-6 mb-6" style={{ backgroundColor: 'var(--bg-card)' }}>
       <div className="flex items-center gap-3 mb-4">
         {icon}
         <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
@@ -66,7 +66,7 @@ export default function RulesPage() {
   const { banDurations, lateThresholdMinutes } = config;
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--bg-primary)' }}>
+    <div className="min-h-screen flex flex-col paper">
       <Navbar />
       <main className="flex-1 pt-24 pb-8 px-4 md:px-8">
         <div className="max-w-4xl mx-auto">
@@ -99,7 +99,7 @@ export default function RulesPage() {
           />
 
           {/* Late TIG Section - includes dynamic ban rules */}
-          <div className="rounded-lg shadow-md p-6 mb-6" style={{ backgroundColor: 'var(--bg-card)' }}>
+          <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] p-6 mb-6" style={{ backgroundColor: 'var(--bg-card)' }}>
             <div className="flex items-center gap-3 mb-4">
               <UserX size={28} className="text-ft-primary" />
               <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>

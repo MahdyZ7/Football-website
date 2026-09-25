@@ -12,7 +12,7 @@ const AdminLogsTab: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="rounded-lg shadow-md overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
+      <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead style={{ backgroundColor: 'var(--bg-secondary)' }}>
@@ -35,7 +35,7 @@ const AdminLogsTab: React.FC = () => {
 
   if (error) {
     return (
-      <div className="rounded-lg shadow-md p-6 text-center bg-red-500 text-white">
+      <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] p-6 text-center bg-red-500 text-white">
         <p className="font-medium">Failed to load admin logs</p>
       </div>
     );
@@ -43,7 +43,7 @@ const AdminLogsTab: React.FC = () => {
 
   return (
     <div>
-      <div className="rounded-lg shadow-md overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
+      <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
         <div className="px-6 py-4 border-b" style={{ borderColor: 'var(--border-color)' }}>
           <h3 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
             Recent Admin Actions ({logs.length})

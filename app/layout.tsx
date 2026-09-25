@@ -8,19 +8,17 @@ import { SiteConfigProvider } from "../contexts/SiteConfigContext";
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Toaster } from "sonner"
-import { Rajdhani, DM_Sans } from "next/font/google"
+import { Big_Shoulders, Instrument_Sans } from "next/font/google"
 
-const rajdhani = Rajdhani({
+const bigShoulders = Big_Shoulders({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-display",
+  variable: "--font-bigshoulders",
   display: "swap",
 });
 
-const dmSans = DM_Sans({
+const instrumentSans = Instrument_Sans({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-body",
+  variable: "--font-instrument",
   display: "swap",
 });
 
@@ -30,8 +28,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${rajdhani.variable} ${dmSans.variable}`}>
-      <body className={dmSans.className}>
+    <html lang="en" className={`${bigShoulders.variable} ${instrumentSans.variable}`}>
+      <body>
         <ErrorBoundary>
           <SessionProvider>
             <QueryProvider>

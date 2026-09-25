@@ -17,7 +17,7 @@ export default function Footer() {
     <footer
       className="border-t mt-auto"
       style={{
-        backgroundColor: 'var(--bg-secondary)',
+        backgroundColor: 'var(--bg-card)',
         borderColor: 'var(--border-color)',
       }}
     >
@@ -26,7 +26,7 @@ export default function Footer() {
           {/* Branding */}
           <div>
             <h3
-              className="font-display text-lg font-bold mb-3"
+              className="font-display text-[2rem] leading-none font-extrabold mb-3"
               style={{ color: 'var(--text-primary)' }}
             >
               42 Football Club
@@ -35,7 +35,7 @@ export default function Footer() {
               Weekly football matches organized by the 42 community. Register, play, compete.
             </p>
             <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
-              <MapPin size={14} className="text-ft-primary flex-shrink-0" />
+              <MapPin size={14} className="flex-shrink-0" aria-hidden="true" />
               <span>42 Abu Dhabi</span>
             </div>
           </div>
@@ -43,7 +43,7 @@ export default function Footer() {
           {/* Quick Links */}
           <div>
             <h4
-              className="font-display text-sm font-bold uppercase tracking-wider mb-3"
+              className="font-display text-xl font-extrabold mb-3"
               style={{ color: 'var(--text-primary)' }}
             >
               Quick Links
@@ -58,7 +58,7 @@ export default function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm transition-colors duration-200 hover:text-ft-primary"
+                    className="text-sm transition-colors duration-150 hover:underline underline-offset-4 hover:text-[var(--text-primary)]"
                     style={{ color: 'var(--text-secondary)' }}
                   >
                     {link.label}
@@ -71,7 +71,7 @@ export default function Footer() {
           {/* Resources */}
           <div>
             <h4
-              className="font-display text-sm font-bold uppercase tracking-wider mb-3"
+              className="font-display text-xl font-extrabold mb-3"
               style={{ color: 'var(--text-primary)' }}
             >
               Resources
@@ -85,7 +85,7 @@ export default function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm transition-colors duration-200 hover:text-ft-primary"
+                    className="text-sm transition-colors duration-150 hover:underline underline-offset-4 hover:text-[var(--text-primary)]"
                     style={{ color: 'var(--text-secondary)' }}
                   >
                     {link.label}
@@ -98,7 +98,7 @@ export default function Footer() {
           {/* Connect */}
           <div>
             <h4
-              className="font-display text-sm font-bold uppercase tracking-wider mb-3"
+              className="font-display text-xl font-extrabold mb-3"
               style={{ color: 'var(--text-primary)' }}
             >
               Connect
@@ -109,7 +109,7 @@ export default function Footer() {
                   href="https://github.com/MahdyZ7/Football-website"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm transition-colors duration-200 hover:text-ft-primary"
+                  className="flex items-center gap-2 text-sm transition-colors duration-150 hover:underline underline-offset-4 hover:text-[var(--text-primary)]"
                   style={{ color: 'var(--text-secondary)' }}
                 >
                   <GithubIcon size={14} className="flex-shrink-0" />
@@ -119,7 +119,7 @@ export default function Footer() {
               <li>
                 <a
                   href="mailto:ayassin@student.42abudhabi.ae"
-                  className="flex items-center gap-2 text-sm transition-colors duration-200 hover:text-ft-primary"
+                  className="flex items-center gap-2 text-sm transition-colors duration-150 hover:underline underline-offset-4 hover:text-[var(--text-primary)]"
                   style={{ color: 'var(--text-secondary)' }}
                 >
                   <Mail size={14} className="flex-shrink-0" />

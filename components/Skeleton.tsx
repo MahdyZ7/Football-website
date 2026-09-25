@@ -15,7 +15,7 @@ export function Skeleton({
   height,
   count = 1
 }: SkeletonProps) {
-  const baseClasses = 'animate-pulse bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700';
+  const baseClasses = 'animate-pulse bg-[var(--bg-secondary)]';
 
   const variantClasses = {
     text: 'rounded h-4',
@@ -109,7 +109,7 @@ export function FeedbackCardSkeleton({ count = 3 }: { count?: number }) {
       {Array.from({ length: count }).map((_, index) => (
         <div
           key={index}
-          className="rounded-lg shadow-md p-6"
+          className="rounded-lg shadow-[0_1px_2px_var(--shadow)] p-6"
           style={{ backgroundColor: 'var(--bg-card)' }}
         >
           <div className="flex items-start gap-3 mb-4">
@@ -136,7 +136,7 @@ export function TeamCardSkeleton({ count = 3 }: { count?: number }) {
       {Array.from({ length: count }).map((_, index) => (
         <div
           key={index}
-          className="rounded-lg shadow-md p-6"
+          className="rounded-lg shadow-[0_1px_2px_var(--shadow)] p-6"
           style={{ backgroundColor: 'var(--bg-card)' }}
         >
           <Skeleton width="50%" height={28} className="mb-4" />
@@ -161,7 +161,7 @@ export function StatsCardSkeleton({ count = 3 }: { count?: number }) {
       {Array.from({ length: count }).map((_, index) => (
         <div
           key={index}
-          className="rounded-lg shadow-md p-6"
+          className="rounded-lg shadow-[0_1px_2px_var(--shadow)] p-6"
           style={{ backgroundColor: 'var(--bg-card)' }}
         >
           <Skeleton width="60%" height={20} className="mb-3" />
@@ -217,7 +217,7 @@ export function PlayerListSkeleton({ count = 21 }: { count?: number }) {
           className={`p-4 rounded-lg border-l-4`}
           style={{
             backgroundColor: index < 21 ? 'var(--paid-bg)' : 'var(--unpaid-bg)',
-            borderLeftColor: index < 21 ? '#16a34a' : 'var(--ft-accent)',
+            borderLeftColor: index < 21 ? 'var(--ft-primary)' : 'var(--ft-accent)',
           }}
         >
           <div className="flex items-center justify-between">

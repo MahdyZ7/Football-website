@@ -80,7 +80,7 @@ export function RegistrationForm({
       {/* Registration Form */}
       <form
         onSubmit={onSubmit}
-        className="max-w-md mx-auto p-8 rounded-lg shadow-md mb-12"
+        className="max-w-md mx-auto p-8 rounded-lg shadow-[0_1px_2px_var(--shadow)] mb-12"
         style={{ backgroundColor: 'var(--bg-secondary)' }}
       >
         <Input

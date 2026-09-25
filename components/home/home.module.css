@@ -1,0 +1,281 @@
+/* Home page ("kit rack") identity. Scoped to .scope so the rest of the site keeps
+   its current theme. The legacy --bg-* / --text-* variables are remapped inside the
+   scope so shared components (history panel, dialogs, ban banner) follow along. */
+
+.scope {
+  --hm-field: #eef3ef;
+  --hm-surface: #ffffff;
+  --hm-ink: #123d2b;
+  --hm-ink-soft: #4a6657;
+  --hm-line: #c9d6cd;
+  --hm-taken: #2e7d4f;
+  --hm-taken-ink: #ffffff;
+  --hm-bib: #ef5f0f;
+  --hm-bib-ink: #10281c;
+  --hm-empty: #9fb3a6;
+
+  --bg-primary: var(--hm-field);
+  --bg-secondary: #e2eae4;
+  --bg-card: var(--hm-surface);
+  --text-primary: var(--hm-ink);
+  --text-secondary: var(--hm-ink-soft);
+  --border-color: var(--hm-line);
+  --input-bg: var(--hm-surface);
+
+  background-color: var(--hm-field);
+  background-image: var(--paper-texture);
+  background-size: 1024px 1024px;
+  background-blend-mode: var(--paper-blend);
+  color: var(--hm-ink);
+  font-family: var(--font-hm-body), system-ui, sans-serif;
+}
+
+:global([data-theme="dark"]) .scope {
+  --hm-field: #0c2419;
+  --hm-surface: #133426;
+  --hm-ink: #e9f1eb;
+  --hm-ink-soft: #a9c1b2;
+  --hm-line: #2a4a3a;
+  --hm-taken: #3fa66a;
+  --hm-taken-ink: #06170f;
+  --hm-bib: #ff7a2e;
+  --hm-bib-ink: #10281c;
+  --hm-empty: #3d5f4d;
+
+  --bg-secondary: #0f2c1f;
+}
+
+.display {
+  font-family: var(--font-hm-display), "Arial Narrow", sans-serif;
+  font-optical-sizing: auto;
+}
+
+/* Section titles. Set explicitly: globals.css styles bare h1/h2 (centered, Rajdhani,
+   2rem bottom margin) outside any layer, which beats Tailwind utilities. */
+.title {
+  font-family: var(--font-hm-display), "Arial Narrow", sans-serif;
+  font-weight: 800;
+  font-size: 2.5rem;
+  line-height: 1;
+  text-align: left;
+  margin: 0 0 0.5rem;
+  color: var(--hm-ink);
+}
+
+.panelTitle {
+  font-family: var(--font-hm-display), "Arial Narrow", sans-serif;
+  font-weight: 800;
+  font-size: 1.75rem;
+  line-height: 1.05;
+  text-align: left;
+  margin: 0;
+  color: var(--hm-ink);
+}
+
+/* Headline: the answer to "can I play?", set large and tight. */
+.headline {
+  font-family: var(--font-hm-display), "Arial Narrow", sans-serif;
+  font-weight: 800;
+  font-size: clamp(2.75rem, 7vw, 4.75rem);
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+  text-align: left;
+  margin: 0;
+  color: var(--hm-ink);
+}
+
+/* ---- Kit rack --------------------------------------------------------- */
+
+.rack {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.5rem 0.375rem;
+}
+
+.shirt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.shirtSvg {
+  width: 100%;
+  max-width: 3.75rem;
+  height: auto;
+  overflow: visible;
+}
+
+.shirtName {
+  font-size: 0.75rem;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--hm-ink-soft);
+}
+
+.shirtNameOwn {
+  color: var(--hm-ink);
+  font-weight: 600;
+}
+
+/* One orchestrated load moment: taken shirts are hung in registration order. */
+@media (prefers-reduced-motion: no-preference) {
+  .hang {
+    animation: hang 420ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+    animation-delay: calc(var(--i) * 35ms);
+    transform-origin: 50% 0;
+  }
+}
+
+@keyframes hang {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) rotate(-6deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---- Controls --------------------------------------------------------- */
+
+.field {
+  width: 100%;
+  padding: 0.75rem 0.875rem;
+  border-radius: 0.375rem;
+  border: 1.5px solid var(--hm-line);
+  background: var(--hm-surface);
+  color: var(--hm-ink);
+  font-size: 1rem;
+  transition: border-color 120ms ease;
+}
+
+.field:focus-visible {
+  outline: 3px solid var(--hm-bib);
+  outline-offset: 1px;
+  border-color: var(--hm-ink);
+}
+
+.field[aria-invalid="true"] {
+  border-color: #c2410c;
+}
+
+.field:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  border-radius: 0.375rem;
+  background: var(--hm-bib);
+  color: var(--hm-bib-ink);
+  font-family: var(--font-hm-display), "Arial Narrow", sans-serif;
+  font-weight: 800;
+  font-size: 1.5rem;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  border: 0;
+  cursor: pointer;
+  text-decoration: none;
+  transition: filter 120ms ease, transform 120ms ease;
+}
+
+.cta:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+.cta:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.cta:focus-visible,
+.iconAction:focus-visible,
+.textLink:focus-visible {
+  outline: 3px solid var(--hm-ink);
+  outline-offset: 2px;
+}
+
+.cta:disabled {
+  background: var(--hm-line);
+  color: var(--hm-ink-soft);
+  cursor: not-allowed;
+}
+
+.iconAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: none;
+  border-radius: 999px;
+  border: 1.5px solid var(--hm-line);
+  background: transparent;
+  color: var(--hm-ink);
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.iconAction:hover {
+  border-color: var(--hm-ink);
+}
+
+.iconActionDanger:hover {
+  border-color: #c2410c;
+  color: #c2410c;
+}
+
+.textLink {
+  color: var(--hm-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  border-radius: 2px;
+}
+
+.textLink:hover {
+  text-decoration-color: var(--hm-bib);
+}
+
+/* ---- Squad sheet ------------------------------------------------------ */
+
+.row {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0;
+  border-bottom: 1px solid var(--hm-line);
+  break-inside: avoid;
+}
+
+.rowNumber {
+  font-family: var(--font-hm-display), "Arial Narrow", sans-serif;
+  font-weight: 800;
+  font-size: 1.75rem;
+  line-height: 1;
+  text-align: right;
+  color: var(--hm-taken);
+  font-variant-numeric: tabular-nums;
+}
+
+.rowNumberBench {
+  color: var(--hm-bib);
+}
+
+.rowOwn {
+  box-shadow: inset 3px 0 0 var(--hm-bib);
+  padding-left: 0.5rem;
+  margin-left: -0.5rem;
+}

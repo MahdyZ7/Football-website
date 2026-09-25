@@ -21,15 +21,16 @@ export function BanNotificationBanner() {
     : 'Unknown';
 
   return (
-    <div className="max-w-md mx-auto mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border-2 border-red-500 dark:border-red-700">
-      <h3 className="text-lg font-bold text-red-700 dark:text-red-400 mb-2">
-        Account Banned
+    <div
+      role="status"
+      className="mb-6 px-5 py-4 rounded-md border-[1.5px] border-l-[6px]"
+      style={{ borderColor: 'var(--danger)', backgroundColor: 'var(--bg-card)' }}
+    >
+      <h3 className="text-[1.5rem] leading-tight m-0" style={{ color: 'var(--danger)' }}>
+        You&apos;re banned until {bannedUntil}
       </h3>
-      <p className="text-sm text-red-600 dark:text-red-300 mb-1">
-        <span className="font-medium">Reason:</span> {banReason}
-      </p>
-      <p className="text-sm text-red-600 dark:text-red-300">
-        <span className="font-medium">Ban expires:</span> {bannedUntil}
+      <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
+        Reason: {banReason}. You can sign up again once the ban ends.
       </p>
     </div>
   );

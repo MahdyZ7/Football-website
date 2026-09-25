@@ -77,14 +77,14 @@ const BanDialog: React.FC<BanDialogProps> = ({ targetUser, onConfirm, onCancel, 
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998] animate-fadeIn"
+        className="fixed inset-0 bg-[var(--overlay)] backdrop-blur-sm z-[9998] animate-fadeIn"
         onClick={onCancel}
       />
 
       {/* Dialog */}
       <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
         <div
-          className="rounded-xl shadow-2xl max-w-lg w-full animate-scaleIn"
+          className="rounded-lg shadow-[0_24px_48px_var(--shadow)] max-w-lg w-full animate-scaleIn"
           style={{ backgroundColor: 'var(--bg-card)' }}
           onClick={(e) => e.stopPropagation()}
         >

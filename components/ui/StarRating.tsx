@@ -99,8 +99,8 @@ export function StarRating({
             className={`
               ${sizeClasses[size]}
               ${isInteractive ? 'cursor-pointer' : 'cursor-default'}
-              ${isInteractive ? 'transition-all duration-200 hover:scale-110' : ''}
-              ${isActive ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'}
+              ${isInteractive ? 'transition-transform duration-150' : ''}
+              ${isActive ? 'text-ft-accent' : 'text-[var(--border-color)]'}
             `}
             role={isInteractive ? 'button' : undefined}
             tabIndex={isInteractive ? 0 : undefined}
@@ -142,7 +142,7 @@ export function StarRatingCompact({
         <span
           key={i}
           className={`text-sm ${
-            i < rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'
+            i < rating ? 'text-ft-accent' : 'text-[var(--border-color)]'
           }`}
         >
           ★

@@ -36,7 +36,7 @@ class ErrorBoundary extends Component<Props, State> {
           style={{ backgroundColor: 'var(--bg-primary, #ffffff)' }}
         >
           <div
-            className="rounded-lg shadow-md max-w-md w-full overflow-hidden"
+            className="rounded-lg shadow-[0_1px_2px_var(--shadow)] max-w-md w-full overflow-hidden"
             style={{ backgroundColor: 'var(--bg-card, #f9fafb)' }}
           >
             <div
@@ -75,18 +75,18 @@ class ErrorBoundary extends Component<Props, State> {
                 <button
                   onClick={() => this.setState({ hasError: false })}
                   className="inline-flex items-center gap-2 px-4 py-2 bg-ft-primary hover:bg-ft-secondary text-white
-                             font-medium rounded transition-all duration-200 transform hover:scale-105"
+                             font-semibold rounded-md transition-colors"
                 >
                   <RotateCcw size={16} />
-                  Try Again
+                  Try again
                 </button>
                 <button
                   onClick={() => window.location.reload()}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white
-                             font-medium rounded transition-all duration-200"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-md font-semibold transition-colors
+                             border-[1.5px] border-[var(--border-color)] hover:border-[var(--text-primary)] text-[var(--text-primary)]"
                 >
                   <RefreshCw size={16} />
-                  Refresh Page
+                  Reload page
                 </button>
               </div>
             </div>

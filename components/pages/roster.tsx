@@ -296,7 +296,7 @@ function TeamColumn({ team, index }: { team: Team; index: number }) {
         >
           {team.founded}
         </motion.div>
-        <h2 className="text-3xl md:text-4xl xl:text-5xl font-black uppercase tracking-tighter leading-none mb-3 drop-shadow-lg">
+        <h2 className="text-inherit text-3xl md:text-4xl xl:text-5xl font-black uppercase tracking-tighter leading-none mb-3 drop-shadow-lg">
           {team.name}
         </h2>
         <div 

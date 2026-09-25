@@ -49,7 +49,7 @@ export function RemovalDialog({
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 z-[1000] flex items-center justify-center p-4"
+      className="fixed inset-0 bg-[var(--overlay)] z-[1000] flex items-center justify-center p-4"
       onClick={onCancel}
       role="dialog"
       aria-labelledby="removal-dialog-title"
@@ -57,16 +57,15 @@ export function RemovalDialog({
       aria-modal="true"
     >
       <div
-        className="rounded-lg shadow-2xl p-4 md:p-8 max-w-md w-full"
-        style={{ backgroundColor: 'var(--bg-card)' }}
+        className="rounded-lg border shadow-[0_24px_48px_var(--shadow)] p-6 md:p-8 max-w-md w-full max-h-[calc(100vh-2rem)] overflow-y-auto"
+        style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}
         onClick={(e) => e.stopPropagation()}
       >
         <h2
           id="removal-dialog-title"
-          className="text-2xl font-bold mb-4"
-          style={{ color: 'var(--text-primary)' }}
+          className="ds-title text-[2rem]"
         >
-          {isAdminAction ? "Remove Player (Admin)" : "Remove Registration"}
+          {isAdminAction ? "Remove player" : "Give up your shirt"}
         </h2>
         <p
           id="removal-dialog-description"
@@ -85,7 +84,7 @@ export function RemovalDialog({
           {!isAdminAction && withinGracePeriod && (
             <label
               htmlFor="reason-grace"
-              className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 border-green-500"
+              className="flex items-start gap-3 p-3 rounded-md border-[1.5px] cursor-pointer hover:bg-[var(--nav-hover)] border-[var(--ft-primary)]"
               style={{ borderColor: 'var(--border-color)', borderWidth: '2px' }}
             >
               <input
@@ -99,7 +98,7 @@ export function RemovalDialog({
                 aria-label="Remove without ban - Grace period within 15 minutes of registration"
               />
               <div className="flex-1">
-                <div className="font-medium text-green-600">
+                <div className="font-medium" style={{ color: 'var(--registered-txt)' }}>
                   Remove without ban (Grace Period)
                 </div>
                 <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
@@ -113,7 +112,7 @@ export function RemovalDialog({
           {!isAdminAction && (
             <label
               htmlFor="reason-cancel"
-              className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+              className="flex items-start gap-3 p-3 rounded-md border-[1.5px] cursor-pointer hover:bg-[var(--nav-hover)]"
               style={{ borderColor: 'var(--border-color)' }}
             >
               <input
@@ -142,7 +141,7 @@ export function RemovalDialog({
             <>
               <label
                 htmlFor="reason-no-ban"
-                className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                className="flex items-start gap-3 p-3 rounded-md border-[1.5px] cursor-pointer hover:bg-[var(--nav-hover)]"
                 style={{ borderColor: 'var(--border-color)' }}
               >
                 <input
@@ -167,7 +166,7 @@ export function RemovalDialog({
 
               <label
                 htmlFor="reason-admin-cancel"
-                className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                className="flex items-start gap-3 p-3 rounded-md border-[1.5px] cursor-pointer hover:bg-[var(--nav-hover)]"
                 style={{ borderColor: 'var(--border-color)' }}
               >
                 <input
@@ -192,7 +191,7 @@ export function RemovalDialog({
 
               <label
                 htmlFor="reason-cancel-game-day"
-                className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                className="flex items-start gap-3 p-3 rounded-md border-[1.5px] cursor-pointer hover:bg-[var(--nav-hover)]"
                 style={{ borderColor: 'var(--border-color)' }}
               >
                 <input
@@ -217,7 +216,7 @@ export function RemovalDialog({
 
               <label
                 htmlFor="reason-not-ready"
-                className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                className="flex items-start gap-3 p-3 rounded-md border-[1.5px] cursor-pointer hover:bg-[var(--nav-hover)]"
                 style={{ borderColor: 'var(--border-color)' }}
               >
                 <input
@@ -242,7 +241,7 @@ export function RemovalDialog({
 
               <label
                 htmlFor="reason-late"
-                className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                className="flex items-start gap-3 p-3 rounded-md border-[1.5px] cursor-pointer hover:bg-[var(--nav-hover)]"
                 style={{ borderColor: 'var(--border-color)' }}
               >
                 <input
@@ -267,7 +266,7 @@ export function RemovalDialog({
 
               <label
                 htmlFor="reason-no-show"
-                className="flex items-start gap-3 p-3 rounded border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                className="flex items-start gap-3 p-3 rounded-md border-[1.5px] cursor-pointer hover:bg-[var(--nav-hover)]"
                 style={{ borderColor: 'var(--border-color)' }}
               >
                 <input
@@ -296,11 +295,11 @@ export function RemovalDialog({
         <div className="flex gap-3">
           <Button
             onClick={onCancel}
-            variant="secondary"
+            variant="outline"
             size="lg"
             fullWidth
           >
-            Cancel
+            Keep it
           </Button>
           <Button
             onClick={() => onConfirm(targetIntra, isAdminAction)}
@@ -309,7 +308,7 @@ export function RemovalDialog({
             fullWidth
             aria-label={isAdminAction ? "Confirm removal of player with selected ban" : "Confirm removal of your registration with selected ban"}
           >
-            {isAdminAction ? "Remove Player" : "Confirm"}
+            {isAdminAction ? "Remove player" : "Remove me"}
           </Button>
         </div>
       </div>

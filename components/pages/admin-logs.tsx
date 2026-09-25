@@ -22,7 +22,7 @@ const AdminLogs: React.FC = () => {
   const { formatTimestamp, getActionColorClass, formatActionName } = useAdminLogsFormatter();
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--bg-primary)' }}>
+    <div className="min-h-screen flex flex-col paper">
       <Navbar />
 
       {/* Main Content Area */}
@@ -43,7 +43,7 @@ const AdminLogs: React.FC = () => {
           </div>
 
           {loading ? (
-            <div className="rounded-lg shadow-md overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
+            <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead style={{ backgroundColor: 'var(--bg-secondary)' }}>
@@ -62,13 +62,13 @@ const AdminLogs: React.FC = () => {
               </div>
             </div>
           ) : error ? (
-            <div className="rounded-lg shadow-md p-6 text-center bg-red-500 text-white mb-8">
+            <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] p-6 text-center bg-red-500 text-white mb-8">
               <p className="font-medium">Failed to load admin logs</p>
             </div>
           ) : (
             <>
               {/* Admin Logs Card */}
-              <div className="rounded-lg shadow-md overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
+              <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
                 <div className="px-6 py-4 border-b" style={{ borderColor: 'var(--border-color)' }}>
                   <h3 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
                     Recent Admin Actions ({logs.length})

@@ -92,7 +92,7 @@ const AdminUserManagement: React.FC = () => {
       </h2>
 
       {usersLoading && (
-        <div className="rounded-lg shadow-md overflow-hidden mb-8" style={{ backgroundColor: 'var(--bg-card)' }}>
+        <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] overflow-hidden mb-8" style={{ backgroundColor: 'var(--bg-card)' }}>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead style={{ backgroundColor: 'var(--bg-secondary)' }}>
@@ -118,7 +118,7 @@ const AdminUserManagement: React.FC = () => {
         </div>
       )}
 
-      <div className="rounded-lg shadow-md overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
+      <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
         {/* Desktop Table */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full">

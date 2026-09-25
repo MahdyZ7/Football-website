@@ -84,7 +84,7 @@ export function TeamRoster({
 
   return (
     <div
-      className={`rounded-lg p-4 shadow-md border-l-4 ${colors.border}`}
+      className={`rounded-lg p-4 shadow-[0_1px_2px_var(--shadow)] border-l-4 ${colors.border}`}
       style={{ backgroundColor: 'var(--bg-card)' }}
     >
       {/* Header - Team Name and Count */}

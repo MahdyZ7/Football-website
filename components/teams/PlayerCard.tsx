@@ -58,7 +58,7 @@ export function PlayerCard({
 }: PlayerCardProps) {
   return (
     <div
-      className="rounded-lg p-4 shadow-md"
+      className="rounded-lg p-4 shadow-[0_1px_2px_var(--shadow)]"
       style={{ backgroundColor: 'var(--bg-card)' }}
     >
       {/* Header - Position and Discard */}
@@ -100,7 +100,7 @@ export function PlayerCard({
           disabled={teamsFull.team1}
           variant="primary"
           size="sm"
-          className="flex-1 bg-blue-500 hover:bg-blue-600"
+          className="flex-1 bg-blue-600! enabled:hover:bg-blue-700!"
           aria-label={`Add ${player.name} to Team 1${teamsFull.team1 ? ' (Full)' : ''}`}
         >
           T1 {teamsFull.team1 ? '(Full)' : ''}
@@ -123,7 +123,7 @@ export function PlayerCard({
             disabled={teamsFull.team3}
             variant="primary"
             size="sm"
-            className="flex-1 !bg-orange-500 hover:!bg-orange-600"
+            className="flex-1 bg-orange-600! enabled:hover:bg-orange-700!"
             aria-label={`Add ${player.name} to Team 3${teamsFull.team3 ? ' (Full)' : ''}`}
           >
             T3 {teamsFull.team3 ? '(Full)' : ''}

@@ -16,10 +16,12 @@ export default function LoadingSpinner({ size = 'medium', message = 'Loading...'
   return (
     <div className="flex flex-col items-center justify-center p-5">
       <div
-        className={`${sizeClasses[size]} border-3 border-gray-200 border-t-status-registered rounded-full animate-spin`}
+        className={`${sizeClasses[size]} border-3 border-[var(--border-color)] border-t-ft-primary rounded-full animate-spin`}
+        role="status"
+        aria-label={message || 'Loading'}
       />
       {message && (
-        <p className="mt-2.5 text-gray-600 dark:text-gray-400">
+        <p className="mt-2.5" style={{ color: 'var(--text-secondary)' }}>
           {message}
         </p>
       )}

@@ -64,7 +64,7 @@ const AdminFeedback: React.FC = () => {
           { label: 'Approved', value: submissions.filter(s => s.status === 'approved').length, color: 'bg-green-600' },
           { label: 'In Progress', value: submissions.filter(s => s.status === 'in_progress').length, color: 'bg-orange-500' },
         ].map((stat) => (
-          <div key={stat.label} className="rounded-lg shadow-md p-4" style={{ backgroundColor: 'var(--bg-card)' }}>
+          <div key={stat.label} className="rounded-lg shadow-[0_1px_2px_var(--shadow)] p-4" style={{ backgroundColor: 'var(--bg-card)' }}>
             <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{stat.label}</p>
             <p className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>{stat.value}</p>
           </div>
@@ -72,7 +72,7 @@ const AdminFeedback: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div className="mb-6 rounded-lg shadow-md p-4" style={{ backgroundColor: 'var(--bg-card)' }}>
+      <div className="mb-6 rounded-lg shadow-[0_1px_2px_var(--shadow)] p-4" style={{ backgroundColor: 'var(--bg-card)' }}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Select
             label="Filter by Status"
@@ -106,7 +106,7 @@ const AdminFeedback: React.FC = () => {
       {feedbackLoading ? (
         <FeedbackCardSkeleton count={5} />
       ) : submissions.length === 0 ? (
-        <div className="rounded-lg shadow-md p-8 text-center" style={{ backgroundColor: 'var(--bg-card)' }}>
+        <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] p-8 text-center" style={{ backgroundColor: 'var(--bg-card)' }}>
           <p className="text-lg" style={{ color: 'var(--text-secondary)' }}>
             No feedback submissions found.
           </p>
@@ -116,7 +116,7 @@ const AdminFeedback: React.FC = () => {
           {submissions.map((submission) => (
             <div
               key={submission.id}
-              className="rounded-lg shadow-md overflow-hidden"
+              className="rounded-lg shadow-[0_1px_2px_var(--shadow)] overflow-hidden"
               style={{ backgroundColor: 'var(--bg-card)' }}
             >
               <div className="p-6">

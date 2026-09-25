@@ -40,7 +40,7 @@ export function PlayerCard({
   return (
     <div
       className={`p-4 rounded-lg border-l-4 flex items-center justify-between transition-all duration-200 ${
-        !isWaitlisted ? 'hover:scale-[1.02]' : ''
+        !isWaitlisted ? '' : ''
       }`}
       style={{
         backgroundColor: !isWaitlisted ? 'var(--paid-bg)' : 'var(--unpaid-bg)',
@@ -71,8 +71,7 @@ export function PlayerCard({
           <button
             onClick={() => onEditName(user.intra, user.name)}
             className="w-10 h-10 flex items-center justify-center rounded-full
-                       bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200
-                       hover:scale-110 active:scale-95"
+                       bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200"
             title="Edit name (within 15-minute grace period)"
             aria-label={`Edit name for ${user.name}`}
           >
@@ -83,8 +82,7 @@ export function PlayerCard({
           <button
             onClick={() => onRemove(user.intra)}
             className="ml-2 w-10 h-10 flex items-center justify-center rounded-full
-                       bg-red-600 hover:bg-red-700 text-white transition-all duration-200
-                       hover:scale-110 active:scale-95"
+                       bg-red-600 hover:bg-red-700 text-white transition-all duration-200"
             title={isAdmin && !isOwnRegistration
               ? "Remove player and apply TIG ban (Admin)"
               : "Remove my registration"}

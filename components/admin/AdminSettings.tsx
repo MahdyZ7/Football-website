@@ -122,12 +122,12 @@ function ConfirmDialog({
   return (
     <>
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998] animate-fadeIn"
+        className="fixed inset-0 bg-[var(--overlay)] backdrop-blur-sm z-[9998] animate-fadeIn"
         onClick={onCancel}
       />
       <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
         <div
-          className="rounded-xl shadow-2xl max-w-lg w-full animate-scaleIn"
+          className="rounded-lg shadow-[0_24px_48px_var(--shadow)] max-w-lg w-full animate-scaleIn"
           style={{ backgroundColor: 'var(--bg-card)' }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -177,7 +177,7 @@ function Section({
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="rounded-lg shadow-md overflow-hidden mb-4" style={{ backgroundColor: 'var(--bg-card)' }}>
+    <div className="rounded-lg shadow-[0_1px_2px_var(--shadow)] overflow-hidden mb-4" style={{ backgroundColor: 'var(--bg-card)' }}>
       <button
         onClick={() => setOpen(!open)}
         className="w-full px-6 py-4 flex items-center justify-between text-left font-semibold text-lg border-b transition-colors hover:opacity-80"
@@ -1052,7 +1052,7 @@ export default function AdminSettings() {
                         update('announcement.title', tpl.title);
                         update('announcement.message', tpl.message);
                       }}
-                      className="px-4 py-2 rounded border text-sm font-medium transition-all duration-200 hover:scale-105"
+                      className="px-4 py-2 rounded border text-sm font-medium transition-all duration-200"
                       style={{
                         borderColor: 'var(--border-color)',
                         color: 'var(--text-primary)',

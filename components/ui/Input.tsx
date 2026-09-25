@@ -61,18 +61,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         <input
           ref={ref}
           id={inputId}
-          className={`
-            px-4 py-3 rounded border-2 transition-all duration-200
-            focus:outline-none focus:ring-2 focus:border-transparent
-            ${error ? 'border-red-500 focus:ring-red-500' : 'focus:ring-ft-primary'}
-            ${fullWidth ? 'w-full' : ''}
-            ${className}
-          `.trim().replace(/\s+/g, ' ')}
-          style={{
-            backgroundColor: 'var(--input-bg)',
-            borderColor: error ? undefined : 'var(--border-color)',
-            color: 'var(--text-primary)'
-          }}
+          className={`ds-field ${fullWidth ? 'w-full' : ''} ${className}`.trim()}
           aria-invalid={!!error}
           aria-describedby={errorId || helperId}
           aria-required={required}
@@ -143,18 +132,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         <textarea
           ref={ref}
           id={inputId}
-          className={`
-            px-4 py-3 rounded border-2 transition-all duration-200
-            focus:outline-none focus:ring-2 focus:border-transparent resize-none
-            ${error ? 'border-red-500 focus:ring-red-500' : 'focus:ring-ft-primary'}
-            ${fullWidth ? 'w-full' : ''}
-            ${className}
-          `.trim().replace(/\s+/g, ' ')}
-          style={{
-            backgroundColor: 'var(--input-bg)',
-            borderColor: error ? undefined : 'var(--border-color)',
-            color: 'var(--text-primary)'
-          }}
+          className={`ds-field ${fullWidth ? 'w-full' : ''} ${className}`.trim()}
           aria-invalid={!!error}
           aria-describedby={errorId || helperId}
           aria-required={required}
@@ -229,17 +207,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         <select
           ref={ref}
           id={inputId}
-          className={`
-            px-4 py-3 rounded border transition-all duration-200
-            focus:ring-2 focus:ring-ft-primary focus:outline-none
-            ${fullWidth ? 'w-full' : ''}
-            ${className}
-          `.trim().replace(/\s+/g, ' ')}
-          style={{
-            backgroundColor: 'var(--input-bg)',
-            borderColor: 'var(--border-color)',
-            color: 'var(--text-primary)'
-          }}
+          className={`ds-field ${fullWidth ? 'w-full' : ''} ${className}`.trim()}
           aria-invalid={!!error}
           aria-describedby={errorId || helperId}
           aria-required={required}
